@@ -9,7 +9,7 @@ namespace Design.Patterns.Prototype
         static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
-            var developer = new Developer("Fulano", new Random().NextDouble(), new List<string> { "C#","JS" });
+            var developer = new Developer("Fulano", new Random().NextDouble(), new List<string> { "C#", "JS" });
             var prototype = developer.CloneEmployee();
             Console.WriteLine(prototype.ToString());
             developer.Name = "Cicrano";
