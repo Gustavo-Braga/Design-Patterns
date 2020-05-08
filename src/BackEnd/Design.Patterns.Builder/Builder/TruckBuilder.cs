@@ -4,28 +4,33 @@ using System.Collections.Generic;
 
 namespace Design.Patterns.Builder.Builder
 {
-    public class TruckBuilder: IVehicleBuilder
+    public class TruckBuilder
     {
         private Vehicle Vehicle = new Vehicle();
 
-        public void SetModel()
+        public TruckBuilder SetModel(string model)
         {
-            Vehicle.Model = "FH 460";
+            Vehicle.Model = model;
+            return this;
         }
 
-        public void SetYear()
+        public TruckBuilder SetYear(int year)
         {
-            Vehicle.Year = 2004;
+            Vehicle.Year = year;
+            return this;
         }
 
-        public void SetColor()
+        public TruckBuilder SetColor(string color)
         {
-            Vehicle.Color = "Cinza";
+            Vehicle.Color = color;
+            return this;
         }
 
-        public void SetAcessories()
+        public TruckBuilder SetAcessories(IEnumerable<string> acessories)
         {
             Vehicle.Acessories = new List<string> { "Geladeira", "Capa para bancos", "Alarme" };
+            Vehicle.Acessories = acessories;
+            return this;
         }
 
         public Vehicle GetVehicle()

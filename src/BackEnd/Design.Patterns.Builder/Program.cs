@@ -1,6 +1,7 @@
 ﻿using Design.Patterns.Builder.Builder;
 using Design.Patterns.Builder.Model;
 using System;
+using System.Collections.Generic;
 
 namespace Design.Patterns.Builder
 {
@@ -17,12 +18,15 @@ namespace Design.Patterns.Builder
             car.CreateVehicleAcessories();
             Console.WriteLine(carBuilder.ToString());
 
-            var truckBuilder = new TruckBuilder();
-            var truck = new VehicleCreator(truckBuilder);
-            truck.CreateVehicleAcessories();
+            //alternativa
+            var truckBuilder = new TruckBuilder()
+                .SetModel("FH-420")
+                .SetColor("Black")
+                .SetYear(2020);
+
             Console.WriteLine(truckBuilder.ToString());
 
-            truck.CreateVehicleCaracteristics();
+            truckBuilder.SetAcessories(new List<string> { "Geladeira", "Capa para bancos", "Alarme" });
             Console.WriteLine(truckBuilder.ToString());
 
             Console.ReadKey();
