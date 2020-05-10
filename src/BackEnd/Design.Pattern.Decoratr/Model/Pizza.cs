@@ -1,6 +1,6 @@
-﻿using Design.Pattern.Decoratr.Interfaces;
+﻿using Design.Pattern.Decorator.Interfaces;
 
-namespace Design.Pattern.Decoratr.Model
+namespace Design.Pattern.Decorator.Model
 {
     public class Pizza : IOrder
     {

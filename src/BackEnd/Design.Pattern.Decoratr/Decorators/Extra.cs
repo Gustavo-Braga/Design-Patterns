@@ -1,8 +1,8 @@
-﻿using Design.Pattern.Decoratr.Interfaces;
+﻿using Design.Pattern.Decorator.Interfaces;
 
-namespace Design.Pattern.Decoratr.Decorators
+namespace Design.Pattern.Decorator.Decorators
 {
-    public abstract class Extra:IOrder
+    public abstract class Extra : IOrder
     {
         protected readonly IOrder _order;
         protected readonly string _label;

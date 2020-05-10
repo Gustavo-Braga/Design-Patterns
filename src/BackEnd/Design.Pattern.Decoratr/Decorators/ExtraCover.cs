@@ -1,6 +1,6 @@
-﻿using Design.Pattern.Decoratr.Interfaces;
+﻿using Design.Pattern.Decorator.Interfaces;
 
-namespace Design.Pattern.Decoratr.Decorators
+namespace Design.Pattern.Decorator.Decorators
 {
     public class ExtraCover : Extra
     {
