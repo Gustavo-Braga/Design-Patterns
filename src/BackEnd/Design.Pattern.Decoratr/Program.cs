@@ -1,6 +1,6 @@
-﻿using Design.Pattern.Decoratr.Decorators;
-using Design.Pattern.Decoratr.Interfaces;
-using Design.Pattern.Decoratr.Model;
+﻿using Design.Pattern.Decorator.Decorators;
+using Design.Pattern.Decorator.Interfaces;
+using Design.Pattern.Decorator.Model;
 using System;
 
 namespace Design.Pattern.Decoratr
@@ -11,7 +11,7 @@ namespace Design.Pattern.Decoratr
         {
             Console.WriteLine("Hello World!");
             IOrder pizza = new Pizza("Frango", 21);
-            pizza = new ExtraCover(pizza, "borda recheada", 8);
+            pizza = new ExtraCover(pizza, "catupiry", 8);
             Console.WriteLine(pizza.GetLabel());
             Console.WriteLine(pizza.GetPrice());
             Console.ReadKey();

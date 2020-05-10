@@ -1,4 +1,4 @@
-﻿namespace Design.Pattern.Decoratr.Interfaces
+﻿namespace Design.Pattern.Decorator.Interfaces
 {
     public interface IOrder
     {
