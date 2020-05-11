@@ -1,7 +1,4 @@
 ﻿using Design.Pattern.Facade.Model;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Design.Pattern.Facade.Facade
 {
