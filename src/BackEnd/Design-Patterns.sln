@@ -35,7 +35,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Design.Pattern.ChainOfRespo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Design.Pattern.Memento", "Design.Patterns.Memento\Design.Pattern.Memento.csproj", "{D6046AFC-1B1B-43AC-AB88-2307DB5893EE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Design.Pattern.Visitor", "Design.Pattern.Visitor\Design.Pattern.Visitor.csproj", "{19728224-35D0-4FC3-8C70-AC9C5F81E041}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Design.Pattern.Visitor", "Design.Pattern.Visitor\Design.Pattern.Visitor.csproj", "{19728224-35D0-4FC3-8C70-AC9C5F81E041}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Design.Pattern.State", "Design.Pattern.State\Design.Pattern.State.csproj", "{12FF2DB7-64D9-4ABF-BBE4-B92ADC2D4D0E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -99,6 +101,10 @@ Global
 		{19728224-35D0-4FC3-8C70-AC9C5F81E041}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{19728224-35D0-4FC3-8C70-AC9C5F81E041}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{19728224-35D0-4FC3-8C70-AC9C5F81E041}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12FF2DB7-64D9-4ABF-BBE4-B92ADC2D4D0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12FF2DB7-64D9-4ABF-BBE4-B92ADC2D4D0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12FF2DB7-64D9-4ABF-BBE4-B92ADC2D4D0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12FF2DB7-64D9-4ABF-BBE4-B92ADC2D4D0E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -118,6 +124,7 @@ Global
 		{6E91EDB8-2280-45E3-AF5E-0282C65E7F91} = {124F2C36-3B5C-49F6-9C2B-BB3C3A95F533}
 		{D6046AFC-1B1B-43AC-AB88-2307DB5893EE} = {124F2C36-3B5C-49F6-9C2B-BB3C3A95F533}
 		{19728224-35D0-4FC3-8C70-AC9C5F81E041} = {124F2C36-3B5C-49F6-9C2B-BB3C3A95F533}
+		{12FF2DB7-64D9-4ABF-BBE4-B92ADC2D4D0E} = {124F2C36-3B5C-49F6-9C2B-BB3C3A95F533}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {901405F5-9263-4AAF-9BF7-7555A85BFBB7}
