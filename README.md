@@ -25,7 +25,7 @@ refactoring.guru</a>)</h6>
 </p>
 
 # Tipos de padrões de projeto
-<ul><a href="#Criacionais">Criacional</a>
+<ul>[Criacional](#Criacionais)
   <li>Singleton</li>
   <li>Protótipo(prototype)</li>
   <li>Constutor(builder)</li>
