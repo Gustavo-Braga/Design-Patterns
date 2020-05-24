@@ -90,14 +90,14 @@ refactoring.guru</a>)</h6>
         }
 ```
 
-<p>Com isto implementado, todas as chamadas ao ProductRepository ira retornar a mesma instancia salva na variável "_instance", deste modo, para realizar a chamada ao método, fica da seguinte maneira</p>
+<p>Com isto implementado, todas as chamadas ao ProductRepository ira retornar a mesma instancia salva na variável "_instance", deste modo, para realizar a chamada ao método, fica da seguinte maneira:</p>
 
  ```c#
   var repository = ProductRepository.GetInstance("Product");
   Console.WriteLine($"Somente uma instância de ProductRepository: {repository.TableName}");
 ```
 
-<p>Use o padrão singleton quando, necessitar de somente uma instância disponível para os classes do sistema, por exemplo, uma classe de banco de dados.</p>  
+<p>Use o padrão singleton quando, necessitar de somente uma instância disponível para as classes do sistema, por exemplo, uma classe de banco de dados.</p>  
 
 
 
