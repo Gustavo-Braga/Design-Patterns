@@ -4,7 +4,7 @@ Este trabalho foi criado com o intuito de aprender e tentar fixar na cabeça, de
 # Introdução
 <p>Padrões de projeto são <b>soluções</b> muito bem testadas para resolver problemas comuns em projetos de softwares, são <b>diretries sobre como lidar com algum determinado problema</b>, basicamente, são soluções utilizando os princípio de orientação a objetos, os padrões de projeto definem uma linguagem única entre os desenvolvedores, pois quando você se depara com um problema, você pode sugerir "isso conseguimos resolver com <b>strategy</b>" e todos os outros desenvolvedores iram entender a ideia da solução proposta.</p>
 <p>Os patterns são classificados em três categorias, sejam elas <b>criacionais</b>, <b>estruturais</b> e <b>comportamentais</b> onde</p>
-<p><a name=“Criacionais”><a/><b>Criacionais</b>: Refere-se a mecanismos para a criação de objetos, tem como objetivo abstrair a instancia dos objetos, de maneira que permita a flexibilidade e reutilização do código existente</p>
+<p><b>Criacionais</b>: Refere-se a mecanismos para a criação de objetos, tem como objetivo abstrair a instancia dos objetos, de maneira que permita a flexibilidade e reutilização do código existente</p>
 <p><b>Estruturais</b>: Refere-se a mecanismos para montar objetos em estruturas maiores, organizando a estrutura das classes e o relacionamento entre elas, mantendo as estruturas flexiveis e eficientes</p>
 <p><b>Comportamentais</b>: Refere-se a mecanismos para atribuir responsabilidades entre os objetos, definindo como os objetos devem se comportar e se comunicar</p>
  
@@ -25,7 +25,7 @@ refactoring.guru</a>)</h6>
 </p>
 
 # Tipos de padrões de projeto
-<ul>[Criacional](#Criacionais)
+<ul>Criacional
   <li>Singleton</li>
   <li>Protótipo(prototype)</li>
   <li>Constutor(builder)</li>
@@ -54,6 +54,48 @@ refactoring.guru</a>)</h6>
   <li>Estratégia(strategy)</li>
   <li>Visitante(visitor)</li>
 </ul>
+
+# Singleton
+
+<p><b>O que é</b>: Singleton é um padrão de design criacional que lhe permite que apenas uma instância desse tipo de objeto exista.</p>
+<p>Exemplo:</p>
+<p>Só pode haver um presidente de um país. O mesmo presidente deve ser acionado sempre que o dever exigir. O presidente é singleton.</p>
+
+<p>Para o nosso exemplo, foi criado uma classe de repositório onde só pode haver uma instância do objeto, para esta classe é necessário informar o nome da tabela que o repositório ira atuar. Para esta classe também foi implementado o thread safe para não quebrar a funcionalidade caso seja chamado de vários threads simultaneamente</p>
+
+<p><b>Solução</b>:</p>
+<p>Torne o construtor padrão privado, para impedir que outros objetos utilizem o operador "new"</p>
+```c#
+      private ProductRepository(string tableName)
+      {
+          TableName = tableName;
+      }
+      
+      public string TableName { get; set; }
+      public static ProductRepository _instance;
+      public static readonly object _lock = new object();
+```
+<p>Crie um método de criação estático que atua como construtor, este método deve chamar o construtor privado e salvar em um campo estático, todas as chamadas a seguir devem retornar o objeto estático<p>
+ 
+ ```c#
+ public static ProductRepository GetInstance(string tableName)
+        {
+            if (_instance == null)
+                lock (_lock)
+                    _instance = new ProductRepository(tableName);
+
+            return _instance;
+        }
+```
+
+<p>Com isto implementado, todas as chamadas ao ProductRepository ira retornar a mesma instancia salva na variável "_instance", deste modo, para realizar a chamada ao método, fica da seguinte maneira</p>
+ ```c#
+  var repository = ProductRepository.GetInstance("Product");
+  Console.WriteLine($"Somente uma instância de ProductRepository: {repository.TableName}");
+```
+
+<p>Use o padrão singleton quando, necessitar de somente uma instância disponível para os classes do sistema, por exemplo, uma classe de banco de dados.</p>  
+
 
 
 
