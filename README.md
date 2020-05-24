@@ -65,6 +65,7 @@ refactoring.guru</a>)</h6>
 
 <p><b>Solução</b>:</p>
 <p>Torne o construtor padrão privado, para impedir que outros objetos utilizem o operador "new"</p>
+
 ```c#
       private ProductRepository(string tableName)
       {
@@ -75,7 +76,8 @@ refactoring.guru</a>)</h6>
       public static ProductRepository _instance;
       public static readonly object _lock = new object();
 ```
-<p>Crie um método de criação estático que atua como construtor, este método deve chamar o construtor privado e salvar em um campo estático, todas as chamadas a seguir devem retornar o objeto estático<p>
+
+<p>Crie um método de criação estático que atua como construtor, este método deve chamar o construtor privado e salvar em um campo estático, todas as chamadas a seguir devem retornar o objeto estático</p>
  
  ```c#
  public static ProductRepository GetInstance(string tableName)
@@ -89,6 +91,7 @@ refactoring.guru</a>)</h6>
 ```
 
 <p>Com isto implementado, todas as chamadas ao ProductRepository ira retornar a mesma instancia salva na variável "_instance", deste modo, para realizar a chamada ao método, fica da seguinte maneira</p>
+
  ```c#
   var repository = ProductRepository.GetInstance("Product");
   Console.WriteLine($"Somente uma instância de ProductRepository: {repository.TableName}");
