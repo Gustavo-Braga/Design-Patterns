@@ -3,7 +3,7 @@
     public interface IEmployee
     {
         //método utilizado para teste, pois em C# existe a interface 
-        //ICloneable que subistituiria o uso do método CloneEmployee
+        //ICloneable que subistituiria o uso dessa interface
         IEmployee CloneEmployee();
     }
 }
