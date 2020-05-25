@@ -58,9 +58,13 @@ refactoring.guru</a>)</h6>
 # Singleton
 
 <p><b>O que é</b>: Singleton é um padrão de design criacional que lhe permite que apenas uma instância desse tipo de objeto exista.</p>
-<p>Exemplo:</p>
-<p>Só pode haver um presidente de um país. O mesmo presidente deve ser acionado sempre que o dever exigir. O presidente é singleton.</p>
+<p><b>Exemplo do mundo real</b>:</p>
 
+> <p>Só pode haver um presidente de um país. O mesmo presidente deve ser acionado sempre que o dever exigir. O presidente é singleton.</p>
+ 
+ <p><b>Problema</b>:</p>
+ <p>Certifique-se de que uma classe possua uma única instância, o motivo mais comum para isso, seria controlar o acesso a algum recurso compartilhado, por exemplo, uma classe de banco de dados</p>
+ 
 <p>Para o nosso exemplo, foi criado uma classe de repositório onde só pode haver uma instância do objeto, para esta classe é necessário informar o nome da tabela que o repositório ira atuar. Para esta classe também foi implementado o thread safe para não quebrar a funcionalidade caso seja chamado de vários threads simultaneamente</p>
 
 <p><b>Solução</b>:</p>
@@ -97,9 +101,135 @@ refactoring.guru</a>)</h6>
   Console.WriteLine($"Somente uma instância de ProductRepository: {repository.TableName}");
 ```
 
+<p><b>Saída</b>:</p>
+
+> <p>Hello Word</p>
+> <p>Somente uma instância de ProductRepository: Product</p>
+
+
 <p>Use o padrão singleton quando, necessitar de somente uma instância disponível para as classes do sistema, por exemplo, uma classe de banco de dados.</p>  
 
+# Protótipo(prototype)
+
+<p><b>O que é</b>: protótipo é um padrão de design criacional que permite criar novos objetos a partir de um modelo original, permite 
+copiar objetos sem tornar o código dependente de suas classes</p>
+ 
+<p><b>Exemplo do mundo real:</p></b>
+
+> Protóripos são criados para possibilitar os testes antes de iniciar a produção em massa de um determinado produto, no entando esses protótipos não participam de nenhuma produção real, desempenha somente um papel passivo.
+
+<p><b>Problema</b>:</p> Digamos que você tenha um objeto e você precisa criar uma cópia exata dele. Você precisaria criar um novo objeto da mesma classe e percorrer todos os campos do objeto original para o novo objeto, porém, criar um objeto "de fora" nem sempre é possível, pois o objeto original pode conter campos privados que seriam invisíveis para quem está realizando a operação de "cópia" do objeto.
+ 
+ <p>Para o nosso exemplo, foi criado uma classe simples de funcionário, onde recebe duas interfaces, a interface IEmployee que é utilizada somente para teste, mostrando uma alternativa para realizar a chamada do método clone, ou seja, pode ser desconsiderada, e a interface ICloneable que é disponibilizada pela Microsoft através da biblioteca System, esta interface segue o exemplo "comum" para implementação do padrão de protótipo
+ 
+ <p><b>Solução</b>:</p>
+<p><b>Implementação alternativa</b>:</p>
+<p>Crie um interface e atribua um método para ser possível realizar a clonagem do objeto, no nosso caso, a interface IEmployee</p>
+
+ ```c#
+    public interface IEmployee
+    {
+        //método utilizado para teste, pois em C# existe a interface 
+        //ICloneable que subistituiria o uso dessa interface
+        IEmployee CloneEmployee();
+    }
+```
+
+<p>Na classe em que deseja realizar a clonagem, herde a interface IEmployee</p>
+
+```c#
+    public class Developer : IEmployee
+    {
+        public Developer(string name, double salary, IEnumerable<string> languages)
+        {
+            Name = name;
+            Salary = salary;
+            Languages = languages;
+        }
+        
+        public string Name { get; set; }
+        private double Salary { get; set; }
+        public IEnumerable<string> Languages { get; set; }
+    }
+```
+
+<p>Com isso, você é forçado a implementar o método CloneEmployee, que fica da seguinte maneira</p>
+
+```c#
+        public IEmployee CloneEmployee()
+        {
+            return (Developer)MemberwiseClone();
+        }
+```
+
+<p>Após a implementação do método, é só realizar a chamada do mesmo</p>
+
+```c#
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Hello World!");
+            var developer = new Developer("Fulano", new Random().NextDouble(), new List<string> { "C#", "JS" });
+            var prototype = developer.CloneEmployee();
+            Console.WriteLine(prototype.ToString());
+            developer.Name = "Cicrano";
+            Console.WriteLine(prototype.ToString());
+        }
+```
+
+<p>Agora, irei mostrar sem a utilização da interface IEmployee e sim com a utilização da interface ICloneable</p>
+<p>Na classe em que deseja realizar a clonagem, herde a interface ICloneable</p>
+
+```c#
+    public class Developer : ICloneable
+    {
+        public Developer(string name, double salary, IEnumerable<string> languages)
+        {
+            Name = name;
+            Salary = salary;
+            Languages = languages;
+        }
+        
+        public string Name { get; set; }
+        private double Salary { get; set; }
+        public IEnumerable<string> Languages { get; set; }
+    }
+    
+```
+
+<p>Com isso, você é forçado a implementar o método Clone, que fica da seguinte maneira</p>
+
+```c#
+        public object Clone()
+        {
+            return MemberwiseClone();
+        }
+```
+
+<p>Após a implementação do método, é só realizar a chamada do mesmo</p>
+
+```c#
+        static void Main(string[] args)
+        {
+            var developer = new Developer("Fulano", new Random().NextDouble(), new List<string> { "C#", "JS" });
+            var prototype2 = (Developer)developer.Clone();
+            Console.WriteLine(prototype2.ToString());
+            prototype2.Name = "Beltrano";
+            Console.WriteLine(prototype2.ToString());
+            Console.ReadKey();
+        }
+```
+
+<p>Em c# a classe Object(que é a classe base de todas as classes) nos fornece o método MemberwiseClone, que criar uma cópia superficial o objeto.</p>
+
+<p><b>Saída</b>:</p>
+
+> <p>Hello World!</p>
+> <p>Fulano, 0,602327118442546, C#, JS</p>
+> <p>Fulano, 0,602327118442546, C#, JS</p>
+> <p>Cicrano, 0,602327118442546, C#, JS</p>
+> <p>Beltrano, 0,602327118442546, C#, JS</p>
 
 
+<p>Use o padrão protóripo quando necessitar copiar objetos sem depender da sua classe concreta. O padrão protótipo torna bem mais simples a criação de novos objetos complexos</p>  
 
 
