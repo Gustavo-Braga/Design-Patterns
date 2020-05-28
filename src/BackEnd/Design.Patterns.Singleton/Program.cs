@@ -9,7 +9,7 @@ namespace Design.Patterns.Singleton
         {
             Console.WriteLine("Hello Word");
             var repository = ProductRepository.GetInstance("Product");
-
+            Console.WriteLine($"Somente uma instância de ProductRepository: {repository.TableName}");
             Console.ReadKey();
         }
     }
