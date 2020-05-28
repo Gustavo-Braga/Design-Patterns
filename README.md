@@ -442,3 +442,112 @@ public class TruckBuilder
 > <p>Modelo: FH-420, Ano: 2020, Cor: Black, Acessórios: Geladeira, Capa para bancos, Alarme</p>
  
 <p>Use o padrão construtor quando deseja se livrar de construtores com 10 parâmetros opcionais. Quando desejar que seu código possa criar representações diferentes sobre algum produto(como o nosso exemplo, carro e caminhão). O padrão construtor pode ser aplicado quando a construção de várias representações do produto envolve etapas semelhantes que diferem apenas nos detalhes.</p>
+
+# Método de Fábrica(factory method)
+
+<p><b>O que é</b>: O Método de Fábrica é um padrão de design criacional que utiliza métodos de fábrica para criar objetos sem precisar especificar a sua classe exata, ele nos fornece uma interface para criar objetos em uma superclasse, mas permite que suas subclasses alterem o tipo do objeto.</p>
+
+<p><b>Problema</b>:</p> 
+<p>Imagine que você esteja criando um aplicativo para gerenciamento de logística, onde a primeira versão do seu aplicativo lida apenas com transportes de caminhões, portanto a maior parte do seu código, fica dentro da classe "Truck". Depois de um tempo, seu aplicativo acaba crescendo bastente e agora existe a necessidade de implementar o transporte marítimo. A maior parte do código foi implementada na classe "Truck", a adição da classe "Ship" exigiria alterações em toda a base do código, além disso, caso exija a necessidade de adicionar um novo tipo de transporte, você enfrentaria os mesmos problemas como código duplicado e diversas condicionais que alteram o comportamento do aplicativo dependendo do objeto de transporte</p>
+
+<p><b>Solução</b>:</p> 
+<p>O padrão Factory Method sugere que você substitua chamadas diretas de construção de objetos por chamadas para um método especial de fábrica. Os objetos ainda são criados pelo new operador, mas estão sendo chamados de dentro do método de fábrica. Objetos retornados por um método de fábrica geralmente são chamados de "produtos".  A primeira vista, esta alteração parece inútil, só foi movido a chamada de um contrutor para outra parte do programa, porém agora você consegue substituir o método de fábrica em uma subclasse e alterar a classe de produtos que estão sendo criados pelo método. Porém há uma limitação, as subclasses podem retornar tipos diferentes de produtos somente se eles possuirem uma interface comum, além disso o método de fábrica deve ter seu tipo de retorno declarado como essa interface.</p>
+
+<p>Para implementar o Factory Method temos o <b>Product</b> que é a interface para criação dos objetos, <b>ConcreteProduct</b> que seriam as classes que herdam da interface Product, <b>Creator</b> esta é a classe abstrata que declara o método factory e retorna o objeto do tipo Product, e por fim temos o <b>ConcreteCreator</b> esta é a classe que implementa a classe Creator e substitui o método factory para retornar uma instância de ConcreteProduct</p>
+
+<p>Para o nosso exemplo, seguimos com a implementação de um método de fábrica para nos retornar o tipo de transporte "Truck" ou "Ship"</p>
+ 
+ <p>Inicialmente, iremos criar a nossa interface(Product) "ITransport" nela adicionaremos um método indicando as milias referente a enrega</p>
+ 
+ ```c#
+     public interface ITransport
+    {
+        string Deliver(int miles);
+    }
+ ```
+ 
+ <p>Feito isso, iremos implementar os nossos meios de transporte(ConcreteProduct) "Truck" e "Ship" onde devem herdar da interface ITransport</p> 
+  
+ ```c#
+    public class Ship : ITransport
+    {
+        public string Deliver(int miles)
+        {
+            return $"O valor para o transporte marítimo é {miles * 12}";
+        }
+    }
+    
+    public class Truck : ITransport
+    {
+        public string Deliver(int miles)
+        {
+            return $"O valor para o transporte de caminhão é {miles * 2}";
+        }
+    }
+ ```
+ 
+ <p>Após a implementação do nosso ConcreteProduct, iremos criar um enun "Transport" para validar qual tipo de transporte será criado</p>
+  
+  ```c#
+    public enum Transport
+    {
+        Maritime,
+        Road
+    }
+  ```
+  
+  <p>Tudo certo por enquanto. Agora iremos implementar o creator "TrasnportFactoryBase"</p>
+    
+  ```c#
+    public abstract class TrasnportFactoryBase
+    {
+        abstract public ITransport GetTransport(Transport transportType);
+    }
+  ```
+  
+ <p>Observe que o tipo de retorno, precisa ser o tipo da interface product e não uma classe concreta</p>
+  <p>Quase pronto, agora precisamos implementar o nosso concreteCreator, ele deve herdar da classe abstrata de creator e é responsável por criar a classe concreta do tipo product</p>
+  
+```c#
+    public class TransportFactory : TrasnportFactoryBase
+    {
+        public override ITransport GetTransport(Transport transportType)
+        {
+            switch (transportType)
+            {
+                case Transport.Maritime:
+                    return new Ship();
+                case Transport.Road:
+                    return new Truck();
+                default: return new Truck();
+            }
+        }
+    }
+```
+
+ <p>Pronto, agora temos a nossa classe de fábrica, neste momento é só chamar a classe de concreteCreator no nosso caso, a classe TransportFactory e informar(com o enum) qual é o tipo de transporte que deve ser retornado</p>
+ 
+ ```c#
+        private static void Main(string[] args)
+        {
+            var factory = new TransportFactory();
+
+            var road = factory.GetTransport(Enum.Transport.Road);
+            Console.WriteLine(road.Deliver(90));
+
+            var maritime = factory.GetTransport(Enum.Transport.Maritime);
+            Console.WriteLine(maritime.Deliver(1200));
+
+            Console.ReadKey();
+        }
+```
+ 
+<p><b>Saída</b>:</p> 
+
+> <p>Hello World!</p>
+> <p>O valor para o transporte de caminhao é 180</p>
+> <p>O valor para o transporte marítimo é 14400</p>
+
+<p>A utilização do padrão Factory é útil quando você precisa criar objetos dinamicamente sem conhecer a classe de implementação, somente usando sua interface, ou também quando existe algum processamento genérico em uma classe, mas a subclasse necessária é decidida dinamicamente no tempo de execução, em outras palavras, quando o cliente não sabe de que subclasse exata ele pode precisar</p>
+
+
