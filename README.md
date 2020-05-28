@@ -62,13 +62,11 @@ refactoring.guru</a>)</h6>
 
 > <p>Só pode haver um presidente de um país. O mesmo presidente deve ser acionado sempre que o dever exigir. O presidente é singleton.</p>
  
- <p><b>Problema</b>:</p>
- <p>Certifique-se de que uma classe possua uma única instância, o motivo mais comum para isso, seria controlar o acesso a algum recurso compartilhado, por exemplo, uma classe de banco de dados</p>
+ <p><b>Problema</b>: Certifique-se de que uma classe possua uma única instância, o motivo mais comum para isso, seria controlar o acesso a algum recurso compartilhado, por exemplo, uma classe de banco de dados</p>
  
 <p>Para o nosso exemplo, foi criado uma classe de repositório onde só pode haver uma instância do objeto, para esta classe é necessário informar o nome da tabela que o repositório ira atuar. Para esta classe também foi implementado o thread safe para não quebrar a funcionalidade caso seja chamado de vários threads simultaneamente</p>
 
-<p><b>Solução</b>:</p>
-<p>Torne o construtor padrão privado, para impedir que outros objetos utilizem o operador "new"</p>
+<p><b>Solução</b>: Torne o construtor padrão privado, para impedir que outros objetos utilizem o operador "new"</p>
 
 ```c#
       private ProductRepository(string tableName)
@@ -118,9 +116,9 @@ copiar objetos sem tornar o código dependente de suas classes</p>
 
 > Protóripos são criados para possibilitar os testes antes de iniciar a produção em massa de um determinado produto, no entando esses protótipos não participam de nenhuma produção real, desempenha somente um papel passivo.
 
-<p><b>Problema</b>:</p> Digamos que você tenha um objeto e você precisa criar uma cópia exata dele. Você precisaria criar um novo objeto da mesma classe e percorrer todos os campos do objeto original para o novo objeto, porém, criar um objeto "de fora" nem sempre é possível, pois o objeto original pode conter campos privados que seriam invisíveis para quem está realizando a operação de "cópia" do objeto.
+<p><b>Problema</b>: Digamos que você tenha um objeto e você precisa criar uma cópia exata dele. Você precisaria criar um novo objeto da mesma classe e percorrer todos os campos do objeto original para o novo objeto, porém, criar um objeto "de fora" nem sempre é possível, pois o objeto original pode conter campos privados que seriam invisíveis para quem está realizando a operação de "cópia" do objeto.</p> 
  
- <p>Para o nosso exemplo, foi criado uma classe simples de funcionário, onde recebe duas interfaces, a interface IEmployee que é utilizada somente para teste, mostrando uma alternativa para realizar a chamada do método clone, ou seja, pode ser desconsiderada, e a interface ICloneable que é disponibilizada pela Microsoft através da biblioteca System, esta interface segue o exemplo "comum" para implementação do padrão de protótipo
+<p>Para o nosso exemplo, foi criado uma classe simples de funcionário, onde recebe duas interfaces, a interface IEmployee que é utilizada somente para teste, mostrando uma alternativa para realizar a chamada do método clone, ou seja, pode ser desconsiderada, e a interface ICloneable que é disponibilizada pela Microsoft através da biblioteca System, esta interface segue o exemplo "comum" para implementação do padrão de protótipo
  
  <p><b>Solução</b>:</p>
 <p><b>Implementação alternativa</b>:</p>
@@ -236,13 +234,12 @@ copiar objetos sem tornar o código dependente de suas classes</p>
 
 <p><b>O que é</b>: Contrutor é um padrão de design criacional que permite construir objetos complexos passo a passo, o padrão construtor descreve uma maneira simples de separar o objeto de sua construção
  
-<p><b>Problema</b>:</p> Imagine que você tenha um objeto complexo, em que a inicialização é trabalhosa e precisa de vários passos para que seja possível montar o objeto, o código de inicialização é oculto dentro do construtor e há muitos parametros de entrada, por exemplo, vamos pensar no objeto "House". Para construir uma casa simples, você precisa construir quatro paredes, um piso, instalar uma porta, encaixar um par de janelas e construir um telhado. Mas e se você quiser uma casa maior e mais brilhante, com um quintal e outras coisas? A solução mais simples, seria estender a "House" e criar um conjunto de subclasses para cobrir todas as combinações de parâmetros, porém ja conseguimos imaginar que iria ter um aumento considerável nas subclasses e um aumento considerável nos parâmetros do constutor.
+<p><b>Problema</b>: Imagine que você tenha um objeto complexo, em que a inicialização é trabalhosa e precisa de vários passos para que seja possível montar o objeto, o código de inicialização é oculto dentro do construtor e há muitos parametros de entrada, por exemplo, vamos pensar no objeto "House". Para construir uma casa simples, você precisa construir quatro paredes, um piso, instalar uma porta, encaixar um par de janelas e construir um telhado. Mas e se você quiser uma casa maior e mais brilhante, com um quintal e outras coisas? A solução mais simples, seria estender a "House" e criar um conjunto de subclasses para cobrir todas as combinações de parâmetros, porém ja conseguimos imaginar que iria ter um aumento considerável nas subclasses e um aumento considerável nos parâmetros do constutor.</p>
 
 
 <p>Para o nosso exemplo, estarei mostrando duas alternativas para implementar o padrão construtor, a primeira, utilizando a classe de "Diretor" e a segunda sem a utilização desta classe, no nosso caso trata-se da criação de um veículo, onde é separado o construtor em vários métodos a fins de que se possa montar o objeto veículo de diferentes formas
 
- <p><b>Solução</b>:</p>
-<p>Deve ser implementado uma interface <b>IBuilder</b> para que nela possa ser extraido todos os métodos referente a criação do objeto. A classe concreta deve herdar desta interface e nos métodos estará a lógica para a criação das partes específicas. A classe de <b>diretor</b> controla o algoritmo para corder de execução das etapas de criação</p>
+ <p><b>Solução</b>: Deve ser implementado uma interface <b>IBuilder</b> para que nela possa ser extraido todos os métodos referente a criação do objeto. A classe concreta deve herdar desta interface e nos métodos estará a lógica para a criação das partes específicas. A classe de <b>diretor</b> controla o algoritmo para corder de execução das etapas de criação</p>
 
 <p><b>Alternativa com diretor</b>:</p>
 <p>Implemente a interface IBuilder, no nosso caso IVehicleBuilder</p>
@@ -447,8 +444,7 @@ public class TruckBuilder
 
 <p><b>O que é</b>: O Método de Fábrica é um padrão de design criacional que utiliza métodos de fábrica para criar objetos sem precisar especificar a sua classe exata, ele nos fornece uma interface para criar objetos em uma superclasse, mas permite que suas subclasses alterem o tipo do objeto.</p>
 
-<p><b>Problema</b>:</p> 
-<p>Imagine que você esteja criando um aplicativo para gerenciamento de logística, onde a primeira versão do seu aplicativo lida apenas com transportes de caminhões, portanto a maior parte do seu código, fica dentro da classe "Truck". Depois de um tempo, seu aplicativo acaba crescendo bastente e agora existe a necessidade de implementar o transporte marítimo. A maior parte do código foi implementada na classe "Truck", a adição da classe "Ship" exigiria alterações em toda a base do código, além disso, caso exija a necessidade de adicionar um novo tipo de transporte, você enfrentaria os mesmos problemas como código duplicado e diversas condicionais que alteram o comportamento do aplicativo dependendo do objeto de transporte</p>
+<p><b>Problema</b>: Imagine que você esteja criando um aplicativo para gerenciamento de logística, onde a primeira versão do seu aplicativo lida apenas com transportes de caminhões, portanto a maior parte do seu código, fica dentro da classe "Truck". Depois de um tempo, seu aplicativo acaba crescendo bastente e agora existe a necessidade de implementar o transporte marítimo. A maior parte do código foi implementada na classe "Truck", a adição da classe "Ship" exigiria alterações em toda a base do código, além disso, caso exija a necessidade de adicionar um novo tipo de transporte, você enfrentaria os mesmos problemas como código duplicado e diversas condicionais que alteram o comportamento do aplicativo dependendo do objeto de transporte</p>
 
 <p><b>Solução</b>:</p> 
 <p>O padrão Factory Method sugere que você substitua chamadas diretas de construção de objetos por chamadas para um método especial de fábrica. Os objetos ainda são criados pelo new operador, mas estão sendo chamados de dentro do método de fábrica. Objetos retornados por um método de fábrica geralmente são chamados de "produtos".  A primeira vista, esta alteração parece inútil, só foi movido a chamada de um contrutor para outra parte do programa, porém agora você consegue substituir o método de fábrica em uma subclasse e alterar a classe de produtos que estão sendo criados pelo método. Porém há uma limitação, as subclasses podem retornar tipos diferentes de produtos somente se eles possuirem uma interface comum, além disso o método de fábrica deve ter seu tipo de retorno declarado como essa interface.</p>
@@ -549,5 +545,227 @@ public class TruckBuilder
 > <p>O valor para o transporte marítimo é 14400</p>
 
 <p>A utilização do padrão Factory é útil quando você precisa criar objetos dinamicamente sem conhecer a classe de implementação, somente usando sua interface, ou também quando existe algum processamento genérico em uma classe, mas a subclasse necessária é decidida dinamicamente no tempo de execução, em outras palavras, quando o cliente não sabe de que subclasse exata ele pode precisar</p>
+
+# Fábrica Abstrata(abstract factory)
+<p><b>O que é</b>: O padrão de Fábrica Abstrata é um padrão criacional que permite produzir famílias de objetos sem especificar suas classes concretas, este padrão fornece uma maneira de encapsular um grupo de fábricas individuais mas relacionadas, sem especificar suas classes concretas</p>
+
+<p><b>Problema</b>: Imagine que você tenha a necessidade de adquirir uma porta, se você quiser uma porta de madeira, você pode ir até uma loja de portas de madeira e adquirir, caso você queira uma de ferro, você precisará ir até uma loja de portas de ferro e adquirir, assim por diante. Além disso, você precisará de um profissional para instalar a porta com especialidades específicas, por exemplo, um carpinteiro para a porta de madeira ou um soldador para a porta de ferro. Como você pode observar, existe uma dependência para cada tipo de porta que você selecionar.</p>
+
+<p><b>Solução</b>: O padrão de fábrica abstrata, nos permite agrupar fábricas individuais que estejam relacionadas, sem precisar especificar suas classes concretas</p>
+
+<p> para o nosso exemplo, iremos criar uma fábrica para mobílias sejam elas sofá e cadeira, será criada as mobílias do tipo moderno e do tipo vitoriano</p> 
+
+<p>Para o padrão de fábrica abstrata, entendemos que <b>AbstractProduct</b> é a interface que declara um tipo de produto(sofá/cadeira), <b>ConcreteProduct</b> é a classe que implementa a interface de AbstractProduct, <b>AbstractFactory</b> é a interface usada para criar produtos abstratos(fábricas) e <b>ConcreteFactory</b> é a classe que implementa a interface AbstractFactory e nos retorna os produtos concretos</p> 
+
+<p>A primeira coisa que precisamos fazer, é declarar explicitamente interfaces(AbstractProduct) para cada tipo distinto da família de produtos(sofá e cadeira)<p>
+ 
+ ```c#
+ 
+    public interface ISofa
+    {
+        string GetType();
+    }
+    
+    public interface IChair
+    {
+        string GetType();
+    }
+ 
+ ```
+
+<p>O próximo passo é declarar o AbstractFactory com a lista de métodos de criação para todos os produtos que fazem parte da família de produtos<p>
+ 
+  ```c#
+ 
+    public interface IFurnitureFactory
+    {
+        IChair CreateChair();
+        ISofa CreateSofa();
+    }
+ 
+ ```
+ 
+<p>Agora para cada variante do produto(ConcreteProduct) precisaremos criar fábricas(ConcreteFactory) separadas para poder retornar o tipo específico do produto. Irei criar o ConcreteProduct para sofá e cadeira do tipo moderno e vitoriano, criarei também as ConcreteFactory para os respectivos tipos de produto, lembrando ConcreteFactory deve herdar de AbstractFactory e ConcreteProduct deve herdar de AbstractProduct<p>
+
+<p>ConcreteProduct do tipo moderno</p>
+
+```c#
+ 
+public class ModernChair : IChair
+    {
+        public ModernChair()
+        {
+        }
+
+        public ModernChair(bool hasLegs)
+        {
+            HasLegs = hasLegs;
+        }
+
+        public bool HasLegs { get; set; }
+        public string GetType()
+        {
+            return $"Esta é uma cadeira Moderna {(HasLegs ? "modelo simples" : "com um modelo inovador")}";
+        }
+    }
+    
+     public class ModernSofa : ISofa
+    {
+        public ModernSofa()
+        {
+        }
+
+        public ModernSofa(string size, bool isRetratil)
+        {
+            Size = size;
+            IsRetratil = isRetratil;
+        }
+
+        public string Size { get; set; }
+        public bool IsRetratil { get; set; }
+
+        public string GetType()
+        {
+            return $"Este é um Sofá Moderno{(IsRetratil ? " retrátil" : "")}{(string.IsNullOrEmpty(Size) ? "" : $", com o tamanho {Size} m")}";
+        }
+    }
+ 
+```
+
+<p>ConcreteProduct do tipo vitoriano</p>
+ 
+ ```c#
+ 
+public class VictorianChair : IChair
+    {
+        public VictorianChair()
+        {
+        }
+
+        public VictorianChair(string texture, bool isMetallic)
+        {
+            Texture = texture;
+            IsMetallic = isMetallic;
+        }
+
+        public string Texture { get; set; }
+        public bool IsMetallic { get; set; }
+
+        public string GetType()
+        {
+            return $"Esta é uma cadeira Vitoriana de textura {(string.IsNullOrEmpty(Texture)? "tecido": Texture)} e com acabamento {(IsMetallic? "metálico": "de madeira")}";
+        }
+    }
+ 
+```
+
+<p>ConcreteFactory do tipo moderno</p>
+
+```c#
+public class ModernFurniture : IFurnitureFactory
+    {
+        public IChair CreateChair(bool hasLegs)
+        {
+            return new ModernChair(hasLegs);
+        }
+
+        public IChair CreateChair()
+        {
+            return new ModernChair();
+        }
+
+        public ISofa CreateSofa(string size, bool isRetratil)
+        {
+            return new ModernSofa(size, isRetratil);
+        }
+        public ISofa CreateSofa()
+        {
+            return new ModernSofa();
+        }
+    }
+```
+
+<p>ConcreteFactory do tipo vitoriano</p>
+
+```c#
+public class VictorianFurniture: IFurnitureFactory
+    {
+        public IChair CreateChair(string texture, bool isMetallic)
+        {
+            return new VictorianChair(texture, isMetallic);
+        }
+
+        public ISofa CreateSofa(string size)
+        {
+            return new VictorianSofa(size);
+        }
+
+        public IChair CreateChair()
+        {
+            return new VictorianChair();
+        }
+
+        public ISofa CreateSofa()
+        {
+            return new VictorianSofa();
+        }
+    }
+```
+
+<p>Com isso finalizamos a implementação, agora é só realizar a chamada.</p>
+
+```c#
+static void Main(string[] args)
+        {
+            Console.WriteLine("Hello World!");
+
+            var modernFurniture = new ModernFurniture();
+            var modernChair1 = modernFurniture.CreateChair(true);
+            var modernChair2 = modernFurniture.CreateChair();
+
+            var modernSofa1 = modernFurniture.CreateSofa("1/2",true);
+            var modernSofa2 = modernFurniture.CreateSofa();
+
+            Console.WriteLine(modernChair1.GetType());
+            Console.WriteLine(modernChair2.GetType());
+            Console.WriteLine(modernSofa1.GetType());
+            Console.WriteLine(modernSofa2.GetType());
+
+            var victorianurniture = new VictorianFurniture();
+            var victorianChair1 = victorianurniture.CreateChair("Couro", true);
+            var victorianChair2 = victorianurniture.CreateChair();
+
+            var victorianSofa1 = victorianurniture.CreateSofa("1/2");
+            var victorianSofa2 = victorianurniture.CreateSofa();
+
+            Console.WriteLine(victorianChair1.GetType());
+            Console.WriteLine(victorianChair2.GetType());
+            Console.WriteLine(victorianSofa1.GetType());
+            Console.WriteLine(victorianSofa2.GetType());
+
+            Console.ReadKey();
+        }
+```
+
+<p><b>Saída</b></p>
+
+> <p>Hello World!</p>
+> <p>Esta é uma cadeira Moderna modelo simples</p>
+> <p>Esta é uma cadeira Moderna com um modelo inovador</p>
+> <p>Este é um Sofá Moderno retrátil, com o tamanho 1/2 m</p>
+> <p>Este é um Sofá Moderno</p>
+> <p>Esta é uma cadeira Vitoriana de textura Couro e com acabamento metálico</p>
+> <p>Esta é uma cadeira Vitoriana de textura tecido e com acabamento de madeira</p>
+> <p>Este é um Sofá Vitoriano, com o tamanho 1/2 m</p>
+> <p>Este é um Sofá Vitoriano</p>
+
+<p>Use o Abstract Factory quando seu código precisar trabalhar com várias famílias de produtos relacionados, mas você não deseja que ele dependa das classes concretas desses produtos</p>
+
+
+
+
+
+
+
 
 
