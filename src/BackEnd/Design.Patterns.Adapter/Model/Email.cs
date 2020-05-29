@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Design.Patterns.Adapter.Model
+﻿namespace Design.Patterns.Adapter.Model
 {
     public class Email
     {
