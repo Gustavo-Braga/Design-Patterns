@@ -1,15 +1,17 @@
-﻿using Design.Patterns.Adapter.Client.Request;
+﻿using Design.Patterns.Adapter.Adaptee;
+using Design.Patterns.Adapter.Adaptee.Request;
 using Design.Patterns.Adapter.Interfaces;
 using Design.Patterns.Adapter.Model;
 using Newtonsoft.Json;
 
 namespace Design.Patterns.Adapter.Adapter
 {
-    public class EmailAdapter: IEmailAdapter
+    public class EmailAdapter : EmailAdaptee, IEmailAdapter
     {
-        public EmailClientRequest GetEmailRequest(Email emailRequest)
+        public void SendEmail(Email email)
         {
-            return new EmailClientRequest(emailRequest.Address, JsonConvert.SerializeObject(emailRequest.Body));
+            var emailRequest = new EmailAdapteeRequest(email.Address, JsonConvert.SerializeObject(email.Body));
+            base.SendEmail(emailRequest);
         }
     }
 }
