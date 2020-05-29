@@ -747,7 +747,7 @@ static void Main(string[] args)
         }
 ```
 
-<p><b>Saída</b></p>
+<p><b>Saída</b>:</p>
 
 > <p>Hello World!</p>
 > <p>Esta é uma cadeira Moderna modelo simples</p>
@@ -761,11 +761,120 @@ static void Main(string[] args)
 
 <p>Use o Abstract Factory quando seu código precisar trabalhar com várias famílias de produtos relacionados, mas você não deseja que ele dependa das classes concretas desses produtos</p>
 
+# Adaptador(adapter)
+
+<p><b>O que é</b>: O padrão Adaptador é um padrão de designt estrutural que permite a colaboração de objetos com interfaces incompatíveis, permite envolver um objeto incompatível em um adaptador para torná-lo compatível com outra classe.</p>
+
+<p><b>Exemplo do mundo real</b>:</p>
+
+> Imagine que você compre um notebook da Europa, ao chegar aqui no Brasil, você vai coloca-lo para carregar, mas tem uma surpresa, o plugue da tomada não se encaixa para as tomadas aqui no Brasil. Você precisará comprar um adaptador de tomada do padrão europeu para o brasileiro
+
+<p><b>Problema</b>: Imagine que o aplicativo do seu cliente receba somente os dados no formato de XML para executar as operações, porém, para melhorar o seu aplicativo, você irá integra-lo com uma outra biblioteca que receba os dados somente no formato JSON, você poderia tentar alterar a biblioteca para trabalhar com dados no formato XML, porém você corre o risco de quebrar algum código existente que depende da biblioteca</p>
 
 
+<p><b>Solução</b>: Você precisa criar um adaptador que realiza a conversão da interface de um objeto para que o outro possa entende-lo, este objeto de adaptador irá ocultar a complexidade que ocorre para ser convertido os dados. Para realizar a implementação devemos ter como base que <b>ITarget</b> é a interface usada pelo cliente pata atingir a funcionalidade, <b>Adaptee</b> é a classe que possui a funcionalidade exigida pelo cliente, <b>Adapter</b> é a classe que implementa o ITarget e herda a classe Adaptee, este fará a comunicação entre o Client e o Adaptee, e por fim, Client que é a clase que interage com o ITarget, no nosso caso será a classe Main</p>
+
+<p>Para o nosso exemplo, foi criado uma classe para realizar o envio de email, onde o nosso request não é compatível com a classe de adaptee</p>
 
 
+<p>Primeiro iremos criar o nosso Adaptee</p>
+ 
+```c#
+    public class EmailAdapteeRequest
+    {
+        public EmailAdapteeRequest(string email, string bodyJson)
+        {
+            Email = email;
+            BodyJson = bodyJson;
+        }
+
+        public string Email { get; set; }
+        public string BodyJson { get; set; }
+    }
+    
+    
+    public class EmailAdaptee
+    {
+        public void SendEmail(EmailAdapteeRequest emailRequest)
+        {
+            Console.WriteLine(emailRequest.Email);
+            Console.WriteLine(emailRequest.BodyJson);
+        }
+
+    }
+    
+```
 
 
+<p>Feito isso, iremos criar um model para Email, para que não seja compatível com o esperado no método SendEmail(isso é somente para fazer sentido o nosso exemplo)</p>
+
+```c#
+    public class Email
+    {
+        public Email(string address, BodyEmail body)
+        {
+            Address = address;
+            Body = body;
+        }
+
+        public string Address { get; set; }
+        public BodyEmail Body { get; set; }
+
+    }
+    
+    public class BodyEmail
+    {
+        public BodyEmail(string subject, string body)
+        {
+            Subject = subject;
+            Body = body;
+        }
+
+        public string Subject { get; set; }
+        public string Body { get; set; }
+
+    }
+```
+
+<p>Feito isso nos deparamos com o problema... Nosso model é do tipo Email e o nosso Adaptee espera o tipo EmailAdapteeRequest e também as propriedades são incompatíveis, o nosso body em Email é um objeto enquanto o body em EmailAdapteeRequest é uma string(JSON). Com isso, iremos criar o nosso ITarget a interface utilizada pelo client para atingir a funcionalidade do nosso Adaptee</p>
+
+```c#
+    public interface IEmailAdapter
+    {
+        void SendEmail(Email email);
+    }
+```
+
+<p>Criamos a nossa interface IEmailAdapter(ITarget), agora precisaremos criar a nossa classe Adapter que irá implementar o método SendEmail e enviar para o método SendEmail do nosso Adaptee, observe que os requests são diferentes, quem é responsável por fazer esta conversão é a nossa classe Adapter<p/>
+
+```c#
+    public class EmailAdapter : EmailAdaptee, IEmailAdapter
+    {
+        public void SendEmail(Email email)
+        {
+            var emailRequest = new EmailAdapteeRequest(email.Address, JsonConvert.SerializeObject(email.Body));
+            base.SendEmail(emailRequest);
+        }
+    }
+```
+<p>Nossa classe EmailAdapter(Adapter) herda de Adaptee e herda de ITarget, realiza a conversão do tipo de request e envia para o nosso Adaptee</p>
+
+<p>Feito isso é somente realizar a chamada do nosso Client(Main)</p>
 
 
+```c#
+      static void Main(string[] args)
+      {
+          var email = new Email("gustavo.braga10@outlook.com", new BodyEmail("teste adapter", "corpo do email"));
+          var emailAdapter = new EmailAdapter();
+          emailAdapter.SendEmail(email);
+          Console.ReadKey();
+      }
+```
+
+<p><b>Saída</b>:</p>
+
+> <p>gustavo.braga10@outlook.com</p>
+> <p>{"Subject":"teste adapter","Body":"corpo do email"}</p>
+
+<p>Use a classe Adapter quando desejar usar alguma classe existente, mas sua interface não é compatível com o restante do seu código. O adaptador permite criar uma camada intermediária que serve como tradutor entre as classes.
