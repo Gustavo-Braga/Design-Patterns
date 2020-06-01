@@ -747,7 +747,7 @@ static void Main(string[] args)
         }
 ```
 
-<p><b>Saída</b></p>
+<p><b>Saída</b>:</p>
 
 > <p>Hello World!</p>
 > <p>Esta é uma cadeira Moderna modelo simples</p>
@@ -761,6 +761,428 @@ static void Main(string[] args)
 
 <p>Use o Abstract Factory quando seu código precisar trabalhar com várias famílias de produtos relacionados, mas você não deseja que ele dependa das classes concretas desses produtos</p>
 
+# Adaptador(adapter)
+
+<p><b>O que é</b>: O padrão Adaptador é um padrão de designt estrutural que permite a colaboração de objetos com interfaces incompatíveis, permite envolver um objeto incompatível em um adaptador para torná-lo compatível com outra classe.</p>
+
+<p><b>Exemplo do mundo real</b>:</p>
+
+> Imagine que você compre um notebook da Europa, ao chegar aqui no Brasil, você vai coloca-lo para carregar, mas tem uma surpresa, o plugue da tomada não se encaixa para as tomadas aqui no Brasil. Você precisará comprar um adaptador de tomada do padrão europeu para o brasileiro
+
+<p><b>Problema</b>: Imagine que o aplicativo do seu cliente receba somente os dados no formato de XML para executar as operações, porém, para melhorar o seu aplicativo, você irá integra-lo com uma outra biblioteca que receba os dados somente no formato JSON, você poderia tentar alterar a biblioteca para trabalhar com dados no formato XML, porém você corre o risco de quebrar algum código existente que depende da biblioteca</p>
+
+
+<p><b>Solução</b>: Você precisa criar um adaptador que realiza a conversão da interface de um objeto para que o outro possa entende-lo, este objeto de adaptador irá ocultar a complexidade que ocorre para ser convertido os dados. Para realizar a implementação devemos ter como base que <b>ITarget</b> é a interface usada pelo cliente pata atingir a funcionalidade, <b>Adaptee</b> é a classe que possui a funcionalidade exigida pelo cliente, <b>Adapter</b> é a classe que implementa o ITarget e herda a classe Adaptee, este fará a comunicação entre o Client e o Adaptee, e por fim, Client que é a clase que interage com o ITarget, no nosso caso será a classe Main</p>
+
+<p>Para o nosso exemplo, foi criado uma classe para realizar o envio de email, onde o nosso request não é compatível com a classe de adaptee</p>
+
+
+<p>Primeiro iremos criar o nosso Adaptee</p>
+ 
+```c#
+    public class EmailAdapteeRequest
+    {
+        public EmailAdapteeRequest(string email, string bodyJson)
+        {
+            Email = email;
+            BodyJson = bodyJson;
+        }
+
+        public string Email { get; set; }
+        public string BodyJson { get; set; }
+    }
+    
+    
+    public class EmailAdaptee
+    {
+        public void SendEmail(EmailAdapteeRequest emailRequest)
+        {
+            Console.WriteLine(emailRequest.Email);
+            Console.WriteLine(emailRequest.BodyJson);
+        }
+
+    }
+    
+```
+
+
+<p>Feito isso, iremos criar um model para Email, para que não seja compatível com o esperado no método SendEmail(isso é somente para fazer sentido o nosso exemplo)</p>
+
+```c#
+    public class Email
+    {
+        public Email(string address, BodyEmail body)
+        {
+            Address = address;
+            Body = body;
+        }
+
+        public string Address { get; set; }
+        public BodyEmail Body { get; set; }
+
+    }
+    
+    public class BodyEmail
+    {
+        public BodyEmail(string subject, string body)
+        {
+            Subject = subject;
+            Body = body;
+        }
+
+        public string Subject { get; set; }
+        public string Body { get; set; }
+
+    }
+```
+
+<p>Feito isso nos deparamos com o problema... Nosso model é do tipo Email e o nosso Adaptee espera o tipo EmailAdapteeRequest e também as propriedades são incompatíveis, o nosso body em Email é um objeto enquanto o body em EmailAdapteeRequest é uma string(JSON). Com isso, iremos criar o nosso ITarget a interface utilizada pelo client para atingir a funcionalidade do nosso Adaptee</p>
+
+```c#
+    public interface IEmailAdapter
+    {
+        void SendEmail(Email email);
+    }
+```
+
+<p>Criamos a nossa interface IEmailAdapter(ITarget), agora precisaremos criar a nossa classe Adapter que irá implementar o método SendEmail e enviar para o método SendEmail do nosso Adaptee, observe que os requests são diferentes, quem é responsável por fazer esta conversão é a nossa classe Adapter<p/>
+
+```c#
+    public class EmailAdapter : EmailAdaptee, IEmailAdapter
+    {
+        public void SendEmail(Email email)
+        {
+            var emailRequest = new EmailAdapteeRequest(email.Address, JsonConvert.SerializeObject(email.Body));
+            base.SendEmail(emailRequest);
+        }
+    }
+```
+<p>Nossa classe EmailAdapter(Adapter) herda de Adaptee e herda de ITarget, realiza a conversão do tipo de request e envia para o nosso Adaptee</p>
+
+<p>Feito isso é somente realizar a chamada do nosso Client(Main)</p>
+
+
+```c#
+      static void Main(string[] args)
+      {
+          var email = new Email("gustavo.braga10@outlook.com", new BodyEmail("teste adapter", "corpo do email"));
+          var emailAdapter = new EmailAdapter();
+          emailAdapter.SendEmail(email);
+          Console.ReadKey();
+      }
+```
+
+<p><b>Saída</b>:</p>
+
+> <p>gustavo.braga10@outlook.com</p>
+> <p>{"Subject":"teste adapter","Body":"corpo do email"}</p>
+
+<p>Use a classe Adapter quando desejar usar alguma classe existente, mas sua interface não é compatível com o restante do seu código. O adaptador permite criar uma camada intermediária que serve como tradutor entre as classes.</p>
+
+
+# Decorador(decorator)
+
+<p><b>O que é</b>: O Decorador é um padrão de design estrutural que permite anexar novos comportamentos aos objetos, permite alterar dinamicamente o comportamento de um objeto em tempo de execução, envolvendo-os em um objeto de uma classe decoradora.</p>
+
+<p><b>Exemplo do mundo real</b>:</p>
+
+> Imagine que você administra uma Cafeteria que oferece vários tipos diferentes de café, café expresso, café com leite, café mocha e também vários tipos de ingredientes, chocolate, chantilly, etc... Você escolhe um tipo de café e vai adicionando dinamicamente os itens desejados, os preços dos produtos iram alterando até obter o custo final. Aqui cada tipo de ingrediente é um decorador.
+
+<p><b>Problema</b>: Você precisa adicionar um comportamento ou estado a objetos individuais em tempo de execução, porém a herança não é viável porque é estática, você não pode alterar o comportamento de um objeto existente no tempo de execução. Você só pode substituir o objeto inteiro por outro criado a partir de uma subclasse diferente</p>
+
+<p><b>Solução</b>: Uma das maneiras de superar essas advertências é usando Agregação(significa que a parte pode ser compartilhada entre vários objetos. O objeto de A contém os objetos de B, B pode viver sem A) ou Composição(significa que a parte não existe sem o todo. O objeto A consiste nos objetos B, um gerencia o ciclo de vida de B, B não pode viver sem A) em vez de herança. Com esta abordagem você consegue substituir o objeto auxiliar vinculando por outro, alterando o comportamento do container em tempo de execução. Um objeto pode usar o comportamento de várias classes, tendo referências a vários objetos e delegando a eles todos os tipos de trabalho.</p>
+
+<p>Para o nosso exemplo será criado um programa semelhante ao da cafeteria, porém uma pizzaria, onde criamos a pizza e adicionamos uma cobertura(ingrediente) extra. Para desenvolver o padrão decorador, temos que ter em mete que. <b>Component</b> é uma interface que contém os membros que serão implementados pela ConcreteClass e Decorator, <b>Decorator</b> é uma classe abstrata que implementa a interface Component e contém a referencia a uma instância Component, esta classe atua como classe base para todos os decoradores de Component, <b>ConcreteComponent</b> esta é uma classe concreta que imlementa a interface Component, <b>ConcreteDecorator</b> esta é a classe que herda de Decorator e fornece um decorador aos components</p>
+
+<p>Inicialmente vamos criar o nosso Component IOrder(porque nossa pizza é um "pedido")</p>
+ 
+ ```c#
+    public interface IOrder
+    {
+        double GetPrice();
+        string GetLabel();
+    }
+ ```
+ 
+ <p>Agora vamos Criar o nosso ConcreteComponent(que é nossa pizza), lembrando que esta deve herdar de Component(IOrder)</p>
+ 
+  ```c#
+ public class Pizza : IOrder
+    {
+        public Pizza(string label, double price)
+        {
+            Label = label;
+            Price = price;
+        }
+
+        public string Label { get; set; }
+        public double Price { get; set; }
+        public double GetPrice()
+        {
+            return Price;
+        }
+
+        public string GetLabel()
+        {
+            return Label;
+        }
+    }
+ ```
+ 
+ <p>Certo, agora iremos criar o nosso Decorator que será a nossa classe base para criação dos decoradores, esta também deve herdar de IOrder</p>
+ 
+ ```c#
+    public abstract class Extra : IOrder
+    {
+        protected readonly IOrder _order;
+        protected readonly string _label;
+        protected readonly double _price;
+
+        public Extra(IOrder order, string label, double price)
+        {
+            _order = order;
+            _label = label;
+            _price = price;
+        }
+
+        public abstract double GetPrice();
+
+        public string GetLabel()
+        {
+            return $"{_order.GetLabel()}, {_label}";
+        }
+    }
+ ```
+ 
+ <p>Feito isso, é só ir criando os ConcreteDecorator, cada um deve herdar do nosso Decorator(Extra), com isso é possível "incrementar" o nosso objeto Pizza</p>
+ 
+ ```c#
+    public class ExtraCover : Extra
+    {
+        public ExtraCover(IOrder order, string label, double price) : base(order, label, price)
+        {
+        }
+
+        public override double GetPrice()
+        {
+            return _order.GetPrice() + _price;
+        }
+    }
+ ```
+ 
+  <p>Agora é só realizar a chamada do ConcreteComponent primeiramente e depois do ConcreteDecorator</p>
+  
+   
+ ```c#
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Hello World!");
+            IOrder pizza = new Pizza("Frango", 21);
+            pizza = new ExtraCover(pizza, "catupiry", 8);
+            Console.WriteLine(pizza.GetLabel());
+            Console.WriteLine(pizza.GetPrice());
+            Console.ReadKey();
+        }
+ ```
+ 
+ <p><b>Saída</b>:</p>
+
+> <p>Hello World!</p>
+> <p>Frango, catupiry</p>
+> <p>29</p>
+
+<p>Use o padrão Decorator quando precisar atribuir comportamentos extras a objetos em tempo de execução sem quebrar o código que usa esses objetos. Use o padrão quando for estranho ou impossível estender o comportamento de um objeto usando herança.</p>
+ 
+ # Ponte(bridge)
+ 
+ <p><b>O que é</b>: Bridge é um padrão de design estrutural que permite dividir uma classe grande ou um conjunto de classes estreitamente relacionadas em duas hierarquias separadas - abstração e implementação - que podem ser desenvolvidas independentemente uma da outra. O padrão de bridge é referente a composição da herança, os detalhes da implementação são transferidos para uma hierarquia separada</p>
+ 
+ <p><b>Problema</b>: Digamos que você precise criar uma página com diferentes tipos de tema light/dark. Inicialmente você precisaria criar uma cópia de cada página para cada um dos seus temas. Utilizando o padrão de bridge, permite que você crie apenas um tema separado e carregue-o com base na preferência do usuário.</p>
+ 
+ <p><b>Solução</b>: O padrão de bridge tenta resolver esse problema alternando da herança para a composição do objeto. Isso significa que é extraido uma das dimensões em uma hierarquia de classes separada, para que as classes originais façam referência a esse objeto da nova hierarquia</p>
+ 
+ <p>Para o padrão bridge temos que ter em mente que <b>Abstraction</b> é a classe abstrata que contém os membros que definem um objeto de negócio abstrato e suas funcionalidades, ele contém a referência para o objeto do tipo Bridge, <b>Bridge</b> é uma interface que atua como uma ponte entre a classe de abstração e as classes do implementador, <b>RedefinedAbstraction</b> esta é a classe que herda de Abstraction e <b>ImplementationClass</b> são as classes que implementam bridge.</p>
+ 
+ <p>Para o nosso exemplo foi criado uma classe de repositório simples onde faremos a conexão(fake) com um banco relacional e outro não relacional.</p>
+ 
+  <p>Vamos a criação dos models, Cliente e Produto</p>
+  
+  ```c#
+    public class Client
+    {
+        public Client(string name, int age)
+        {
+            Name = name;
+            Age = age;
+        }
+
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public int Age { get; set; }
+
+        public override string ToString()
+        {
+            return $"Id: {Id}, Nome: {Name}, Idade: {Age}";
+        }
+
+    }
+    
+    
+    public class Product
+    {
+        public Product(string description)
+        {
+            Description = description;
+        }
+
+        public int Id { get; set; }
+        public string Description { get; set; }
+
+        public override string ToString()
+        {
+            return $"Id: {Id}, Descrição: {Description}";
+        }
+    } 
+    
+  ```
+ 
+<p>Agora, vamos criar a nossa interface de Bridge(IConnectionDataBase)</p>
+
+  ```c#
+    public interface IConnectionDataBase
+    {
+        void OpenConnection(string connectionString);
+        void CloseConnection();
+    }
+  ```
+  
+<p>Com a interface de Bridge criada, conseguimos criar os ImplementationClass que são os nossos objetos para realizar a conexão com o banco relacional ou não relacional</p>
+  
+```c#
+    public class SqlConnection: IConnectionDataBase
+    {
+        public void OpenConnection(string connectionString)
+        {
+            Console.WriteLine($"Abre conexão com banco de dados SQL {connectionString}");
+        }
+
+        public void CloseConnection()
+        {
+            Console.WriteLine($"Fecha conexão com banco de dados SQL");
+        }
+    }
+    
+    
+    public class NoSqlConnection : IConnectionDataBase
+    {
+        public void OpenConnection(string connectionString)
+        {
+            Console.WriteLine($"Abre conexão com banco de dados NoSQL {connectionString}");
+        }
+
+        public void CloseConnection()
+        {
+            Console.WriteLine($"Fecha conexão com banco de dados NoSQL");
+        }
+    }
+```
+
+<p>Com isto, é suficiente para criarmos a nossa classe Abstraction que é a classe que terá a referência para a interface de Bridge(IConnectionDataBase)</p>
+
+```c#
+    public class RepositoryBase
+    {
+        protected readonly IConnectionDataBase _connectionDataBase;
+
+        public RepositoryBase(string connectionString, IConnectionDataBase connectionDataBase)
+        {
+            ConnectionString = connectionString;
+            _connectionDataBase = connectionDataBase;
+        }
+
+        protected string ConnectionString { get; set; }
+    }
+```
+
+<p>Quase pronto, agora precisamos criar as classes de RedefinedAbstraction que são as classes que implementarão a classe de Abstraction(RepositoryBase). Foi criado uma outra interface para IRepository devido ao método comum de Insert<p>
+
+```c#
+    public interface IRepository<T>
+    {
+        int Insert(T entity);
+    }
+```
+
+<p>Agora será feito a implementação das duas RedefinedAbstraction uma para cada model<p>
+ 
+```c#
+    public class ClientRepository : RepositoryBase, IRepository<Client>
+    {
+        public ClientRepository(string connectionString, IConnectionDataBase connectionDataBase) : base(connectionString, connectionDataBase)
+        {
+        }
+
+        public int Insert(Client entity)
+        {
+            _connectionDataBase.OpenConnection(ConnectionString);
+            entity.Id = new Random().Next(0, 100);
+            Console.WriteLine($"inserido cliente {entity.ToString()}");
+            _connectionDataBase.CloseConnection();
+            return entity.Id;
+        }
+    }
+    
+    
+    public class ProductRepository : RepositoryBase, IRepository<Product>
+    {
+        public ProductRepository(string connectionString, IConnectionDataBase connectionDataBase) : base(connectionString, connectionDataBase)
+        {
+        }
+
+        public int Insert(Product entity)
+        {
+            _connectionDataBase.OpenConnection(ConnectionString);
+            entity.Id = new Random().Next(0, 100);
+            Console.WriteLine($"inserido Produto {entity.ToString()}");
+            _connectionDataBase.CloseConnection();
+            return entity.Id;
+        }
+    }
+```
+<p>Tudo pronto, agora só precisamos realizar a chamada e passar qual tipo de conexão queremos para qual repositório</p>
+
+```c#
+   static void Main(string[] args)
+   {
+       Console.WriteLine("Hello World!");
+       var client = new Client("Gustavo", 23);
+       var connectionStringSql = "connectionStringBancoRelacional";
+       var sqlConnection = new SqlConnection();
+       var clientRepository = new ClientRepository(connectionStringSql, sqlConnection);
+       clientRepository.Insert(client);
+
+       var product = new Product("Martelo");
+       var connectionStringNoSql = "connectionStringBancoNÃORelacional";
+       var noSqlConnection = new NoSqlConnection();
+       var productRepository = new ProductRepository(connectionStringNoSql, noSqlConnection);
+       productRepository.Insert(product);
+
+       Console.ReadKey();
+   }
+```
+
+ <p><b>Saída</b>:</p>
+
+> <p>Hello World!</p>
+> <p>Abre conexao com banco de dados SQL connectionStringBancoRelacional</p>
+> <p>inserido cliente Id: 21, Nome: Gustavo, Idade: 23</p>
+> <p>Fecha conexao com banco de dados SQL</p>
+> <p>Abre conexao com banco de dados NoSQL connectionStringBancoNAORelacional</p>
+> <p>inserido Produto Id: 69, Descriçao: Martelo</p>
+> <p>Fecha conexao com banco de dados NoSQL</p>
+
+<p>Use o padrão Bridge quando desejar dividir e organizar uma classe monolítica que tenha várias variantes de algumas funcionalidades (por exemplo, se a classe puder trabalhar com vários servidores de banco de dados). Use o padrão quando precisar estender uma classe em várias dimensões ortogonais (independentes) ou quando precisar alternar a implementação em tempo de execução.</p> 
+ 
 
 
 
@@ -768,4 +1190,4 @@ static void Main(string[] args)
 
 
 
-
+  
