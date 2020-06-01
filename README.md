@@ -877,4 +877,119 @@ static void Main(string[] args)
 > <p>gustavo.braga10@outlook.com</p>
 > <p>{"Subject":"teste adapter","Body":"corpo do email"}</p>
 
-<p>Use a classe Adapter quando desejar usar alguma classe existente, mas sua interface não é compatível com o restante do seu código. O adaptador permite criar uma camada intermediária que serve como tradutor entre as classes.
+<p>Use a classe Adapter quando desejar usar alguma classe existente, mas sua interface não é compatível com o restante do seu código. O adaptador permite criar uma camada intermediária que serve como tradutor entre as classes.</p>
+
+
+# Decorador(decorator)
+
+<p><b>O que é</b>: O Decorador é um padrão de design estrutural que permite anexar novos comportamentos aos objetos, permite alterar dinamicamente o comportamento de um objeto em tempo de execução, envolvendo-os em um objeto de uma classe decoradora.</p>
+
+<p><b>Exemplo do mundo real</b>:</p>
+
+> Imagine que você administra uma Cafeteria que oferece vários tipos diferentes de café, café expresso, café com leite, café mocha e também vários tipos de ingredientes, chocolate, chantilly, etc... Você escolhe um tipo de café e vai adicionando dinamicamente os itens desejados, os preços dos produtos iram alterando até obter o custo final. Aqui cada tipo de ingrediente é um decorador.
+
+<p><b>Problema</b>: Você precisa adicionar um comportamento ou estado a objetos individuais em tempo de execução, porém a herança não é viável porque é estática, você não pode alterar o comportamento de um objeto existente no tempo de execução. Você só pode substituir o objeto inteiro por outro criado a partir de uma subclasse diferente</p>
+
+<p><b>Solução</b>: Uma das maneiras de superar essas advertências é usando Agregação(significa que a parte pode ser compartilhada entre vários objetos. O objeto de A contém os objetos de B, B pode viver sem A) ou Composição(significa que a parte não existe sem o todo. O objeto A consiste nos objetos B, um gerencia o ciclo de vida de B, B não pode viver sem A) em vez de herança. Com esta abordagem você consegue substituir o objeto auxiliar vinculando por outro, alterando o comportamento do container em tempo de execução. Um objeto pode usar o comportamento de várias classes, tendo referências a vários objetos e delegando a eles todos os tipos de trabalho.</p>
+
+<p>Para o nosso exemplo será criado um programa semelhante ao da cafeteria, porém uma pizzaria, onde criamos a pizza e adicionarmos uma cobertura(ingrediente) extra. Para desenvolver o padrão decorador, temos que ter em mete que. <b>Component</b> esta é uma interface que contém os membros que serão implementados pela ConcreteClass e Decorator, <b>Decorator</b> é uma classe abstrata que implementa a interface Component e contém a referencia a uma instância Component, esta classe atua como classe base para todos os decoradores de Component, <b>ConcreteComponent</b> esta é uma classe concreta que imlementa a interface Component, <b>ConcreteDecorator</b> esta é a classe que herda de Decorator e fornece um decorador aos components</p>
+
+<p>Inicialmente vamos criar o nosso Component IOrder(porque nossa pizza é um "pedido")</p>
+ 
+ ```c#
+    public interface IOrder
+    {
+        double GetPrice();
+        string GetLabel();
+    }
+ ```
+ 
+ <p>Agora vamos Criar o nosso ConcreteComponent(que é nossa pizza), lembrando que esta deve herdar de Component(IOrder)</p>
+ 
+  ```c#
+ public class Pizza : IOrder
+    {
+        public Pizza(string label, double price)
+        {
+            Label = label;
+            Price = price;
+        }
+
+        public string Label { get; set; }
+        public double Price { get; set; }
+        public double GetPrice()
+        {
+            return Price;
+        }
+
+        public string GetLabel()
+        {
+            return Label;
+        }
+    }
+ ```
+ 
+ <p>Certo, agora iremos criar o nosso Decorator que será a nossa classe base para criação dos decoradores, esta também deve herdar de IOrder</p>
+ 
+ ```c#
+    public abstract class Extra : IOrder
+    {
+        protected readonly IOrder _order;
+        protected readonly string _label;
+        protected readonly double _price;
+
+        public Extra(IOrder order, string label, double price)
+        {
+            _order = order;
+            _label = label;
+            _price = price;
+        }
+
+        public abstract double GetPrice();
+
+        public string GetLabel()
+        {
+            return $"{_order.GetLabel()}, {_label}";
+        }
+    }
+ ```
+ 
+ <p>Feito isso, é só ir criando os ConcreteDecorator, cada um deve herdar do nosso Decorator(Extra), com isso é possível "incrementar" o nosso objeto Pizza</p>
+ 
+ ```c#
+    public class ExtraCover : Extra
+    {
+        public ExtraCover(IOrder order, string label, double price) : base(order, label, price)
+        {
+        }
+
+        public override double GetPrice()
+        {
+            return _order.GetPrice() + _price;
+        }
+    }
+ ```
+ 
+  <p>Agora é só realizar a chamada do ConcreteComponent primeiramente e depois do ConcreteDecorator</p>
+  
+   
+ ```c#
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Hello World!");
+            IOrder pizza = new Pizza("Frango", 21);
+            pizza = new ExtraCover(pizza, "catupiry", 8);
+            Console.WriteLine(pizza.GetLabel());
+            Console.WriteLine(pizza.GetPrice());
+            Console.ReadKey();
+        }
+ ```
+ 
+ <p><b>Saída</b>:</p>
+
+> <p>Hello World!</p>
+> <p>Frango, catupiry</p>
+> <p>29</p>
+
+<p>Use o padrão Decorator quando precisar atribuir comportamentos extras a objetos em tempo de execução sem quebrar o código que usa esses objetos. Use o padrão quando for estranho ou impossível estender o comportamento de um objeto usando herança.
+ 
