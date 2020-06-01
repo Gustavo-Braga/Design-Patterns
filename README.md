@@ -991,5 +991,203 @@ static void Main(string[] args)
 > <p>Frango, catupiry</p>
 > <p>29</p>
 
-<p>Use o padrão Decorator quando precisar atribuir comportamentos extras a objetos em tempo de execução sem quebrar o código que usa esses objetos. Use o padrão quando for estranho ou impossível estender o comportamento de um objeto usando herança.
+<p>Use o padrão Decorator quando precisar atribuir comportamentos extras a objetos em tempo de execução sem quebrar o código que usa esses objetos. Use o padrão quando for estranho ou impossível estender o comportamento de um objeto usando herança.</p>
  
+ # Ponte(bridge)
+ 
+ <p><b>O que é</b>: Bridge é um padrão de design estrutural que permite dividir uma classe grande ou um conjunto de classes estreitamente relacionadas em duas hierarquias separadas - abstração e implementação - que podem ser desenvolvidas independentemente uma da outra. O padrão de bridge é referente a composição da herança, os detalhes da implementação são transferidos para uma hierarquia separada</p>
+ 
+ <p><b>Problema</b>: Digamos que você precise criar uma página com diferentes tipos de tema light/dark. Inicialmente você precisaria criar uma cópia de cada página para cada um dos seus temas. Utilizando o padrão de bridge, permite que você crie apenas um tema separado e carregue-o com base na preferência do usuário.</p>
+ 
+ <p><b>Solução</b>: O padrão de bridge tenta resolver esse problema alternando da herança para a composição do objeto. Isso significa que é extraido uma das dimensões em uma hierarquia de classes separada, para que as classes originais façam referência a esse objeto da nova hierarquia</p>
+ 
+ <p>Para o padrão bridge temos que ter em mente que <b>Abstraction</b> é a classe abstrata que contém os membros que definem um objeto de negócio abstrato e suas funcionalidades, ele contém a referência para o objeto do tipo Bridge, <b>Bridge</b> é uma interface que atua como uma ponte entre a classe de abstração e as classes do implementador, <b>RedefinedAbstraction</b> esta é a classe que herda de Abstraction e <b>ImplementationClass</b> são as classes que implementam bridge.</p>
+ 
+ <p>Para o nosso exemplo foi criado uma classe de repositório simples onde faremos a conexão(fake) com um banco relacional e outro não relacional.</p>
+ 
+  <p>Vamos a criação dos models, Cliente e Produto</p>
+  
+  ```c#
+    public class Client
+    {
+        public Client(string name, int age)
+        {
+            Name = name;
+            Age = age;
+        }
+
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public int Age { get; set; }
+
+        public override string ToString()
+        {
+            return $"Id: {Id}, Nome: {Name}, Idade: {Age}";
+        }
+
+    }
+    
+    
+    public class Product
+    {
+        public Product(string description)
+        {
+            Description = description;
+        }
+
+        public int Id { get; set; }
+        public string Description { get; set; }
+
+        public override string ToString()
+        {
+            return $"Id: {Id}, Descrição: {Description}";
+        }
+    } 
+    
+  ```
+ 
+<p>Agora, vamos criar a nossa interface de Bridge(IConnectionDataBase)</p>
+
+  ```c#
+    public interface IConnectionDataBase
+    {
+        void OpenConnection(string connectionString);
+        void CloseConnection();
+    }
+  ```
+  
+<p>Com a interface de Bridge criada, conseguimos criar os ImplementationClass que são os nossos objetos para realizar a conexão com o banco relacional ou não relacional</p>
+  
+```c#
+    public class SqlConnection: IConnectionDataBase
+    {
+        public void OpenConnection(string connectionString)
+        {
+            Console.WriteLine($"Abre conexão com banco de dados SQL {connectionString}");
+        }
+
+        public void CloseConnection()
+        {
+            Console.WriteLine($"Fecha conexão com banco de dados SQL");
+        }
+    }
+    
+    
+    public class NoSqlConnection : IConnectionDataBase
+    {
+        public void OpenConnection(string connectionString)
+        {
+            Console.WriteLine($"Abre conexão com banco de dados NoSQL {connectionString}");
+        }
+
+        public void CloseConnection()
+        {
+            Console.WriteLine($"Fecha conexão com banco de dados NoSQL");
+        }
+    }
+```
+
+<p>Com isto, é suficiente para criarmos a nossa classe Abstraction que é a classe que terá a referência para a interface de Bridge(IConnectionDataBase)</p>
+
+```c#
+    public class RepositoryBase
+    {
+        protected readonly IConnectionDataBase _connectionDataBase;
+
+        public RepositoryBase(string connectionString, IConnectionDataBase connectionDataBase)
+        {
+            ConnectionString = connectionString;
+            _connectionDataBase = connectionDataBase;
+        }
+
+        protected string ConnectionString { get; set; }
+    }
+```
+
+<p>Quase pronto, agora precisamos criar as classes de RedefinedAbstraction que são as classes que implementarão a classe de Abstraction(RepositoryBase). Foi criado uma outra interface para IRepository devido ao método comum de Insert<p>
+
+```c#
+    public interface IRepository<T>
+    {
+        int Insert(T entity);
+    }
+```
+
+<p>Agora será feito a implementação das duas RedefinedAbstraction uma para cada model<p>
+ 
+```c#
+    public class ClientRepository : RepositoryBase, IRepository<Client>
+    {
+        public ClientRepository(string connectionString, IConnectionDataBase connectionDataBase) : base(connectionString, connectionDataBase)
+        {
+        }
+
+        public int Insert(Client entity)
+        {
+            _connectionDataBase.OpenConnection(ConnectionString);
+            entity.Id = new Random().Next(0, 100);
+            Console.WriteLine($"inserido cliente {entity.ToString()}");
+            _connectionDataBase.CloseConnection();
+            return entity.Id;
+        }
+    }
+    
+    
+    public class ProductRepository : RepositoryBase, IRepository<Product>
+    {
+        public ProductRepository(string connectionString, IConnectionDataBase connectionDataBase) : base(connectionString, connectionDataBase)
+        {
+        }
+
+        public int Insert(Product entity)
+        {
+            _connectionDataBase.OpenConnection(ConnectionString);
+            entity.Id = new Random().Next(0, 100);
+            Console.WriteLine($"inserido Produto {entity.ToString()}");
+            _connectionDataBase.CloseConnection();
+            return entity.Id;
+        }
+    }
+```
+<p>Tudo pronto, agora só precisamos realizar a chamada e passar qual tipo de conexão queremos para qual repositório</p>
+
+```c#
+   static void Main(string[] args)
+   {
+       Console.WriteLine("Hello World!");
+       var client = new Client("Gustavo", 23);
+       var connectionStringSql = "connectionStringBancoRelacional";
+       var sqlConnection = new SqlConnection();
+       var clientRepository = new ClientRepository(connectionStringSql, sqlConnection);
+       clientRepository.Insert(client);
+
+       var product = new Product("Martelo");
+       var connectionStringNoSql = "connectionStringBancoNÃORelacional";
+       var noSqlConnection = new NoSqlConnection();
+       var productRepository = new ProductRepository(connectionStringNoSql, noSqlConnection);
+       productRepository.Insert(product);
+
+       Console.ReadKey();
+   }
+```
+
+ <p><b>Saída</b>:</p>
+
+> <p>Hello World!</p>
+> <p>Abre conexao com banco de dados SQL connectionStringBancoRelacional</p>
+> <p>inserido cliente Id: 21, Nome: Gustavo, Idade: 23</p>
+> <p>Fecha conexao com banco de dados SQL</p>
+> <p>Abre conexao com banco de dados NoSQL connectionStringBancoNAORelacional</p>
+> <p>inserido Produto Id: 69, Descriçao: Martelo</p>
+> <p>Fecha conexao com banco de dados NoSQL</p>
+
+<p>Use o padrão Bridge quando desejar dividir e organizar uma classe monolítica que tenha várias variantes de algumas funcionalidades (por exemplo, se a classe puder trabalhar com vários servidores de banco de dados). Use o padrão quando precisar estender uma classe em várias dimensões ortogonais (independentes) ou quando precisar alternar a implementação em tempo de execução.</p> 
+ 
+
+
+
+
+
+
+
+  
