@@ -1183,11 +1183,97 @@ static void Main(string[] args)
 
 <p>Use o padrão Bridge quando desejar dividir e organizar uma classe monolítica que tenha várias variantes de algumas funcionalidades (por exemplo, se a classe puder trabalhar com vários servidores de banco de dados). Use o padrão quando precisar estender uma classe em várias dimensões ortogonais (independentes) ou quando precisar alternar a implementação em tempo de execução.</p> 
  
+ # Fachada(facade)
+ 
+ <p><b>O que é</b>: Facade é um padrão de design estrutural que fornece uma interface simplificada referente a uma biblioteca, estrutura ou um conjunto complexo de classes. Em outras palavras o padrão facade fornece uma interface simplificada para um subsistema complexo</p>
+ 
+ <p><b>Problema</b>: Imagine que você precise realizar uma operação e deva consumir uma biblioteca onde há um amplo conjunto de objetos ou estrutura sofisticada, qua precisa inicializar todos os objetos, acompanhar as depêndencias, executar métodos em ordem, assim por diante. Essas bibliotecas são muito complexas, com muito código de difícil compreensão e a única coisa que você deseja é consumir um determinado recurso, você precisa conhecer toda a estrutura interna e os recursos disponíveis para simplismente executar uma operação.</p>
+ 
+ <p><b>Solução</b>: O Facade é uma classe que fornece uma interface simples para esse subsistema complexo, onde é possível extrair as funcionalidades que o cliente realmente precisa se preocupar. Com ele é possível abstrair/simplificar essa complexidade, fazendo com que o desenvolvedor não precise conhecer toda arquitetura por trás da biblioteca, é possível desacoplar o sistema, favorecendo a separação de responsabilidades, possível reduzir dependências e "esconder" o código sujo, inviável de refatorar.</p>
+ 
+ <p>Para realizar a implementação do facade devemos ter em mente que <b>Facade</b> é uma classe de wrapper(trata-se de classes que empacotam tipos primitivos) onde contém um conjunto de membros exigidos pelo cliente</p>
+
+<p>Para o nosso exemplo foi criado um sistema bem simples onde será construido um carro, onde CarModel executa um método, CarBody outro e CarAcessories outro, esse contexto é muito simples para a necessidade real do Facade, porém, podemos imaginar que dentro desses métodos há estruturas muito complexas e impossíveis de compreender 100% em pouco tempo, iremos utilizar o Facade aqui, para abstrair a complexidade que há dentro desses métodos e fornecer uma estruturas simples para o cliente criar um carro completo, sem a necessidade de saber que é necessário executar a classe SetModel, depois SetBody e por ultimo a classe SetAcessories, com o facade ele atinge o objetivo de criar o carro completo, simplesmente através do método CreateCompleteCar.</p>
+
+<p>Para iniciar o desenvolvimento, vamos a criação das nossas classes para a construção do carro</p>
+
+```c#
+    public class CarBody
+    {
+        public void SetBody()
+        {
+            Console.WriteLine("Body");
+        }
+    }
+    
+    public class CarModel
+    {
+        public void SetModel()
+        {
+            Console.WriteLine("Model");
+        }
+    }
+    
+    public class CarAcessories
+    {
+        public void SetAcessories()
+        {
+            Console.WriteLine("Acessories");
+        }
+    }
+```
+
+<p>Queremos esconder este código complexo para a criação do carro, então criaremos o CarFacade e iremos expor o método para criação do carro.</p>
+
+```c#
+
+public class CarFacade
+    {
+        public CarModel CarModel { get; set; }
+        public CarBody CarBody { get; set; }
+        public CarAcessories CarAcessories { get; set; }
+
+        public CarFacade()
+        {
+            CarModel = new CarModel();
+            CarBody = new CarBody();
+            CarAcessories = new CarAcessories();
+        }
+
+        public void CreateCompleteCar()
+        {
+            CarModel.SetModel();
+            CarBody.SetBody();
+            CarAcessories.SetAcessories();
+        }
 
 
-
-
-
-
-
+    }
   
+```
+
+<p>Certo. Com isso temos o nosso objeto de Facade onde conseguiremos através de um método simples criar o nosso carro, sem precisarmos saber que há a necessidade de criar três outras classes para isso.</p>
+
+- Deve-se tomar muito cuidado ao implementar esse pattern, para que você não crie um God Class(Classe Deus, uma classe que sabe demais ou faz demais, em engenharia de software é reconhecido como anti padrão).
+
+<p>Feito isso é só realizar a chamada da nossa Facade.</p>
+
+```c#
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Hello World!");
+            var facade = new CarFacade();
+            facade.CreateCompleteCar();
+            Console.ReadKey();
+        }
+```
+
+ 
+ <p><b>Saída</b>:</p>
+
+> <p>Hello World!</p>
+> <p>Model</p>
+> <p>Body</p>
+> <p>Acessories</p>
+
+<p>Use o padrão Fachada quando precisar ter uma interface limitada, mas direta, para um subsistema complexo, quando desejar estruturar um subsistema em camadas.</p>
