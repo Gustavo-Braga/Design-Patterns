@@ -1277,3 +1277,128 @@ public class CarFacade
 > <p>Acessories</p>
 
 <p>Use o padrão Fachada quando precisar ter uma interface limitada, mas direta, para um subsistema complexo, quando desejar estruturar um subsistema em camadas.</p>
+
+# Proxy
+
+<p><b>O que é</b>: Proxy é um padrão de design estrutural que representa a funcionalidade de uma outra classe. Um proxy controla o acesso ao objeto original, permitindo que você execute algo antes ou depois que a solicitação chega ao objeto original. É responsável por fornecer um espaço reservado na memória para um outro objeto.</p>
+ 
+- Com o proxy nós conseguimos aplicar lógicas antes ou depois da lógica primária da classe, o proxy permite fazer estas implementações sem alterar a sua classe original. O proxy implementa a mesma interface que a classe original então ela pode ser passada para qualquer cliente que espera um objeto real.
+
+
+<p><b>Implementação </b>: O padrão Proxy sugere que você crie uma nova classe de proxy com a mesma interface que um objeto de serviço original, para realizar a implementação, devemos ter em mente que: <b>Subject</b> Essa é uma interface com membros que serão implementados pelas classes RealSubject e Proxy, <b>RealSubject</b> esta é a classe original em que o proxy ira atuar, e <b>Proxy</b> esta é a classe que contém a instancia da RealSubject e pode acessar seus membros conforme necessário</p>
+
+<p>Para o nosso exemplo foi criado uma classe de repositório simples onde iremos salvar o produto e o log do produto</p>
+
+<p>Irei iniciar criando a minha classe model</p>
+
+```c#
+    public class Product
+    {
+        public Product(string name)
+        {
+            Name = name;
+        }
+
+        public int Id { get; set; }
+        public string Name { get; set; }
+    }
+```
+
+<p>Agora irei implementar a interface do repositório para produto e para o log do produto</p>
+
+```c#
+    public interface IProductRepository
+    {
+        int Insert(Product product);
+    }
+    
+    public interface IProductLogRepository
+    {
+        int Insert(Product product);
+    }  
+```
+
+<p>Agora a classe concreta</p>
+
+```c#
+    public class ProductRepository: IProductRepository
+    {
+        public int Insert(Product product)
+        {
+            product.Id = new Random().Next(1, 300);
+            Console.WriteLine($"Produto inserido = id: {product.Id}, name: {product.Name}");
+            return product.Id;
+        }
+    }
+
+
+    public class ProductLogRepository : IProductLogRepository
+    {
+        public int Insert(Product product)
+        {
+            Console.WriteLine($"Produto Log inserido = id: {product.Id}, name: {product.Name}");
+            return product.Id;
+        }
+    }
+    
+```
+
+<p>Feito isso, já conseguimos criar a nossa classe de proxy, vamos levar em conta que. RealSubject é a nossa classe ProductRepository, o nosso proxy irá atuar em cima dela, executando uma operação antes de inserir o produto e após inserir, o nosso proxy será responsável por salvar o log de produto que é implemetado na classe ProductLogRepository</p>
+
+<p>Implementando o proxy</p>
+
+```c#
+    public class ProxyProductRepository : IProductRepository
+    {
+        public IProductLogRepository _productLogRepository = new ProductLogRepository();
+        public IProductRepository _productRepository = new ProductRepository();
+
+
+        public int Insert(Product product)
+        {
+            Console.WriteLine("Iniciando proxy");
+            product.Id = _productRepository.Insert(product);
+
+            _productLogRepository.Insert(product);
+            Console.WriteLine("Finalizando proxy");
+            return product.Id;
+        }
+    }
+```
+
+<p>Observe que ele possui a mesma interface que o RealSubject, ele também possui as variáveis para ProductRepository e ProductLogRepository que devem ser atribuidas via injeção de dependência(ela não foi realizada devido não ter impacto para o entendimento do padrão). Observe que dentro da classe Insert somos livres para implementar os algorítmos necessários para o nosso problema</p>
+
+<p>Agora fica muito mais fácil, e é somente criar o nosso produto e chamar a nossa classe de proxy ProxyProductRepository. Aqui irei realizar as duas chamadas para podermos visualizar melhor, uma chamando somente a classe ProductRepository e a outra chamando o nosso ProxyProductRepository<p>
+ 
+ ```c#
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Hello World!");
+            var product1 = new Product("Produto 1");
+
+            var productRepository = new ProductRepository();
+            productRepository.Insert(product1);
+
+            var product2 = new Product("Produto 2");
+            var proxyProductRepository = new ProxyProductRepository();
+            proxyProductRepository.Insert(product2);
+
+            Console.ReadKey();
+        }
+ ```
+ 
+ <p><b>Saída</b>:</p>
+ 
+> <p>Hello World!</p>
+> <p>Produto inserido = id: 239, name: Produto 1</p>
+> <p>Iniciando proxy</p>
+> <p>Produto inserido = id: 197, name: Produto 2</p>
+> <p>Produto Log inserido = id: 197, name: Produto 2</p>
+> <p>Finalizando proxy</p>
+
+ <p>Use a classe de proxy quando quiser realizar o controle de acesso(é quando você deseja que apenas clientes específicos possam usar o objeto de serviço). Execução local de um serviço remoto(quando o objeto de serviço está localizado em um servidor remoto). Solicitações de log(quando você deseja manter um histórico de solicitações para o objeto de serviço). Resultados da solicitação de armazenamento em cache(quando você precisa armazenar em cache os resultados das solicitações do cliente e gerenciar o ciclo de vida desse cache, especialmente se os resultados forem muito grandes).</p>
+
+
+
+
+
