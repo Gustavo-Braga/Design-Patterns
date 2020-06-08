@@ -761,11 +761,195 @@ static void Main(string[] args)
 
 <p>Use o Abstract Factory quando seu código precisar trabalhar com várias famílias de produtos relacionados, mas você não deseja que ele dependa das classes concretas desses produtos</p>
 
+# Composto(composite)
+
+<p><b>O que é</b>: Composto é um padrão de design estrutural que permite compor objetos em estruturas de árvores e trabalhar com essas estruturas como se fossem objetos individuais. O padrão composto descreve que um grupo de objetos deve ser tratado da mesma maneira que uma única instância de um objeto, a intenção deste patern é "compor" os objetos em estruturas de árvores para representar hierarquias de partes inteiras.</p>
+
+<p><b>Problema</b>: Imagine que você tenha dois tipos de objetos, Produtos e Caixas, cada caixa pode conter vários produtos e cada produto pode conter várias caixas, que por sua vez pode conter vários outros produtos ou até mesmo várias outras caixas. Imagine que você deseja identificar o saldo total da sua caixa, a abordagem direta seria acessar cada caixa e verificar o valor de cada produto, porém isso pode não ser tão simples.</p>
 
 
+<p><b>Solução</b>: O padrão Composto compõe objetos em termos de uma estrutura em árvore para representar partes e hierarquias inteiras. O maior benefício é que você não precisa se preocupar com as classes concretas de objetos que compõem a árvore, você pode tratá-los da mesma forma através da interface.</p>
 
+<p>Para realizar a implementação, precisamos ter em mente que <b>Component</b> é a classe abstrata que contém os membros que serão implementados pela hierarquia(atua como classe base para todos), <b>Leaf</b> é usado para implementar componentes de folha na estrutura da árvore, estar nao podem ter filhos e <b>Composite</b> esta é a classe que inclui os métodos para adicionar, remover, consultar, é aqui que são executadas as operações nos componentes filhos</p>
 
+<p>Para o nosso exemplo foi criado um cenário simples, onde temos os dados de uma empresa, funcionários, departamentos, setores e sede da empresa. Aqui criamos a estrutura de árvore da seguinte maneira, nossa interface IEmployee é a nossa folha(Leaf), todos os funcionários irão implementar esta interface. Foi criado um CompanyMember para que seja nosso objeto Component(classe base) o mesmo implementa a interface IEmployee e também possui os métodos de adicionar, remover, possui os métodos adquados para o seu negócio. Os nossos objetos de Composit serão CompanySector, CompanyDepartment e CompanyHeadquarters, observe que essas classes herdam de CompanyMember que é o nosso Composit, a lógica para este cenário é que, uma lista de funcionários pode estar em um setor, uma lista de setor(com funcionários) pode estar dentro de uma lista de Departamentos(com mais funcionários) e a lista de departamentos com a lista de setores, podem estar dentro da sede da empresa que pos rua vez também possui N funcionários.</p>
 
+<p>Vamos a implementação, primeiramente, criaremos a nossa Leaf(IEmployee)
+ 
+ ```c#
+    public interface IEmployee
+    {
+        decimal GetSalary();
+        void Show();
+    }
+ ```
+ 
+<p>Agora iremos criar as nossas classes de funcionários(para o exemplo deixarei somente um, mas você pode consultar o exemplo completo aqui "link_para_models")</p>
+
+```c#
+    public class Developer : IEmployee
+    {
+        public Developer(string name, decimal salary, IEnumerable<string> skills)
+        {
+            Name = name;
+            Salary = salary;
+            Skills = skills;
+        }
+
+        public string Name { get; set; }
+        public decimal Salary { get; set; }
+        public IEnumerable<string> Skills { get; set; }
+
+        public decimal GetSalary()
+        {
+            return Salary;
+        }
+
+        public void Show()
+        {
+            Console.WriteLine($"Desenvolvedor: Nome: {Name}, Saláio: {Salary}, Habilidades: {string.Join(", ", Skills)}");
+        }
+    }
+```
+ 
+<p>Feito isso, iremos criar nossa classe de Component(CompanyMember) a mesma implementa a interface de Leaf(IEmployee)</p>
+
+```c#
+    public abstract class CompanyMember : IEmployee
+    {
+        public abstract string Description { get; set; }
+
+        public abstract decimal GetSalary();
+        public abstract void Show();
+        public abstract void AddMember(IEmployee employee);
+        public abstract void AddRangeMember(IEnumerable<IEmployee> employees);
+    }
+```
+
+<p>Tudo certo até aqui. Agora, com isso, ja temos o necessário para implementarmos o nosso composit(para o exemplo deixarei somente um, mas você pode consultar o exemplo completo aqui "link_para_classe_composit")</p>
+
+```c#
+    public class CompanyDepartment: CompanyMember
+    {
+        private List<IEmployee> _companyMembers { get; set; }
+
+        public CompanyDepartment(string description)
+        {
+            Description = description;
+            _companyMembers = new List<IEmployee>();
+        }
+
+        public override string Description { get; set; }
+
+        public override decimal GetSalary()
+        {
+            return _companyMembers.Sum(x => x.GetSalary());
+        }
+
+        public override void AddMember(IEmployee employee)
+        {
+            _companyMembers.Add(employee);
+        }
+        public override void AddRangeMember(IEnumerable<IEmployee> employees)
+        {
+            _companyMembers.AddRange(employees);
+        }
+
+        public override void Show()
+        {
+            Console.WriteLine($"Departamento: {Description}");
+            foreach (var item in _companyMembers)
+            {
+                item.Show();
+            }
+        }
+    }
+
+```
+
+<p>Observe que esta classe possui uma lista de Leaf, os métodos de adicionar e obter salário, é feito com base nesta lista(para ficar mais claro, a classe Component(CompanyMember) seria o tronco da árvore, a classe Composit(CompanyDepartment) seria os galhos e a interface Leaf(IEmployee) seria nossas folhas).</p>
+
+<p>Feito isso, agora conseguimos adicionar os funcionários aos departamentos/setores/sede, também conseguimos adicionar setores dentro de departamentos e departamentos dentro de sede. Com base no nosso CompanyMember iremos conseguir trabalhar com toda esta estrutura, de maneira simples. Abaixo eta o exemplo utilizando todos os recursos do nosso CompanyMember.</p>
+
+```c#
+   class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Hello World!");
+            var randomSalary = new Random();
+            var dev1 = new Developer("Lucas", GetRamdomSalary(randomSalary), new List<string> { "skill1", "skill2", "skill3", "skill4" });
+            var dev2 = new Developer("Bruno", GetRamdomSalary(randomSalary), new List<string> { "skill1", "skill2", "skill3" });
+            var dev3 = new Developer("Maria", GetRamdomSalary(randomSalary), new List<string> { "skill1", "skill2" });
+
+            var qa1 = new Developer("Julia", GetRamdomSalary(randomSalary), new List<string> { "skill1", "skill2", "skill3", "skill4" });
+            var qa2 = new Developer("Pedro", GetRamdomSalary(randomSalary), new List<string> { "skill1", "skill2", "skill3" });
+            var qa3 = new Developer("Lucia", GetRamdomSalary(randomSalary), new List<string> { "skill1", "skill2" });
+            var qa4 = new Developer("Roberto", GetRamdomSalary(randomSalary), new List<string> { "skill1", "skill2", "skill5" });
+
+            var sectorDev = new CompanySector("Desenvolvimento");
+            sectorDev.AddMember(dev1);
+            sectorDev.AddMember(dev2);
+            sectorDev.AddMember(dev3);
+
+            var sectorQA = new CompanySector("Qualidade");
+            sectorQA.AddMember(qa1);
+            sectorQA.AddMember(qa2);
+            sectorQA.AddMember(qa3);
+            sectorQA.AddMember(qa4);
+
+            var tiDepartment = new CompanyDepartment("Tecnologia da Informação");
+            var developerManager = new Manager("Adriana", GetRamdomSalary(randomSalary), "Gerente de Desenvolvimento");
+            tiDepartment.AddMember(developerManager);
+            tiDepartment.AddMember(sectorDev);
+
+            var qualityAnalystManager = new Manager("Pedro", GetRamdomSalary(randomSalary), "Gerente de Qualidade");
+            tiDepartment.AddMember(qualityAnalystManager);
+            tiDepartment.AddMember(sectorQA);
+
+            var rhManager = new Manager("Luisa", GetRamdomSalary(randomSalary), "Gerente de RH");
+            var rhDepartment = new CompanyDepartment("Recursos Humanos");
+            rhDepartment.AddMember(rhManager);
+
+            var director = new Director("Nathália", GetRamdomSalary(randomSalary), "Dona da Empresa");
+            var headQuarters = new CompanyHeadquarters("Matriz");
+            headQuarters.AddMember(director);
+            headQuarters.AddRangeMember(new List<CompanyMember> { rhDepartment, tiDepartment });
+
+            Console.WriteLine($"Salario total: {headQuarters.GetSalary()}");
+            headQuarters.Show();
+            Console.ReadKey();
+        }
+
+        public static int GetRamdomSalary(Random randomSalary)
+        {
+            return randomSalary.Next(0, 10000);
+        }
+    }
+```
+
+<p><b>Saída</b></p>
+
+> <p>Hello World!</p>
+> <p>Salario total: 44087</p>
+> <p>Matriz: Matriz</p>
+> <p>Diretor: Nome: Nathália, Saláio: 4835, Descriçao: Dona da Empresa</p>
+> <p>Departamento: Recursos Humanos</p>
+> <p>Gerente: Nome: Luisa, Saláio: 3620, Descriçao: Gerente de RH</p>
+> <p>Departamento: Tecnologia da Informaçao</p>
+> <p>Gerente: Nome: Adriana, Saláio: 9447, Descriçao: Gerente de Desenvolvimento</p>
+> <p>Setor: Desenvolvimento</p>
+> <p>Desenvolvedor: Nome: Lucas, Saláio: 6543, Habilidades: skill1, skill2, skill3, skill4</p>
+> <p>Desenvolvedor: Nome: Bruno, Saláio: 748, Habilidades: skill1, skill2, skill3</p>
+> <p>Desenvolvedor: Nome: Maria, Saláio: 5518, Habilidades: skill1, skill2</p>
+> <p>Gerente: Nome: Pedro, Saláio: 611, Descriçao: Gerente de Qualidade</p>
+> <p>Setor: Qualidade</p>
+> <p>Desenvolvedor: Nome: Julia, Saláio: 4274, Habilidades: skill1, skill2, skill3, skill4</p>
+> <p>Desenvolvedor: Nome: Pedro, Saláio: 1931, Habilidades: skill1, skill2, skill3</p></p>
+> <p>Desenvolvedor: Nome: Lucia, Saláio: 3251, Habilidades: skill1, skill2</p>
+> <p>Desenvolvedor: Nome: Roberto, Saláio: 3309, Habilidades: skill1, skill2, skill5</p>
+
+<p>Use o padrão Composto quando precisar implementar uma estrutura de objeto semelhante a uma árvore, quando desejar que o código do cliente trate elementos simples e complexos de maneira uniforme.</p>
 
 
 
