@@ -1,8 +1,8 @@
-﻿namespace Design.Patterns.Adapter.Client.Request
+﻿namespace Design.Patterns.Adapter.Adaptee.Request
 {
-    public class EmailClientRequest
+    public class EmailAdapteeRequest
     {
-        public EmailClientRequest(string email, string bodyJson)
+        public EmailAdapteeRequest(string email, string bodyJson)
         {
             Email = email;
             BodyJson = bodyJson;

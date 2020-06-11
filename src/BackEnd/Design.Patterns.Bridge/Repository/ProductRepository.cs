@@ -6,10 +6,8 @@ namespace Design.Patterns.Bridge.Repository
 {
     public class ProductRepository : RepositoryBase, IRepository<Product>
     {
-        private readonly IConnectionDataBase _connectionDataBase;
-        public ProductRepository(string connectionString, IConnectionDataBase connectionDataBase) : base(connectionString)
+        public ProductRepository(string connectionString, IConnectionDataBase connectionDataBase) : base(connectionString, connectionDataBase)
         {
-            _connectionDataBase = connectionDataBase;
         }
 
         public int Insert(Product entity)

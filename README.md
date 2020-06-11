@@ -747,7 +747,7 @@ static void Main(string[] args)
         }
 ```
 
-<p><b>Saída</b></p>
+<p><b>Saída</b>:</p>
 
 > <p>Hello World!</p>
 > <p>Esta é uma cadeira Moderna modelo simples</p>
@@ -760,3 +760,1089 @@ static void Main(string[] args)
 > <p>Este é um Sofá Vitoriano</p>
 
 <p>Use o Abstract Factory quando seu código precisar trabalhar com várias famílias de produtos relacionados, mas você não deseja que ele dependa das classes concretas desses produtos</p>
+
+# Adaptador(adapter)
+
+<p><b>O que é</b>: O padrão Adaptador é um padrão de designt estrutural que permite a colaboração de objetos com interfaces incompatíveis, permite envolver um objeto incompatível em um adaptador para torná-lo compatível com outra classe.</p>
+
+<p><b>Exemplo do mundo real</b>:</p>
+
+> Imagine que você compre um notebook da Europa, ao chegar aqui no Brasil, você vai coloca-lo para carregar, mas tem uma surpresa, o plugue da tomada não se encaixa para as tomadas aqui no Brasil. Você precisará comprar um adaptador de tomada do padrão europeu para o brasileiro
+
+<p><b>Problema</b>: Imagine que o aplicativo do seu cliente receba somente os dados no formato de XML para executar as operações, porém, para melhorar o seu aplicativo, você irá integra-lo com uma outra biblioteca que receba os dados somente no formato JSON, você poderia tentar alterar a biblioteca para trabalhar com dados no formato XML, porém você corre o risco de quebrar algum código existente que depende da biblioteca</p>
+
+
+<p><b>Solução</b>: Você precisa criar um adaptador que realiza a conversão da interface de um objeto para que o outro possa entende-lo, este objeto de adaptador irá ocultar a complexidade que ocorre para ser convertido os dados. Para realizar a implementação devemos ter como base que <b>ITarget</b> é a interface usada pelo cliente pata atingir a funcionalidade, <b>Adaptee</b> é a classe que possui a funcionalidade exigida pelo cliente, <b>Adapter</b> é a classe que implementa o ITarget e herda a classe Adaptee, este fará a comunicação entre o Client e o Adaptee, e por fim, Client que é a clase que interage com o ITarget, no nosso caso será a classe Main</p>
+
+<p>Para o nosso exemplo, foi criado uma classe para realizar o envio de email, onde o nosso request não é compatível com a classe de adaptee</p>
+
+
+<p>Primeiro iremos criar o nosso Adaptee</p>
+ 
+```c#
+    public class EmailAdapteeRequest
+    {
+        public EmailAdapteeRequest(string email, string bodyJson)
+        {
+            Email = email;
+            BodyJson = bodyJson;
+        }
+
+        public string Email { get; set; }
+        public string BodyJson { get; set; }
+    }
+    
+    
+    public class EmailAdaptee
+    {
+        public void SendEmail(EmailAdapteeRequest emailRequest)
+        {
+            Console.WriteLine(emailRequest.Email);
+            Console.WriteLine(emailRequest.BodyJson);
+        }
+
+    }
+    
+```
+
+
+<p>Feito isso, iremos criar um model para Email, para que não seja compatível com o esperado no método SendEmail(isso é somente para fazer sentido o nosso exemplo)</p>
+
+```c#
+    public class Email
+    {
+        public Email(string address, BodyEmail body)
+        {
+            Address = address;
+            Body = body;
+        }
+
+        public string Address { get; set; }
+        public BodyEmail Body { get; set; }
+
+    }
+    
+    public class BodyEmail
+    {
+        public BodyEmail(string subject, string body)
+        {
+            Subject = subject;
+            Body = body;
+        }
+
+        public string Subject { get; set; }
+        public string Body { get; set; }
+
+    }
+```
+
+<p>Feito isso nos deparamos com o problema... Nosso model é do tipo Email e o nosso Adaptee espera o tipo EmailAdapteeRequest e também as propriedades são incompatíveis, o nosso body em Email é um objeto enquanto o body em EmailAdapteeRequest é uma string(JSON). Com isso, iremos criar o nosso ITarget a interface utilizada pelo client para atingir a funcionalidade do nosso Adaptee</p>
+
+```c#
+    public interface IEmailAdapter
+    {
+        void SendEmail(Email email);
+    }
+```
+
+<p>Criamos a nossa interface IEmailAdapter(ITarget), agora precisaremos criar a nossa classe Adapter que irá implementar o método SendEmail e enviar para o método SendEmail do nosso Adaptee, observe que os requests são diferentes, quem é responsável por fazer esta conversão é a nossa classe Adapter<p/>
+
+```c#
+    public class EmailAdapter : EmailAdaptee, IEmailAdapter
+    {
+        public void SendEmail(Email email)
+        {
+            var emailRequest = new EmailAdapteeRequest(email.Address, JsonConvert.SerializeObject(email.Body));
+            base.SendEmail(emailRequest);
+        }
+    }
+```
+<p>Nossa classe EmailAdapter(Adapter) herda de Adaptee e herda de ITarget, realiza a conversão do tipo de request e envia para o nosso Adaptee</p>
+
+<p>Feito isso é somente realizar a chamada do nosso Client(Main)</p>
+
+
+```c#
+      static void Main(string[] args)
+      {
+          var email = new Email("gustavo.braga10@outlook.com", new BodyEmail("teste adapter", "corpo do email"));
+          var emailAdapter = new EmailAdapter();
+          emailAdapter.SendEmail(email);
+          Console.ReadKey();
+      }
+```
+
+<p><b>Saída</b>:</p>
+
+> <p>gustavo.braga10@outlook.com</p>
+> <p>{"Subject":"teste adapter","Body":"corpo do email"}</p>
+
+<p>Use a classe Adapter quando desejar usar alguma classe existente, mas sua interface não é compatível com o restante do seu código. O adaptador permite criar uma camada intermediária que serve como tradutor entre as classes.</p>
+
+
+# Decorador(decorator)
+
+<p><b>O que é</b>: O Decorador é um padrão de design estrutural que permite anexar novos comportamentos aos objetos, permite alterar dinamicamente o comportamento de um objeto em tempo de execução, envolvendo-os em um objeto de uma classe decoradora.</p>
+
+<p><b>Exemplo do mundo real</b>:</p>
+
+> Imagine que você administra uma Cafeteria que oferece vários tipos diferentes de café, café expresso, café com leite, café mocha e também vários tipos de ingredientes, chocolate, chantilly, etc... Você escolhe um tipo de café e vai adicionando dinamicamente os itens desejados, os preços dos produtos iram alterando até obter o custo final. Aqui cada tipo de ingrediente é um decorador.
+
+<p><b>Problema</b>: Você precisa adicionar um comportamento ou estado a objetos individuais em tempo de execução, porém a herança não é viável porque é estática, você não pode alterar o comportamento de um objeto existente no tempo de execução. Você só pode substituir o objeto inteiro por outro criado a partir de uma subclasse diferente</p>
+
+<p><b>Solução</b>: Uma das maneiras de superar essas advertências é usando Agregação(significa que a parte pode ser compartilhada entre vários objetos. O objeto de A contém os objetos de B, B pode viver sem A) ou Composição(significa que a parte não existe sem o todo. O objeto A consiste nos objetos B, um gerencia o ciclo de vida de B, B não pode viver sem A) em vez de herança. Com esta abordagem você consegue substituir o objeto auxiliar vinculando por outro, alterando o comportamento do container em tempo de execução. Um objeto pode usar o comportamento de várias classes, tendo referências a vários objetos e delegando a eles todos os tipos de trabalho.</p>
+
+<p>Para o nosso exemplo será criado um programa semelhante ao da cafeteria, porém uma pizzaria, onde criamos a pizza e adicionamos uma cobertura(ingrediente) extra. Para desenvolver o padrão decorador, temos que ter em mete que. <b>Component</b> é uma interface que contém os membros que serão implementados pela ConcreteClass e Decorator, <b>Decorator</b> é uma classe abstrata que implementa a interface Component e contém a referencia a uma instância Component, esta classe atua como classe base para todos os decoradores de Component, <b>ConcreteComponent</b> esta é uma classe concreta que imlementa a interface Component, <b>ConcreteDecorator</b> esta é a classe que herda de Decorator e fornece um decorador aos components</p>
+
+<p>Inicialmente vamos criar o nosso Component IOrder(porque nossa pizza é um "pedido")</p>
+ 
+ ```c#
+    public interface IOrder
+    {
+        double GetPrice();
+        string GetLabel();
+    }
+ ```
+ 
+ <p>Agora vamos Criar o nosso ConcreteComponent(que é nossa pizza), lembrando que esta deve herdar de Component(IOrder)</p>
+ 
+  ```c#
+ public class Pizza : IOrder
+    {
+        public Pizza(string label, double price)
+        {
+            Label = label;
+            Price = price;
+        }
+
+        public string Label { get; set; }
+        public double Price { get; set; }
+        public double GetPrice()
+        {
+            return Price;
+        }
+
+        public string GetLabel()
+        {
+            return Label;
+        }
+    }
+ ```
+ 
+ <p>Certo, agora iremos criar o nosso Decorator que será a nossa classe base para criação dos decoradores, esta também deve herdar de IOrder</p>
+ 
+ ```c#
+    public abstract class Extra : IOrder
+    {
+        protected readonly IOrder _order;
+        protected readonly string _label;
+        protected readonly double _price;
+
+        public Extra(IOrder order, string label, double price)
+        {
+            _order = order;
+            _label = label;
+            _price = price;
+        }
+
+        public abstract double GetPrice();
+
+        public string GetLabel()
+        {
+            return $"{_order.GetLabel()}, {_label}";
+        }
+    }
+ ```
+ 
+ <p>Feito isso, é só ir criando os ConcreteDecorator, cada um deve herdar do nosso Decorator(Extra), com isso é possível "incrementar" o nosso objeto Pizza</p>
+ 
+ ```c#
+    public class ExtraCover : Extra
+    {
+        public ExtraCover(IOrder order, string label, double price) : base(order, label, price)
+        {
+        }
+
+        public override double GetPrice()
+        {
+            return _order.GetPrice() + _price;
+        }
+    }
+ ```
+ 
+  <p>Agora é só realizar a chamada do ConcreteComponent primeiramente e depois do ConcreteDecorator</p>
+  
+   
+ ```c#
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Hello World!");
+            IOrder pizza = new Pizza("Frango", 21);
+            pizza = new ExtraCover(pizza, "catupiry", 8);
+            Console.WriteLine(pizza.GetLabel());
+            Console.WriteLine(pizza.GetPrice());
+            Console.ReadKey();
+        }
+ ```
+ 
+ <p><b>Saída</b>:</p>
+
+> <p>Hello World!</p>
+> <p>Frango, catupiry</p>
+> <p>29</p>
+
+<p>Use o padrão Decorator quando precisar atribuir comportamentos extras a objetos em tempo de execução sem quebrar o código que usa esses objetos. Use o padrão quando for estranho ou impossível estender o comportamento de um objeto usando herança.</p>
+ 
+ # Ponte(bridge)
+ 
+ <p><b>O que é</b>: Bridge é um padrão de design estrutural que permite dividir uma classe grande ou um conjunto de classes estreitamente relacionadas em duas hierarquias separadas - abstração e implementação - que podem ser desenvolvidas independentemente uma da outra. O padrão de bridge é referente a composição da herança, os detalhes da implementação são transferidos para uma hierarquia separada</p>
+ 
+ <p><b>Problema</b>: Digamos que você precise criar uma página com diferentes tipos de tema light/dark. Inicialmente você precisaria criar uma cópia de cada página para cada um dos seus temas. Utilizando o padrão de bridge, permite que você crie apenas um tema separado e carregue-o com base na preferência do usuário.</p>
+ 
+ <p><b>Solução</b>: O padrão de bridge tenta resolver esse problema alternando da herança para a composição do objeto. Isso significa que é extraido uma das dimensões em uma hierarquia de classes separada, para que as classes originais façam referência a esse objeto da nova hierarquia</p>
+ 
+ <p>Para o padrão bridge temos que ter em mente que <b>Abstraction</b> é a classe abstrata que contém os membros que definem um objeto de negócio abstrato e suas funcionalidades, ele contém a referência para o objeto do tipo Bridge, <b>Bridge</b> é uma interface que atua como uma ponte entre a classe de abstração e as classes do implementador, <b>RedefinedAbstraction</b> esta é a classe que herda de Abstraction e <b>ImplementationClass</b> são as classes que implementam bridge.</p>
+ 
+ <p>Para o nosso exemplo foi criado uma classe de repositório simples onde faremos a conexão(fake) com um banco relacional e outro não relacional.</p>
+ 
+  <p>Vamos a criação dos models, Cliente e Produto</p>
+  
+  ```c#
+    public class Client
+    {
+        public Client(string name, int age)
+        {
+            Name = name;
+            Age = age;
+        }
+
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public int Age { get; set; }
+
+        public override string ToString()
+        {
+            return $"Id: {Id}, Nome: {Name}, Idade: {Age}";
+        }
+
+    }
+    
+    
+    public class Product
+    {
+        public Product(string description)
+        {
+            Description = description;
+        }
+
+        public int Id { get; set; }
+        public string Description { get; set; }
+
+        public override string ToString()
+        {
+            return $"Id: {Id}, Descrição: {Description}";
+        }
+    } 
+    
+  ```
+ 
+<p>Agora, vamos criar a nossa interface de Bridge(IConnectionDataBase)</p>
+
+  ```c#
+    public interface IConnectionDataBase
+    {
+        void OpenConnection(string connectionString);
+        void CloseConnection();
+    }
+  ```
+  
+<p>Com a interface de Bridge criada, conseguimos criar os ImplementationClass que são os nossos objetos para realizar a conexão com o banco relacional ou não relacional</p>
+  
+```c#
+    public class SqlConnection: IConnectionDataBase
+    {
+        public void OpenConnection(string connectionString)
+        {
+            Console.WriteLine($"Abre conexão com banco de dados SQL {connectionString}");
+        }
+
+        public void CloseConnection()
+        {
+            Console.WriteLine($"Fecha conexão com banco de dados SQL");
+        }
+    }
+    
+    
+    public class NoSqlConnection : IConnectionDataBase
+    {
+        public void OpenConnection(string connectionString)
+        {
+            Console.WriteLine($"Abre conexão com banco de dados NoSQL {connectionString}");
+        }
+
+        public void CloseConnection()
+        {
+            Console.WriteLine($"Fecha conexão com banco de dados NoSQL");
+        }
+    }
+```
+
+<p>Com isto, é suficiente para criarmos a nossa classe Abstraction que é a classe que terá a referência para a interface de Bridge(IConnectionDataBase)</p>
+
+```c#
+    public class RepositoryBase
+    {
+        protected readonly IConnectionDataBase _connectionDataBase;
+
+        public RepositoryBase(string connectionString, IConnectionDataBase connectionDataBase)
+        {
+            ConnectionString = connectionString;
+            _connectionDataBase = connectionDataBase;
+        }
+
+        protected string ConnectionString { get; set; }
+    }
+```
+
+<p>Quase pronto, agora precisamos criar as classes de RedefinedAbstraction que são as classes que implementarão a classe de Abstraction(RepositoryBase). Foi criado uma outra interface para IRepository devido ao método comum de Insert<p>
+
+```c#
+    public interface IRepository<T>
+    {
+        int Insert(T entity);
+    }
+```
+
+<p>Agora será feito a implementação das duas RedefinedAbstraction uma para cada model<p>
+ 
+```c#
+    public class ClientRepository : RepositoryBase, IRepository<Client>
+    {
+        public ClientRepository(string connectionString, IConnectionDataBase connectionDataBase) : base(connectionString, connectionDataBase)
+        {
+        }
+
+        public int Insert(Client entity)
+        {
+            _connectionDataBase.OpenConnection(ConnectionString);
+            entity.Id = new Random().Next(0, 100);
+            Console.WriteLine($"inserido cliente {entity.ToString()}");
+            _connectionDataBase.CloseConnection();
+            return entity.Id;
+        }
+    }
+    
+    
+    public class ProductRepository : RepositoryBase, IRepository<Product>
+    {
+        public ProductRepository(string connectionString, IConnectionDataBase connectionDataBase) : base(connectionString, connectionDataBase)
+        {
+        }
+
+        public int Insert(Product entity)
+        {
+            _connectionDataBase.OpenConnection(ConnectionString);
+            entity.Id = new Random().Next(0, 100);
+            Console.WriteLine($"inserido Produto {entity.ToString()}");
+            _connectionDataBase.CloseConnection();
+            return entity.Id;
+        }
+    }
+```
+<p>Tudo pronto, agora só precisamos realizar a chamada e passar qual tipo de conexão queremos para qual repositório</p>
+
+```c#
+   static void Main(string[] args)
+   {
+       Console.WriteLine("Hello World!");
+       var client = new Client("Gustavo", 23);
+       var connectionStringSql = "connectionStringBancoRelacional";
+       var sqlConnection = new SqlConnection();
+       var clientRepository = new ClientRepository(connectionStringSql, sqlConnection);
+       clientRepository.Insert(client);
+
+       var product = new Product("Martelo");
+       var connectionStringNoSql = "connectionStringBancoNÃORelacional";
+       var noSqlConnection = new NoSqlConnection();
+       var productRepository = new ProductRepository(connectionStringNoSql, noSqlConnection);
+       productRepository.Insert(product);
+
+       Console.ReadKey();
+   }
+```
+
+ <p><b>Saída</b>:</p>
+
+> <p>Hello World!</p>
+> <p>Abre conexao com banco de dados SQL connectionStringBancoRelacional</p>
+> <p>inserido cliente Id: 21, Nome: Gustavo, Idade: 23</p>
+> <p>Fecha conexao com banco de dados SQL</p>
+> <p>Abre conexao com banco de dados NoSQL connectionStringBancoNAORelacional</p>
+> <p>inserido Produto Id: 69, Descriçao: Martelo</p>
+> <p>Fecha conexao com banco de dados NoSQL</p>
+
+<p>Use o padrão Bridge quando desejar dividir e organizar uma classe monolítica que tenha várias variantes de algumas funcionalidades (por exemplo, se a classe puder trabalhar com vários servidores de banco de dados). Use o padrão quando precisar estender uma classe em várias dimensões ortogonais (independentes) ou quando precisar alternar a implementação em tempo de execução.</p> 
+ 
+ # Fachada(facade)
+ 
+ <p><b>O que é</b>: Facade é um padrão de design estrutural que fornece uma interface simplificada referente a uma biblioteca, estrutura ou um conjunto complexo de classes. Em outras palavras o padrão facade fornece uma interface simplificada para um subsistema complexo</p>
+ 
+ <p><b>Problema</b>: Imagine que você precise realizar uma operação e deva consumir uma biblioteca onde há um amplo conjunto de objetos ou estrutura sofisticada, qua precisa inicializar todos os objetos, acompanhar as depêndencias, executar métodos em ordem, assim por diante. Essas bibliotecas são muito complexas, com muito código de difícil compreensão e a única coisa que você deseja é consumir um determinado recurso, você precisa conhecer toda a estrutura interna e os recursos disponíveis para simplismente executar uma operação.</p>
+ 
+ <p><b>Solução</b>: O Facade é uma classe que fornece uma interface simples para esse subsistema complexo, onde é possível extrair as funcionalidades que o cliente realmente precisa se preocupar. Com ele é possível abstrair/simplificar essa complexidade, fazendo com que o desenvolvedor não precise conhecer toda arquitetura por trás da biblioteca, é possível desacoplar o sistema, favorecendo a separação de responsabilidades, possível reduzir dependências e "esconder" o código sujo, inviável de refatorar.</p>
+ 
+ <p>Para realizar a implementação do facade devemos ter em mente que <b>Facade</b> é uma classe de wrapper(trata-se de classes que empacotam tipos primitivos) onde contém um conjunto de membros exigidos pelo cliente</p>
+
+<p>Para o nosso exemplo foi criado um sistema bem simples onde será construido um carro, onde CarModel executa um método, CarBody outro e CarAcessories outro, esse contexto é muito simples para a necessidade real do Facade, porém, podemos imaginar que dentro desses métodos há estruturas muito complexas e impossíveis de compreender 100% em pouco tempo, iremos utilizar o Facade aqui, para abstrair a complexidade que há dentro desses métodos e fornecer uma estruturas simples para o cliente criar um carro completo, sem a necessidade de saber que é necessário executar a classe SetModel, depois SetBody e por ultimo a classe SetAcessories, com o facade ele atinge o objetivo de criar o carro completo, simplesmente através do método CreateCompleteCar.</p>
+
+<p>Para iniciar o desenvolvimento, vamos a criação das nossas classes para a construção do carro</p>
+
+```c#
+    public class CarBody
+    {
+        public void SetBody()
+        {
+            Console.WriteLine("Body");
+        }
+    }
+    
+    public class CarModel
+    {
+        public void SetModel()
+        {
+            Console.WriteLine("Model");
+        }
+    }
+    
+    public class CarAcessories
+    {
+        public void SetAcessories()
+        {
+            Console.WriteLine("Acessories");
+        }
+    }
+```
+
+<p>Queremos esconder este código complexo para a criação do carro, então criaremos o CarFacade e iremos expor o método para criação do carro.</p>
+
+```c#
+
+public class CarFacade
+    {
+        public CarModel CarModel { get; set; }
+        public CarBody CarBody { get; set; }
+        public CarAcessories CarAcessories { get; set; }
+
+        public CarFacade()
+        {
+            CarModel = new CarModel();
+            CarBody = new CarBody();
+            CarAcessories = new CarAcessories();
+        }
+
+        public void CreateCompleteCar()
+        {
+            CarModel.SetModel();
+            CarBody.SetBody();
+            CarAcessories.SetAcessories();
+        }
+
+
+    }
+  
+```
+
+<p>Certo. Com isso temos o nosso objeto de Facade onde conseguiremos através de um método simples criar o nosso carro, sem precisarmos saber que há a necessidade de criar três outras classes para isso.</p>
+
+- Deve-se tomar muito cuidado ao implementar esse pattern, para que você não crie um God Class(Classe Deus, uma classe que sabe demais ou faz demais, em engenharia de software é reconhecido como anti padrão).
+
+<p>Feito isso é só realizar a chamada da nossa Facade.</p>
+
+```c#
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Hello World!");
+            var facade = new CarFacade();
+            facade.CreateCompleteCar();
+            Console.ReadKey();
+        }
+```
+
+ 
+ <p><b>Saída</b>:</p>
+
+> <p>Hello World!</p>
+> <p>Model</p>
+> <p>Body</p>
+> <p>Acessories</p>
+
+<p>Use o padrão Fachada quando precisar ter uma interface limitada, mas direta, para um subsistema complexo, quando desejar estruturar um subsistema em camadas.</p>
+
+# Proxy
+
+<p><b>O que é</b>: Proxy é um padrão de design estrutural que representa a funcionalidade de uma outra classe. Um proxy controla o acesso ao objeto original, permitindo que você execute algo antes ou depois que a solicitação chega ao objeto original. É responsável por fornecer um espaço reservado na memória para um outro objeto.</p>
+ 
+- Com o proxy nós conseguimos aplicar lógicas antes ou depois da lógica primária da classe, o proxy permite fazer estas implementações sem alterar a sua classe original. O proxy implementa a mesma interface que a classe original então ela pode ser passada para qualquer cliente que espera um objeto real.
+
+
+<p><b>Implementação </b>: O padrão Proxy sugere que você crie uma nova classe de proxy com a mesma interface que um objeto de serviço original, para realizar a implementação, devemos ter em mente que: <b>Subject</b> Essa é uma interface com membros que serão implementados pelas classes RealSubject e Proxy, <b>RealSubject</b> esta é a classe original em que o proxy ira atuar, e <b>Proxy</b> esta é a classe que contém a instancia da RealSubject e pode acessar seus membros conforme necessário</p>
+
+<p>Para o nosso exemplo foi criado uma classe de repositório simples onde iremos salvar o produto e o log do produto</p>
+
+<p>Irei iniciar criando a minha classe model</p>
+
+```c#
+    public class Product
+    {
+        public Product(string name)
+        {
+            Name = name;
+        }
+
+        public int Id { get; set; }
+        public string Name { get; set; }
+    }
+```
+
+<p>Agora irei implementar a interface do repositório para produto e para o log do produto</p>
+
+```c#
+    public interface IProductRepository
+    {
+        int Insert(Product product);
+    }
+    
+    public interface IProductLogRepository
+    {
+        int Insert(Product product);
+    }  
+```
+
+<p>Agora a classe concreta</p>
+
+```c#
+    public class ProductRepository: IProductRepository
+    {
+        public int Insert(Product product)
+        {
+            product.Id = new Random().Next(1, 300);
+            Console.WriteLine($"Produto inserido = id: {product.Id}, name: {product.Name}");
+            return product.Id;
+        }
+    }
+
+
+    public class ProductLogRepository : IProductLogRepository
+    {
+        public int Insert(Product product)
+        {
+            Console.WriteLine($"Produto Log inserido = id: {product.Id}, name: {product.Name}");
+            return product.Id;
+        }
+    }
+    
+```
+
+<p>Feito isso, já conseguimos criar a nossa classe de proxy, vamos levar em conta que. RealSubject é a nossa classe ProductRepository, o nosso proxy irá atuar em cima dela, executando uma operação antes de inserir o produto e após inserir, o nosso proxy será responsável por salvar o log de produto que é implemetado na classe ProductLogRepository</p>
+
+<p>Implementando o proxy</p>
+
+```c#
+    public class ProxyProductRepository : IProductRepository
+    {
+        public IProductLogRepository _productLogRepository = new ProductLogRepository();
+        public IProductRepository _productRepository = new ProductRepository();
+
+
+        public int Insert(Product product)
+        {
+            Console.WriteLine("Iniciando proxy");
+            product.Id = _productRepository.Insert(product);
+
+            _productLogRepository.Insert(product);
+            Console.WriteLine("Finalizando proxy");
+            return product.Id;
+        }
+    }
+```
+
+<p>Observe que ele possui a mesma interface que o RealSubject, ele também possui as variáveis para ProductRepository e ProductLogRepository que devem ser atribuidas via injeção de dependência(ela não foi realizada devido não ter impacto para o entendimento do padrão). Observe que dentro da classe Insert somos livres para implementar os algorítmos necessários para o nosso problema</p>
+
+<p>Agora fica muito mais fácil, e é somente criar o nosso produto e chamar a nossa classe de proxy ProxyProductRepository. Aqui irei realizar as duas chamadas para podermos visualizar melhor, uma chamando somente a classe ProductRepository e a outra chamando o nosso ProxyProductRepository<p>
+ 
+ ```c#
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Hello World!");
+            var product1 = new Product("Produto 1");
+
+            var productRepository = new ProductRepository();
+            productRepository.Insert(product1);
+
+            var product2 = new Product("Produto 2");
+            var proxyProductRepository = new ProxyProductRepository();
+            proxyProductRepository.Insert(product2);
+
+            Console.ReadKey();
+        }
+ ```
+ 
+ <p><b>Saída</b>:</p>
+ 
+> <p>Hello World!</p>
+> <p>Produto inserido = id: 239, name: Produto 1</p>
+> <p>Iniciando proxy</p>
+> <p>Produto inserido = id: 197, name: Produto 2</p>
+> <p>Produto Log inserido = id: 197, name: Produto 2</p>
+> <p>Finalizando proxy</p>
+
+ <p>Use a classe de proxy quando quiser realizar o controle de acesso(é quando você deseja que apenas clientes específicos possam usar o objeto de serviço). Execução local de um serviço remoto(quando o objeto de serviço está localizado em um servidor remoto). Solicitações de log(quando você deseja manter um histórico de solicitações para o objeto de serviço). Resultados da solicitação de armazenamento em cache(quando você precisa armazenar em cache os resultados das solicitações do cliente e gerenciar o ciclo de vida desse cache, especialmente se os resultados forem muito grandes).</p>
+
+
+# Composto(composite)
+
+<p><b>O que é</b>: Composto é um padrão de design estrutural que permite compor objetos em estruturas de árvores e trabalhar com essas estruturas como se fossem objetos individuais. O padrão composto descreve que um grupo de objetos deve ser tratado da mesma maneira que uma única instância de um objeto, a intenção deste patern é "compor" os objetos em estruturas de árvores para representar hierarquias de partes inteiras.</p>
+
+<p><b>Problema</b>: Imagine que você tenha dois tipos de objetos, Produtos e Caixas, cada caixa pode conter vários produtos e cada produto pode conter várias caixas, que por sua vez pode conter vários outros produtos ou até mesmo várias outras caixas. Imagine que você deseja identificar o saldo total da sua caixa, a abordagem direta seria acessar cada caixa e verificar o valor de cada produto, porém isso pode não ser tão simples.</p>
+
+
+<p><b>Solução</b>: O padrão Composto compõe objetos em termos de uma estrutura em árvore para representar partes e hierarquias inteiras. O maior benefício é que você não precisa se preocupar com as classes concretas de objetos que compõem a árvore, você pode tratá-los da mesma forma através da interface.</p>
+
+<p>Para realizar a implementação, precisamos ter em mente que <b>Component</b> é a classe abstrata que contém os membros que serão implementados pela hierarquia(atua como classe base para todos), <b>Leaf</b> é usado para implementar componentes de folha na estrutura da árvore, estar nao podem ter filhos e <b>Composite</b> esta é a classe que inclui os métodos para adicionar, remover, consultar, é aqui que são executadas as operações nos componentes filhos</p>
+
+<p>Para o nosso exemplo foi criado um cenário simples, onde temos os dados de uma empresa, funcionários, departamentos, setores e sede da empresa. Aqui criamos a estrutura de árvore da seguinte maneira, nossa interface IEmployee é a nossa folha(Leaf), todos os funcionários irão implementar esta interface. Foi criado um CompanyMember para que seja nosso objeto Component(classe base) o mesmo implementa a interface IEmployee e também possui os métodos de adicionar, remover, possui os métodos adquados para o seu negócio. Os nossos objetos de Composit serão CompanySector, CompanyDepartment e CompanyHeadquarters, observe que essas classes herdam de CompanyMember que é o nosso Composit, a lógica para este cenário é que, uma lista de funcionários pode estar em um setor, uma lista de setor(com funcionários) pode estar dentro de uma lista de Departamentos(com mais funcionários) e a lista de departamentos com a lista de setores, podem estar dentro da sede da empresa que pos rua vez também possui N funcionários.</p>
+
+<p>Vamos a implementação, primeiramente, criaremos a nossa Leaf(IEmployee)
+ 
+ ```c#
+    public interface IEmployee
+    {
+        decimal GetSalary();
+        void Show();
+    }
+ ```
+ 
+<p>Agora iremos criar as nossas classes de funcionários(para o exemplo deixarei somente um, mas você pode consultar o exemplo completo aqui "link_para_models")</p>
+
+```c#
+    public class Developer : IEmployee
+    {
+        public Developer(string name, decimal salary, IEnumerable<string> skills)
+        {
+            Name = name;
+            Salary = salary;
+            Skills = skills;
+        }
+
+        public string Name { get; set; }
+        public decimal Salary { get; set; }
+        public IEnumerable<string> Skills { get; set; }
+
+        public decimal GetSalary()
+        {
+            return Salary;
+        }
+
+        public void Show()
+        {
+            Console.WriteLine($"Desenvolvedor: Nome: {Name}, Saláio: {Salary}, Habilidades: {string.Join(", ", Skills)}");
+        }
+    }
+```
+ 
+<p>Feito isso, iremos criar nossa classe de Component(CompanyMember) a mesma implementa a interface de Leaf(IEmployee)</p>
+
+```c#
+    public abstract class CompanyMember : IEmployee
+    {
+        public abstract string Description { get; set; }
+
+        public abstract decimal GetSalary();
+        public abstract void Show();
+        public abstract void AddMember(IEmployee employee);
+        public abstract void AddRangeMember(IEnumerable<IEmployee> employees);
+    }
+```
+
+<p>Tudo certo até aqui. Agora, com isso, ja temos o necessário para implementarmos o nosso composit(para o exemplo deixarei somente um, mas você pode consultar o exemplo completo aqui "link_para_classe_composit")</p>
+
+```c#
+    public class CompanyDepartment: CompanyMember
+    {
+        private List<IEmployee> _companyMembers { get; set; }
+
+        public CompanyDepartment(string description)
+        {
+            Description = description;
+            _companyMembers = new List<IEmployee>();
+        }
+
+        public override string Description { get; set; }
+
+        public override decimal GetSalary()
+        {
+            return _companyMembers.Sum(x => x.GetSalary());
+        }
+
+        public override void AddMember(IEmployee employee)
+        {
+            _companyMembers.Add(employee);
+        }
+        public override void AddRangeMember(IEnumerable<IEmployee> employees)
+        {
+            _companyMembers.AddRange(employees);
+        }
+
+        public override void Show()
+        {
+            Console.WriteLine($"Departamento: {Description}");
+            foreach (var item in _companyMembers)
+            {
+                item.Show();
+            }
+        }
+    }
+
+```
+
+<p>Observe que esta classe possui uma lista de Leaf, os métodos de adicionar e obter salário, é feito com base nesta lista(para ficar mais claro, a classe Component(CompanyMember) seria o tronco da árvore, a classe Composit(CompanyDepartment) seria os galhos e a interface Leaf(IEmployee) seria nossas folhas).</p>
+
+<p>Feito isso, agora conseguimos adicionar os funcionários aos departamentos/setores/sede, também conseguimos adicionar setores dentro de departamentos e departamentos dentro de sede. Com base no nosso CompanyMember iremos conseguir trabalhar com toda esta estrutura, de maneira simples. Abaixo eta o exemplo utilizando todos os recursos do nosso CompanyMember.</p>
+
+```c#
+   class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Hello World!");
+            var randomSalary = new Random();
+            var dev1 = new Developer("Lucas", GetRamdomSalary(randomSalary), new List<string> { "skill1", "skill2", "skill3", "skill4" });
+            var dev2 = new Developer("Bruno", GetRamdomSalary(randomSalary), new List<string> { "skill1", "skill2", "skill3" });
+            var dev3 = new Developer("Maria", GetRamdomSalary(randomSalary), new List<string> { "skill1", "skill2" });
+
+            var qa1 = new Developer("Julia", GetRamdomSalary(randomSalary), new List<string> { "skill1", "skill2", "skill3", "skill4" });
+            var qa2 = new Developer("Pedro", GetRamdomSalary(randomSalary), new List<string> { "skill1", "skill2", "skill3" });
+            var qa3 = new Developer("Lucia", GetRamdomSalary(randomSalary), new List<string> { "skill1", "skill2" });
+            var qa4 = new Developer("Roberto", GetRamdomSalary(randomSalary), new List<string> { "skill1", "skill2", "skill5" });
+
+            var sectorDev = new CompanySector("Desenvolvimento");
+            sectorDev.AddMember(dev1);
+            sectorDev.AddMember(dev2);
+            sectorDev.AddMember(dev3);
+
+            var sectorQA = new CompanySector("Qualidade");
+            sectorQA.AddMember(qa1);
+            sectorQA.AddMember(qa2);
+            sectorQA.AddMember(qa3);
+            sectorQA.AddMember(qa4);
+
+            var tiDepartment = new CompanyDepartment("Tecnologia da Informação");
+            var developerManager = new Manager("Adriana", GetRamdomSalary(randomSalary), "Gerente de Desenvolvimento");
+            tiDepartment.AddMember(developerManager);
+            tiDepartment.AddMember(sectorDev);
+
+            var qualityAnalystManager = new Manager("Pedro", GetRamdomSalary(randomSalary), "Gerente de Qualidade");
+            tiDepartment.AddMember(qualityAnalystManager);
+            tiDepartment.AddMember(sectorQA);
+
+            var rhManager = new Manager("Luisa", GetRamdomSalary(randomSalary), "Gerente de RH");
+            var rhDepartment = new CompanyDepartment("Recursos Humanos");
+            rhDepartment.AddMember(rhManager);
+
+            var director = new Director("Nathália", GetRamdomSalary(randomSalary), "Dona da Empresa");
+            var headQuarters = new CompanyHeadquarters("Matriz");
+            headQuarters.AddMember(director);
+            headQuarters.AddRangeMember(new List<CompanyMember> { rhDepartment, tiDepartment });
+
+            Console.WriteLine($"Salario total: {headQuarters.GetSalary()}");
+            headQuarters.Show();
+            Console.ReadKey();
+        }
+
+        public static int GetRamdomSalary(Random randomSalary)
+        {
+            return randomSalary.Next(0, 10000);
+        }
+    }
+```
+
+<p><b>Saída</b></p>
+
+> <p>Hello World!</p>
+> <p>Salario total: 44087</p>
+> <p>Matriz: Matriz</p>
+> <p>Diretor: Nome: Nathália, Saláio: 4835, Descriçao: Dona da Empresa</p>
+> <p>Departamento: Recursos Humanos</p>
+> <p>Gerente: Nome: Luisa, Saláio: 3620, Descriçao: Gerente de RH</p>
+> <p>Departamento: Tecnologia da Informaçao</p>
+> <p>Gerente: Nome: Adriana, Saláio: 9447, Descriçao: Gerente de Desenvolvimento</p>
+> <p>Setor: Desenvolvimento</p>
+> <p>Desenvolvedor: Nome: Lucas, Saláio: 6543, Habilidades: skill1, skill2, skill3, skill4</p>
+> <p>Desenvolvedor: Nome: Bruno, Saláio: 748, Habilidades: skill1, skill2, skill3</p>
+> <p>Desenvolvedor: Nome: Maria, Saláio: 5518, Habilidades: skill1, skill2</p>
+> <p>Gerente: Nome: Pedro, Saláio: 611, Descriçao: Gerente de Qualidade</p>
+> <p>Setor: Qualidade</p>
+> <p>Desenvolvedor: Nome: Julia, Saláio: 4274, Habilidades: skill1, skill2, skill3, skill4</p>
+> <p>Desenvolvedor: Nome: Pedro, Saláio: 1931, Habilidades: skill1, skill2, skill3</p></p>
+> <p>Desenvolvedor: Nome: Lucia, Saláio: 3251, Habilidades: skill1, skill2</p>
+> <p>Desenvolvedor: Nome: Roberto, Saláio: 3309, Habilidades: skill1, skill2, skill5</p>
+
+<p>Use o padrão Composto quando precisar implementar uma estrutura de objeto semelhante a uma árvore, quando desejar que o código do cliente trate elementos simples e complexos de maneira uniforme.</p>
+
+# Flyweight
+
+<p><b>O que é</b>: O Flyweight é um padrão de design estrutural que permite ajustar mais objetos à quantidade disponível de RAM. É usado para minimizar o uso de memória ou as despesas computacionais, compartilhando o máximo possível com objetos semelhantes.</p>
+
+<p><b>Problema</b>: Imagine que você esteja criando um jogo simples para se divertir, porém com vários cenários e vários objetos para melhorar a experiência do usuário. Após você finalizar a implementação, você joga por um tempo, garante que está funcionando e passa o jogo para um amigo, porém seu amigo não consegue jogar por muito tempo, o jogo começa a travar e apresentar erros depois de alguns minutos jogando. Após longas horas de depuração de código, você consegue identificar que o real problema era a quantidade insuficiente de memória RAM do computador do seu amigo, pois os objetos criados para exibir o cenário e seus detalhes, continham muitos dados e isso fez com que a memória RAM não suportasse.</p>
+
+<p><b>Solução</b>: O padrão Flyweight tenta reutilizar objetos dos tipos semelhantes já existentes, armazenando-os e criando um novo objeto quando nenhum correspondente é encontrado. Cada objeto flyweight é dividido em duas partes: a parte dependente do estado (extrínseca) e a parte independente do estado (intrínseca). O estado intrínseco é armazenado (compartilhado) no objeto Flyweight. O estado extrínseco é armazenado ou calculado pelos objetos do cliente e passado para o Flyweight quando suas operações são invocadas. Uma característica importante dos objetos flyweight é que eles são imutáveis, isso significa que eles não podem ser modificados depois de construídos.</p>
+
+<p>Para realizar a implementação, devemos ter em mente que <b>Flyweight</b> é uma interface que define os membros dos objetos flyweight, <b>ConcreteFlyweight</b> são as classes que herdam de flyweight, <b>FlyweightFactory</b> esta é a classe que contém as referências dos objetos flyweights, nesta classe quando for solicitado um objeto, a classe verifica se já possui uma instância e caso não, cria uma e retorne-a.</p>
+
+
+<p>Para o nosso exemplo, vamos criar o jogo do Counter-Strike, tentando minimizar o uso da memória RAM na criação dos personagens.</p>
+
+<p>Inicialmente vamos criar a nossa interface flyweight, no nosso caso será IPlayer, ela também irá possuir alguns métodos para ser utilizado nos nossos players</p>
+
+```c#
+    public interface IPlayer
+    {
+        void AssignWeapon(string weapon);
+        void Mission(string task);
+        bool IsTerrorist();
+        void Show();
+    }
+```
+
+
+<p>Agora, vamos criar os jogadores, CounterTerrorist e Terrorist, estes são nossos ConcreteFlyweight</p>
+
+```c#
+    public class CounterTerrorist : IPlayer
+    {
+        public string TaskPlayer { get; set; }
+        private string Weapon { get; set; }
+
+        public void AssignWeapon(string weapon)
+        {
+            Weapon = weapon;
+        }
+
+        public void Mission(string task)
+        {
+            TaskPlayer = $"Policial deve realizar o objetivo de {task}";
+        }
+        public bool IsTerrorist()
+        {
+            return false;
+        }
+
+        public void Show()
+        {
+            Console.WriteLine(TaskPlayer);
+            Console.WriteLine($"Possui arma: {Weapon}");
+        }
+    }
+    
+    
+    public class Terrorist : IPlayer
+    {
+        public string TaskPlayer { get; set; }
+        private string Weapon { get; set; }
+
+        public void AssignWeapon(string weapon)
+        {
+            Weapon = weapon;
+        }
+
+        public void Mission(string task)
+        {
+            TaskPlayer = $"Terrorista deve realizar o objetivo de {task}";
+        }
+
+        public bool IsTerrorist()
+        {
+            return true;
+        }
+
+        public void Show()
+        {
+            Console.WriteLine(TaskPlayer);
+            Console.WriteLine($"Possui arma: {Weapon}");
+        }
+    }
+```
+
+<p>Feito isso, já conseguimos implementar a nossa classe de FlyweightFactory, ela será a PlayerFactory, observe que o método GetPlayer verifica se já existe uma instância de IPlayer no nosso dicionário, caso exista, ele simplesmente irá retornar, caso não exista, será criado uma e adicionado ao nosso dicionário e só ai é retornado para que o chamou.</p>
+
+```c#
+    public class PlayerFactory
+    {
+        public PlayerFactory()
+        {
+            Players = new Dictionary<string, IPlayer>();
+        }
+
+        private Dictionary<string, IPlayer> Players { get; set; }
+
+        public IPlayer GetPlayer(string type)
+        {
+            if (Players.ContainsKey(type))
+                return Players[type];
+            else
+            {
+                switch (type.ToUpper())
+                {
+                    case "TERRORIST":
+                        Players.Add(type, new Terrorist());
+                        return Players[type];
+                    case "COUNTERTERRORIST":
+                        Players.Add(type, new CounterTerrorist());
+                        return Players[type];
+                    default:
+                        throw new KeyNotFoundException();
+                }
+            }
+        }
+    }
+```
+
+<p>Até aqui, nós conseguimos diminuir o uso da memória para criação dos objetos, pois sempre será fornecido a instancia já criada que está no dicionário, então com isso já concluímos o usso do padrão para o nosso cenário. Para ficar ainda mais legal, irei criar uma classe para representar o mapa do jogador, marcando a posição de cada jogador e também para obter algumas informações sobre a partida como por exemplo quantos são terroristas/policiais.</p>
+
+<p>Será criada a classe PlayersMapFactory, onde terá o dicionário armazenando a posição de cada jogador e os métodos pertinentes ao nosso jogo.</p>
+
+```c#
+    public class PlayersMapFactory
+    {
+        public PlayersMapFactory()
+        {
+            Players = new Dictionary<int, IPlayer>();
+        }
+
+        private Dictionary<int, IPlayer> Players { get; set; }
+
+        public bool AddPlayer(int position, IPlayer player)
+        {
+            if (Players.ContainsKey(position))
+                return false;
+            else
+                Players.Add(position, player);
+            return true;
+        }
+
+        public int GetTerrorist()
+        {
+            return Players.Values.Count(x => x.IsTerrorist());
+        }
+
+        public int GetPolice()
+        {
+            return Players.Values.Count(x => !x.IsTerrorist());
+        }
+
+        public void ShowPlayers()
+        {
+            foreach (var item in Players)
+            {
+                Console.WriteLine($"Jogador {item.Key}");
+                item.Value.Show();
+            }
+        }
+    }
+```
+
+<p>Feito isso, iremos realizar as chamadas, para o nosso exemplo não foi adicionado métodos intrínseco(campos que contêm dados imutáveis, duplicados em muitos objetos), foram feito somente métodos extrínsecos(campos que contêm dados contextuais exclusivos para cada objeto). Essa divisão é crucial na hora de implementar o patter flyweight, pois deve-se analisar muito bem para realizar esta separação. Aqui no método Main, foi criado alguns métodos para deixar mais dinâmico a criação dos personagens, como por exemplo o tipo de jogador Terrorist/CounterTerrorist tipo de arma e missões.</p>
+
+```c#
+    class Program
+    {
+        public static string[] PlayerType = { "Terrorist", "CounterTerrorist" };
+        public static string[] Weapons = { "AK-47", "AWP", "Desert Eagle", "M4A4", "P90", "SSG 08", "MP7" };
+        public static string[] PoliceObjective = { "Desarmar Bomba", "Salvar Reféns" };
+        public static string[] TerroristObjective = { "Armar Bomba", "Pegar Reféns" };
+
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Hello World!");
+
+            var playerFactory = new PlayerFactory();
+            var playersMapFactory = new PlayersMapFactory();
+            for (int i = 0; i < 10; i++)
+            {
+                var player = playerFactory.GetPlayer(GetPlayerType());
+                player.AssignWeapon(GetWeapons());
+                if (player.IsTerrorist())
+                    player.Mission(GetTerroristObjective());
+                else
+                    player.Mission(GetPoliceObjective());
+
+                playersMapFactory.AddPlayer(i+1, player);
+            }
+            Console.WriteLine($"Terroristas: {playersMapFactory.GetTerrorist()}");
+            Console.WriteLine($"Policiais: {playersMapFactory.GetPolice()}");
+            playersMapFactory.ShowPlayers();
+
+            Console.ReadKey();
+        }
+
+        private static string GetPlayerType()
+        {
+            return PlayerType[new Random().Next(PlayerType.Length)];
+        }
+
+        private static string GetWeapons()
+        {
+            return Weapons[new Random().Next(Weapons.Length)];
+        }
+        private static string GetPoliceObjective()
+        {
+            return PoliceObjective[new Random().Next(PoliceObjective.Length)];
+        }
+        private static string GetTerroristObjective()
+        {
+            return TerroristObjective[new Random().Next(TerroristObjective.Length)];
+        }
+    }
+```
+
+<p><b>Saída</b></p>
+
+> <p>Hello World!</p>
+> <p>Terroristas: 4</p>
+> <p>Policiais: 6</p>
+> <p>Jogador 1</p>
+> <p>Policial deve realizar o objetivo de Salvar Reféns</p>
+> <p>Possui arma: SSG 08</p>
+> <p>Jogador 2</p>
+> <p>Policial deve realizar o objetivo de Salvar Reféns</p>
+> <p>Possui arma: SSG 08</p>
+> <p>Jogador 3</p>
+> <p>Policial deve realizar o objetivo de Salvar Reféns</p>
+> <p>Possui arma: SSG 08</p>
+> <p>Jogador 4</p>
+> <p>Terrorista deve realizar o objetivo de Pegar Reféns</p>
+> <p>Possui arma: MP7</p>
+> <p>Jogador 5</p>
+> <p>Terrorista deve realizar o objetivo de Pegar Reféns</p>
+> <p>Possui arma: MP7</p>
+> <p>Jogador 6</p>
+> <p>Terrorista deve realizar o objetivo de Pegar Reféns</p>
+> <p>Possui arma: MP7</p>
+> <p>Jogador 7</p>
+> <p>Policial deve realizar o objetivo de Salvar Reféns</p>
+> <p>Possui arma: SSG 08</p>
+> <p>Jogador 8</p>
+> <p>Terrorista deve realizar o objetivo de Pegar Reféns</p>
+> <p>Possui arma: MP7</p>
+> <p>Jogador 9</p>
+> <p>Policial deve realizar o objetivo de Salvar Reféns</p>
+> <p>Possui arma: SSG 08</p>
+> <p>Jogador 10</p>
+> <p>Policial deve realizar o objetivo de Salvar Reféns</p>
+> <p>Possui arma: SSG 08</p>
+
+<p>Use o padrão Flyweight apenas quando seu programa precisar suportar um grande número de objetos que mal cabem na RAM disponível.</p>
+
+
+
+

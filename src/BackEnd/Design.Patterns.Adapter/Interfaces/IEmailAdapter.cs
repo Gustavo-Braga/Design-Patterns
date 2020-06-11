@@ -1,10 +1,9 @@
-﻿using Design.Patterns.Adapter.Client.Request;
-using Design.Patterns.Adapter.Model;
+﻿using Design.Patterns.Adapter.Model;
 
 namespace Design.Patterns.Adapter.Interfaces
 {
     public interface IEmailAdapter
     {
-        EmailClientRequest GetEmailRequest(Email emailRequest);
+        void SendEmail(Email email);
     }
 }
