@@ -951,5 +951,256 @@ static void Main(string[] args)
 
 <p>Use o padrão Composto quando precisar implementar uma estrutura de objeto semelhante a uma árvore, quando desejar que o código do cliente trate elementos simples e complexos de maneira uniforme.</p>
 
+# Flyweight
+
+<p><b>O que é</b>: O Flyweight é um padrão de design estrutural que permite ajustar mais objetos à quantidade disponível de RAM. É usado para minimizar o uso de memória ou as despesas computacionais, compartilhando o máximo possível com objetos semelhantes.</p>
+
+<p><b>Problema</b>: Imagine que você esteja criando um jogo simples para se divertir, porém com vários cenários e vários objetos para melhorar a experiência do usuário. Após você finalizar a implementação, você joga por um tempo, garante que está funcionando e passa o jogo para um amigo, porém seu amigo não consegue jogar por muito tempo, o jogo começa a travar e apresentar erros depois de alguns minutos jogando. Após longas horas de depuração de código, você consegue identificar que o real problema era a quantidade insuficiente de memória RAM do computador do seu amigo, pois os objetos criados para exibir o cenário e seus detalhes, continham muitos dados e isso fez com que a memória RAM não suportasse.</p>
+
+<p><b>Solução</b>: O padrão Flyweight tenta reutilizar objetos dos tipos semelhantes já existentes, armazenando-os e criando um novo objeto quando nenhum correspondente é encontrado. Cada objeto flyweight é dividido em duas partes: a parte dependente do estado (extrínseca) e a parte independente do estado (intrínseca). O estado intrínseco é armazenado (compartilhado) no objeto Flyweight. O estado extrínseco é armazenado ou calculado pelos objetos do cliente e passado para o Flyweight quando suas operações são invocadas. Uma característica importante dos objetos flyweight é que eles são imutáveis, isso significa que eles não podem ser modificados depois de construídos.</p>
+
+<p>Para realizar a implementação, devemos ter em mente que <b>Flyweight</b> é uma interface que define os membros dos objetos flyweight, <b>ConcreteFlyweight</b> são as classes que herdam de flyweight, <b>FlyweightFactory</b> esta é a classe que contém as referências dos objetos flyweights, nesta classe quando for solicitado um objeto, a classe verifica se já possui uma instância e caso não, cria uma e retorne-a.</p>
 
 
+<p>Para o nosso exemplo, vamos criar o jogo do Counter-Strike, tentando minimizar o uso da memória RAM na criação dos personagens.</p>
+
+<p>Inicialmente vamos criar a nossa interface flyweight, no nosso caso será IPlayer, ela também irá possuir alguns métodos para ser utilizado nos nossos players</p>
+
+```c#
+    public interface IPlayer
+    {
+        void AssignWeapon(string weapon);
+        void Mission(string task);
+        bool IsTerrorist();
+        void Show();
+    }
+```
+
+
+<p>Agora, vamos criar os jogadores, CounterTerrorist e Terrorist, estes são nossos ConcreteFlyweight</p>
+
+```c#
+    public class CounterTerrorist : IPlayer
+    {
+        public string TaskPlayer { get; set; }
+        private string Weapon { get; set; }
+
+        public void AssignWeapon(string weapon)
+        {
+            Weapon = weapon;
+        }
+
+        public void Mission(string task)
+        {
+            TaskPlayer = $"Policial deve realizar o objetivo de {task}";
+        }
+        public bool IsTerrorist()
+        {
+            return false;
+        }
+
+        public void Show()
+        {
+            Console.WriteLine(TaskPlayer);
+            Console.WriteLine($"Possui arma: {Weapon}");
+        }
+    }
+    
+    
+    public class Terrorist : IPlayer
+    {
+        public string TaskPlayer { get; set; }
+        private string Weapon { get; set; }
+
+        public void AssignWeapon(string weapon)
+        {
+            Weapon = weapon;
+        }
+
+        public void Mission(string task)
+        {
+            TaskPlayer = $"Terrorista deve realizar o objetivo de {task}";
+        }
+
+        public bool IsTerrorist()
+        {
+            return true;
+        }
+
+        public void Show()
+        {
+            Console.WriteLine(TaskPlayer);
+            Console.WriteLine($"Possui arma: {Weapon}");
+        }
+    }
+```
+
+<p>Feito isso, já conseguimos implementar a nossa classe de FlyweightFactory, ela será a PlayerFactory, observe que o método GetPlayer verifica se já existe uma instância de IPlayer no nosso dicionário, caso exista, ele simplesmente irá retornar, caso não exista, será criado uma e adicionado ao nosso dicionário e só ai é retornado para que o chamou.</p>
+
+```c#
+    public class PlayerFactory
+    {
+        public PlayerFactory()
+        {
+            Players = new Dictionary<string, IPlayer>();
+        }
+
+        private Dictionary<string, IPlayer> Players { get; set; }
+
+        public IPlayer GetPlayer(string type)
+        {
+            if (Players.ContainsKey(type))
+                return Players[type];
+            else
+            {
+                switch (type.ToUpper())
+                {
+                    case "TERRORIST":
+                        Players.Add(type, new Terrorist());
+                        return Players[type];
+                    case "COUNTERTERRORIST":
+                        Players.Add(type, new CounterTerrorist());
+                        return Players[type];
+                    default:
+                        throw new KeyNotFoundException();
+                }
+            }
+        }
+    }
+```
+
+<p>Até aqui, nós conseguimos diminuir o uso da memória para criação dos objetos, pois sempre será fornecido a instancia já criada que está no dicionário, então com isso já concluímos o usso do padrão para o nosso cenário. Para ficar ainda mais legal, irei criar uma classe para representar o mapa do jogador, marcando a posição de cada jogador e também para obter algumas informações sobre a partida como por exemplo quantos são terroristas/policiais.</p>
+
+<p>Será criada a classe PlayersMapFactory, onde terá o dicionário armazenando a posição de cada jogador e os métodos pertinentes ao nosso jogo.</p>
+
+```c#
+    public class PlayersMapFactory
+    {
+        public PlayersMapFactory()
+        {
+            Players = new Dictionary<int, IPlayer>();
+        }
+
+        private Dictionary<int, IPlayer> Players { get; set; }
+
+        public bool AddPlayer(int position, IPlayer player)
+        {
+            if (Players.ContainsKey(position))
+                return false;
+            else
+                Players.Add(position, player);
+            return true;
+        }
+
+        public int GetTerrorist()
+        {
+            return Players.Values.Count(x => x.IsTerrorist());
+        }
+
+        public int GetPolice()
+        {
+            return Players.Values.Count(x => !x.IsTerrorist());
+        }
+
+        public void ShowPlayers()
+        {
+            foreach (var item in Players)
+            {
+                Console.WriteLine($"Jogador {item.Key}");
+                item.Value.Show();
+            }
+        }
+    }
+```
+
+<p>Feito isso, iremos realizar as chamadas, para o nosso exemplo não foi adicionado métodos intrínseco(campos que contêm dados imutáveis, duplicados em muitos objetos), foram feito somente métodos extrínsecos(campos que contêm dados contextuais exclusivos para cada objeto). Essa divisão é crucial na hora de implementar o patter flyweight, pois deve-se analisar muito bem para realizar esta separação. Aqui no método Main, foi criado alguns métodos para deixar mais dinâmico a criação dos personagens, como por exemplo o tipo de jogador Terrorist/CounterTerrorist tipo de arma e missões.</p>
+
+```c#
+    class Program
+    {
+        public static string[] PlayerType = { "Terrorist", "CounterTerrorist" };
+        public static string[] Weapons = { "AK-47", "AWP", "Desert Eagle", "M4A4", "P90", "SSG 08", "MP7" };
+        public static string[] PoliceObjective = { "Desarmar Bomba", "Salvar Reféns" };
+        public static string[] TerroristObjective = { "Armar Bomba", "Pegar Reféns" };
+
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Hello World!");
+
+            var playerFactory = new PlayerFactory();
+            var playersMapFactory = new PlayersMapFactory();
+            for (int i = 0; i < 10; i++)
+            {
+                var player = playerFactory.GetPlayer(GetPlayerType());
+                player.AssignWeapon(GetWeapons());
+                if (player.IsTerrorist())
+                    player.Mission(GetTerroristObjective());
+                else
+                    player.Mission(GetPoliceObjective());
+
+                playersMapFactory.AddPlayer(i+1, player);
+            }
+            Console.WriteLine($"Terroristas: {playersMapFactory.GetTerrorist()}");
+            Console.WriteLine($"Policiais: {playersMapFactory.GetPolice()}");
+            playersMapFactory.ShowPlayers();
+
+            Console.ReadKey();
+        }
+
+        private static string GetPlayerType()
+        {
+            return PlayerType[new Random().Next(PlayerType.Length)];
+        }
+
+        private static string GetWeapons()
+        {
+            return Weapons[new Random().Next(Weapons.Length)];
+        }
+        private static string GetPoliceObjective()
+        {
+            return PoliceObjective[new Random().Next(PoliceObjective.Length)];
+        }
+        private static string GetTerroristObjective()
+        {
+            return TerroristObjective[new Random().Next(TerroristObjective.Length)];
+        }
+    }
+```
+
+<p><b>Saída</b></p>
+
+> <p>Hello World!</p>
+> <p>Terroristas: 4</p>
+> <p>Policiais: 6</p>
+> <p>Jogador 1</p>
+> <p>Policial deve realizar o objetivo de Salvar Reféns</p>
+> <p>Possui arma: SSG 08</p>
+> <p>Jogador 2</p>
+> <p>Policial deve realizar o objetivo de Salvar Reféns</p>
+> <p>Possui arma: SSG 08</p>
+> <p>Jogador 3</p>
+> <p>Policial deve realizar o objetivo de Salvar Reféns</p>
+> <p>Possui arma: SSG 08</p>
+> <p>Jogador 4</p>
+> <p>Terrorista deve realizar o objetivo de Pegar Reféns</p>
+> <p>Possui arma: MP7</p>
+> <p>Jogador 5</p>
+> <p>Terrorista deve realizar o objetivo de Pegar Reféns</p>
+> <p>Possui arma: MP7</p>
+> <p>Jogador 6</p>
+> <p>Terrorista deve realizar o objetivo de Pegar Reféns</p>
+> <p>Possui arma: MP7</p>
+> <p>Jogador 7</p>
+> <p>Policial deve realizar o objetivo de Salvar Reféns</p>
+> <p>Possui arma: SSG 08</p>
+> <p>Jogador 8</p>
+> <p>Terrorista deve realizar o objetivo de Pegar Reféns</p>
+> <p>Possui arma: MP7</p>
+> <p>Jogador 9</p>
+> <p>Policial deve realizar o objetivo de Salvar Reféns</p>
+> <p>Possui arma: SSG 08</p>
+> <p>Jogador 10</p>
+> <p>Policial deve realizar o objetivo de Salvar Reféns</p>
+> <p>Possui arma: SSG 08</p>
+
+<p>Use o padrão Flyweight apenas quando seu programa precisar suportar um grande número de objetos que mal cabem na RAM disponível.</p>
