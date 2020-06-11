@@ -1399,6 +1399,450 @@ public class CarFacade
  <p>Use a classe de proxy quando quiser realizar o controle de acesso(é quando você deseja que apenas clientes específicos possam usar o objeto de serviço). Execução local de um serviço remoto(quando o objeto de serviço está localizado em um servidor remoto). Solicitações de log(quando você deseja manter um histórico de solicitações para o objeto de serviço). Resultados da solicitação de armazenamento em cache(quando você precisa armazenar em cache os resultados das solicitações do cliente e gerenciar o ciclo de vida desse cache, especialmente se os resultados forem muito grandes).</p>
 
 
+# Composto(composite)
+
+<p><b>O que é</b>: Composto é um padrão de design estrutural que permite compor objetos em estruturas de árvores e trabalhar com essas estruturas como se fossem objetos individuais. O padrão composto descreve que um grupo de objetos deve ser tratado da mesma maneira que uma única instância de um objeto, a intenção deste patern é "compor" os objetos em estruturas de árvores para representar hierarquias de partes inteiras.</p>
+
+<p><b>Problema</b>: Imagine que você tenha dois tipos de objetos, Produtos e Caixas, cada caixa pode conter vários produtos e cada produto pode conter várias caixas, que por sua vez pode conter vários outros produtos ou até mesmo várias outras caixas. Imagine que você deseja identificar o saldo total da sua caixa, a abordagem direta seria acessar cada caixa e verificar o valor de cada produto, porém isso pode não ser tão simples.</p>
+
+
+<p><b>Solução</b>: O padrão Composto compõe objetos em termos de uma estrutura em árvore para representar partes e hierarquias inteiras. O maior benefício é que você não precisa se preocupar com as classes concretas de objetos que compõem a árvore, você pode tratá-los da mesma forma através da interface.</p>
+
+<p>Para realizar a implementação, precisamos ter em mente que <b>Component</b> é a classe abstrata que contém os membros que serão implementados pela hierarquia(atua como classe base para todos), <b>Leaf</b> é usado para implementar componentes de folha na estrutura da árvore, estar nao podem ter filhos e <b>Composite</b> esta é a classe que inclui os métodos para adicionar, remover, consultar, é aqui que são executadas as operações nos componentes filhos</p>
+
+<p>Para o nosso exemplo foi criado um cenário simples, onde temos os dados de uma empresa, funcionários, departamentos, setores e sede da empresa. Aqui criamos a estrutura de árvore da seguinte maneira, nossa interface IEmployee é a nossa folha(Leaf), todos os funcionários irão implementar esta interface. Foi criado um CompanyMember para que seja nosso objeto Component(classe base) o mesmo implementa a interface IEmployee e também possui os métodos de adicionar, remover, possui os métodos adquados para o seu negócio. Os nossos objetos de Composit serão CompanySector, CompanyDepartment e CompanyHeadquarters, observe que essas classes herdam de CompanyMember que é o nosso Composit, a lógica para este cenário é que, uma lista de funcionários pode estar em um setor, uma lista de setor(com funcionários) pode estar dentro de uma lista de Departamentos(com mais funcionários) e a lista de departamentos com a lista de setores, podem estar dentro da sede da empresa que pos rua vez também possui N funcionários.</p>
+
+<p>Vamos a implementação, primeiramente, criaremos a nossa Leaf(IEmployee)
+ 
+ ```c#
+    public interface IEmployee
+    {
+        decimal GetSalary();
+        void Show();
+    }
+ ```
+ 
+<p>Agora iremos criar as nossas classes de funcionários(para o exemplo deixarei somente um, mas você pode consultar o exemplo completo aqui "link_para_models")</p>
+
+```c#
+    public class Developer : IEmployee
+    {
+        public Developer(string name, decimal salary, IEnumerable<string> skills)
+        {
+            Name = name;
+            Salary = salary;
+            Skills = skills;
+        }
+
+        public string Name { get; set; }
+        public decimal Salary { get; set; }
+        public IEnumerable<string> Skills { get; set; }
+
+        public decimal GetSalary()
+        {
+            return Salary;
+        }
+
+        public void Show()
+        {
+            Console.WriteLine($"Desenvolvedor: Nome: {Name}, Saláio: {Salary}, Habilidades: {string.Join(", ", Skills)}");
+        }
+    }
+```
+ 
+<p>Feito isso, iremos criar nossa classe de Component(CompanyMember) a mesma implementa a interface de Leaf(IEmployee)</p>
+
+```c#
+    public abstract class CompanyMember : IEmployee
+    {
+        public abstract string Description { get; set; }
+
+        public abstract decimal GetSalary();
+        public abstract void Show();
+        public abstract void AddMember(IEmployee employee);
+        public abstract void AddRangeMember(IEnumerable<IEmployee> employees);
+    }
+```
+
+<p>Tudo certo até aqui. Agora, com isso, ja temos o necessário para implementarmos o nosso composit(para o exemplo deixarei somente um, mas você pode consultar o exemplo completo aqui "link_para_classe_composit")</p>
+
+```c#
+    public class CompanyDepartment: CompanyMember
+    {
+        private List<IEmployee> _companyMembers { get; set; }
+
+        public CompanyDepartment(string description)
+        {
+            Description = description;
+            _companyMembers = new List<IEmployee>();
+        }
+
+        public override string Description { get; set; }
+
+        public override decimal GetSalary()
+        {
+            return _companyMembers.Sum(x => x.GetSalary());
+        }
+
+        public override void AddMember(IEmployee employee)
+        {
+            _companyMembers.Add(employee);
+        }
+        public override void AddRangeMember(IEnumerable<IEmployee> employees)
+        {
+            _companyMembers.AddRange(employees);
+        }
+
+        public override void Show()
+        {
+            Console.WriteLine($"Departamento: {Description}");
+            foreach (var item in _companyMembers)
+            {
+                item.Show();
+            }
+        }
+    }
+
+```
+
+<p>Observe que esta classe possui uma lista de Leaf, os métodos de adicionar e obter salário, é feito com base nesta lista(para ficar mais claro, a classe Component(CompanyMember) seria o tronco da árvore, a classe Composit(CompanyDepartment) seria os galhos e a interface Leaf(IEmployee) seria nossas folhas).</p>
+
+<p>Feito isso, agora conseguimos adicionar os funcionários aos departamentos/setores/sede, também conseguimos adicionar setores dentro de departamentos e departamentos dentro de sede. Com base no nosso CompanyMember iremos conseguir trabalhar com toda esta estrutura, de maneira simples. Abaixo eta o exemplo utilizando todos os recursos do nosso CompanyMember.</p>
+
+```c#
+   class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Hello World!");
+            var randomSalary = new Random();
+            var dev1 = new Developer("Lucas", GetRamdomSalary(randomSalary), new List<string> { "skill1", "skill2", "skill3", "skill4" });
+            var dev2 = new Developer("Bruno", GetRamdomSalary(randomSalary), new List<string> { "skill1", "skill2", "skill3" });
+            var dev3 = new Developer("Maria", GetRamdomSalary(randomSalary), new List<string> { "skill1", "skill2" });
+
+            var qa1 = new Developer("Julia", GetRamdomSalary(randomSalary), new List<string> { "skill1", "skill2", "skill3", "skill4" });
+            var qa2 = new Developer("Pedro", GetRamdomSalary(randomSalary), new List<string> { "skill1", "skill2", "skill3" });
+            var qa3 = new Developer("Lucia", GetRamdomSalary(randomSalary), new List<string> { "skill1", "skill2" });
+            var qa4 = new Developer("Roberto", GetRamdomSalary(randomSalary), new List<string> { "skill1", "skill2", "skill5" });
+
+            var sectorDev = new CompanySector("Desenvolvimento");
+            sectorDev.AddMember(dev1);
+            sectorDev.AddMember(dev2);
+            sectorDev.AddMember(dev3);
+
+            var sectorQA = new CompanySector("Qualidade");
+            sectorQA.AddMember(qa1);
+            sectorQA.AddMember(qa2);
+            sectorQA.AddMember(qa3);
+            sectorQA.AddMember(qa4);
+
+            var tiDepartment = new CompanyDepartment("Tecnologia da Informação");
+            var developerManager = new Manager("Adriana", GetRamdomSalary(randomSalary), "Gerente de Desenvolvimento");
+            tiDepartment.AddMember(developerManager);
+            tiDepartment.AddMember(sectorDev);
+
+            var qualityAnalystManager = new Manager("Pedro", GetRamdomSalary(randomSalary), "Gerente de Qualidade");
+            tiDepartment.AddMember(qualityAnalystManager);
+            tiDepartment.AddMember(sectorQA);
+
+            var rhManager = new Manager("Luisa", GetRamdomSalary(randomSalary), "Gerente de RH");
+            var rhDepartment = new CompanyDepartment("Recursos Humanos");
+            rhDepartment.AddMember(rhManager);
+
+            var director = new Director("Nathália", GetRamdomSalary(randomSalary), "Dona da Empresa");
+            var headQuarters = new CompanyHeadquarters("Matriz");
+            headQuarters.AddMember(director);
+            headQuarters.AddRangeMember(new List<CompanyMember> { rhDepartment, tiDepartment });
+
+            Console.WriteLine($"Salario total: {headQuarters.GetSalary()}");
+            headQuarters.Show();
+            Console.ReadKey();
+        }
+
+        public static int GetRamdomSalary(Random randomSalary)
+        {
+            return randomSalary.Next(0, 10000);
+        }
+    }
+```
+
+<p><b>Saída</b></p>
+
+> <p>Hello World!</p>
+> <p>Salario total: 44087</p>
+> <p>Matriz: Matriz</p>
+> <p>Diretor: Nome: Nathália, Saláio: 4835, Descriçao: Dona da Empresa</p>
+> <p>Departamento: Recursos Humanos</p>
+> <p>Gerente: Nome: Luisa, Saláio: 3620, Descriçao: Gerente de RH</p>
+> <p>Departamento: Tecnologia da Informaçao</p>
+> <p>Gerente: Nome: Adriana, Saláio: 9447, Descriçao: Gerente de Desenvolvimento</p>
+> <p>Setor: Desenvolvimento</p>
+> <p>Desenvolvedor: Nome: Lucas, Saláio: 6543, Habilidades: skill1, skill2, skill3, skill4</p>
+> <p>Desenvolvedor: Nome: Bruno, Saláio: 748, Habilidades: skill1, skill2, skill3</p>
+> <p>Desenvolvedor: Nome: Maria, Saláio: 5518, Habilidades: skill1, skill2</p>
+> <p>Gerente: Nome: Pedro, Saláio: 611, Descriçao: Gerente de Qualidade</p>
+> <p>Setor: Qualidade</p>
+> <p>Desenvolvedor: Nome: Julia, Saláio: 4274, Habilidades: skill1, skill2, skill3, skill4</p>
+> <p>Desenvolvedor: Nome: Pedro, Saláio: 1931, Habilidades: skill1, skill2, skill3</p></p>
+> <p>Desenvolvedor: Nome: Lucia, Saláio: 3251, Habilidades: skill1, skill2</p>
+> <p>Desenvolvedor: Nome: Roberto, Saláio: 3309, Habilidades: skill1, skill2, skill5</p>
+
+<p>Use o padrão Composto quando precisar implementar uma estrutura de objeto semelhante a uma árvore, quando desejar que o código do cliente trate elementos simples e complexos de maneira uniforme.</p>
+
+# Flyweight
+
+<p><b>O que é</b>: O Flyweight é um padrão de design estrutural que permite ajustar mais objetos à quantidade disponível de RAM. É usado para minimizar o uso de memória ou as despesas computacionais, compartilhando o máximo possível com objetos semelhantes.</p>
+
+<p><b>Problema</b>: Imagine que você esteja criando um jogo simples para se divertir, porém com vários cenários e vários objetos para melhorar a experiência do usuário. Após você finalizar a implementação, você joga por um tempo, garante que está funcionando e passa o jogo para um amigo, porém seu amigo não consegue jogar por muito tempo, o jogo começa a travar e apresentar erros depois de alguns minutos jogando. Após longas horas de depuração de código, você consegue identificar que o real problema era a quantidade insuficiente de memória RAM do computador do seu amigo, pois os objetos criados para exibir o cenário e seus detalhes, continham muitos dados e isso fez com que a memória RAM não suportasse.</p>
+
+<p><b>Solução</b>: O padrão Flyweight tenta reutilizar objetos dos tipos semelhantes já existentes, armazenando-os e criando um novo objeto quando nenhum correspondente é encontrado. Cada objeto flyweight é dividido em duas partes: a parte dependente do estado (extrínseca) e a parte independente do estado (intrínseca). O estado intrínseco é armazenado (compartilhado) no objeto Flyweight. O estado extrínseco é armazenado ou calculado pelos objetos do cliente e passado para o Flyweight quando suas operações são invocadas. Uma característica importante dos objetos flyweight é que eles são imutáveis, isso significa que eles não podem ser modificados depois de construídos.</p>
+
+<p>Para realizar a implementação, devemos ter em mente que <b>Flyweight</b> é uma interface que define os membros dos objetos flyweight, <b>ConcreteFlyweight</b> são as classes que herdam de flyweight, <b>FlyweightFactory</b> esta é a classe que contém as referências dos objetos flyweights, nesta classe quando for solicitado um objeto, a classe verifica se já possui uma instância e caso não, cria uma e retorne-a.</p>
+
+
+<p>Para o nosso exemplo, vamos criar o jogo do Counter-Strike, tentando minimizar o uso da memória RAM na criação dos personagens.</p>
+
+<p>Inicialmente vamos criar a nossa interface flyweight, no nosso caso será IPlayer, ela também irá possuir alguns métodos para ser utilizado nos nossos players</p>
+
+```c#
+    public interface IPlayer
+    {
+        void AssignWeapon(string weapon);
+        void Mission(string task);
+        bool IsTerrorist();
+        void Show();
+    }
+```
+
+
+<p>Agora, vamos criar os jogadores, CounterTerrorist e Terrorist, estes são nossos ConcreteFlyweight</p>
+
+```c#
+    public class CounterTerrorist : IPlayer
+    {
+        public string TaskPlayer { get; set; }
+        private string Weapon { get; set; }
+
+        public void AssignWeapon(string weapon)
+        {
+            Weapon = weapon;
+        }
+
+        public void Mission(string task)
+        {
+            TaskPlayer = $"Policial deve realizar o objetivo de {task}";
+        }
+        public bool IsTerrorist()
+        {
+            return false;
+        }
+
+        public void Show()
+        {
+            Console.WriteLine(TaskPlayer);
+            Console.WriteLine($"Possui arma: {Weapon}");
+        }
+    }
+    
+    
+    public class Terrorist : IPlayer
+    {
+        public string TaskPlayer { get; set; }
+        private string Weapon { get; set; }
+
+        public void AssignWeapon(string weapon)
+        {
+            Weapon = weapon;
+        }
+
+        public void Mission(string task)
+        {
+            TaskPlayer = $"Terrorista deve realizar o objetivo de {task}";
+        }
+
+        public bool IsTerrorist()
+        {
+            return true;
+        }
+
+        public void Show()
+        {
+            Console.WriteLine(TaskPlayer);
+            Console.WriteLine($"Possui arma: {Weapon}");
+        }
+    }
+```
+
+<p>Feito isso, já conseguimos implementar a nossa classe de FlyweightFactory, ela será a PlayerFactory, observe que o método GetPlayer verifica se já existe uma instância de IPlayer no nosso dicionário, caso exista, ele simplesmente irá retornar, caso não exista, será criado uma e adicionado ao nosso dicionário e só ai é retornado para que o chamou.</p>
+
+```c#
+    public class PlayerFactory
+    {
+        public PlayerFactory()
+        {
+            Players = new Dictionary<string, IPlayer>();
+        }
+
+        private Dictionary<string, IPlayer> Players { get; set; }
+
+        public IPlayer GetPlayer(string type)
+        {
+            if (Players.ContainsKey(type))
+                return Players[type];
+            else
+            {
+                switch (type.ToUpper())
+                {
+                    case "TERRORIST":
+                        Players.Add(type, new Terrorist());
+                        return Players[type];
+                    case "COUNTERTERRORIST":
+                        Players.Add(type, new CounterTerrorist());
+                        return Players[type];
+                    default:
+                        throw new KeyNotFoundException();
+                }
+            }
+        }
+    }
+```
+
+<p>Até aqui, nós conseguimos diminuir o uso da memória para criação dos objetos, pois sempre será fornecido a instancia já criada que está no dicionário, então com isso já concluímos o usso do padrão para o nosso cenário. Para ficar ainda mais legal, irei criar uma classe para representar o mapa do jogador, marcando a posição de cada jogador e também para obter algumas informações sobre a partida como por exemplo quantos são terroristas/policiais.</p>
+
+<p>Será criada a classe PlayersMapFactory, onde terá o dicionário armazenando a posição de cada jogador e os métodos pertinentes ao nosso jogo.</p>
+
+```c#
+    public class PlayersMapFactory
+    {
+        public PlayersMapFactory()
+        {
+            Players = new Dictionary<int, IPlayer>();
+        }
+
+        private Dictionary<int, IPlayer> Players { get; set; }
+
+        public bool AddPlayer(int position, IPlayer player)
+        {
+            if (Players.ContainsKey(position))
+                return false;
+            else
+                Players.Add(position, player);
+            return true;
+        }
+
+        public int GetTerrorist()
+        {
+            return Players.Values.Count(x => x.IsTerrorist());
+        }
+
+        public int GetPolice()
+        {
+            return Players.Values.Count(x => !x.IsTerrorist());
+        }
+
+        public void ShowPlayers()
+        {
+            foreach (var item in Players)
+            {
+                Console.WriteLine($"Jogador {item.Key}");
+                item.Value.Show();
+            }
+        }
+    }
+```
+
+<p>Feito isso, iremos realizar as chamadas, para o nosso exemplo não foi adicionado métodos intrínseco(campos que contêm dados imutáveis, duplicados em muitos objetos), foram feito somente métodos extrínsecos(campos que contêm dados contextuais exclusivos para cada objeto). Essa divisão é crucial na hora de implementar o patter flyweight, pois deve-se analisar muito bem para realizar esta separação. Aqui no método Main, foi criado alguns métodos para deixar mais dinâmico a criação dos personagens, como por exemplo o tipo de jogador Terrorist/CounterTerrorist tipo de arma e missões.</p>
+
+```c#
+    class Program
+    {
+        public static string[] PlayerType = { "Terrorist", "CounterTerrorist" };
+        public static string[] Weapons = { "AK-47", "AWP", "Desert Eagle", "M4A4", "P90", "SSG 08", "MP7" };
+        public static string[] PoliceObjective = { "Desarmar Bomba", "Salvar Reféns" };
+        public static string[] TerroristObjective = { "Armar Bomba", "Pegar Reféns" };
+
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Hello World!");
+
+            var playerFactory = new PlayerFactory();
+            var playersMapFactory = new PlayersMapFactory();
+            for (int i = 0; i < 10; i++)
+            {
+                var player = playerFactory.GetPlayer(GetPlayerType());
+                player.AssignWeapon(GetWeapons());
+                if (player.IsTerrorist())
+                    player.Mission(GetTerroristObjective());
+                else
+                    player.Mission(GetPoliceObjective());
+
+                playersMapFactory.AddPlayer(i+1, player);
+            }
+            Console.WriteLine($"Terroristas: {playersMapFactory.GetTerrorist()}");
+            Console.WriteLine($"Policiais: {playersMapFactory.GetPolice()}");
+            playersMapFactory.ShowPlayers();
+
+            Console.ReadKey();
+        }
+
+        private static string GetPlayerType()
+        {
+            return PlayerType[new Random().Next(PlayerType.Length)];
+        }
+
+        private static string GetWeapons()
+        {
+            return Weapons[new Random().Next(Weapons.Length)];
+        }
+        private static string GetPoliceObjective()
+        {
+            return PoliceObjective[new Random().Next(PoliceObjective.Length)];
+        }
+        private static string GetTerroristObjective()
+        {
+            return TerroristObjective[new Random().Next(TerroristObjective.Length)];
+        }
+    }
+```
+
+<p><b>Saída</b></p>
+
+> <p>Hello World!</p>
+> <p>Terroristas: 4</p>
+> <p>Policiais: 6</p>
+> <p>Jogador 1</p>
+> <p>Policial deve realizar o objetivo de Salvar Reféns</p>
+> <p>Possui arma: SSG 08</p>
+> <p>Jogador 2</p>
+> <p>Policial deve realizar o objetivo de Salvar Reféns</p>
+> <p>Possui arma: SSG 08</p>
+> <p>Jogador 3</p>
+> <p>Policial deve realizar o objetivo de Salvar Reféns</p>
+> <p>Possui arma: SSG 08</p>
+> <p>Jogador 4</p>
+> <p>Terrorista deve realizar o objetivo de Pegar Reféns</p>
+> <p>Possui arma: MP7</p>
+> <p>Jogador 5</p>
+> <p>Terrorista deve realizar o objetivo de Pegar Reféns</p>
+> <p>Possui arma: MP7</p>
+> <p>Jogador 6</p>
+> <p>Terrorista deve realizar o objetivo de Pegar Reféns</p>
+> <p>Possui arma: MP7</p>
+> <p>Jogador 7</p>
+> <p>Policial deve realizar o objetivo de Salvar Reféns</p>
+> <p>Possui arma: SSG 08</p>
+> <p>Jogador 8</p>
+> <p>Terrorista deve realizar o objetivo de Pegar Reféns</p>
+> <p>Possui arma: MP7</p>
+> <p>Jogador 9</p>
+> <p>Policial deve realizar o objetivo de Salvar Reféns</p>
+> <p>Possui arma: SSG 08</p>
+> <p>Jogador 10</p>
+> <p>Policial deve realizar o objetivo de Salvar Reféns</p>
+> <p>Possui arma: SSG 08</p>
+
+<p>Use o padrão Flyweight apenas quando seu programa precisar suportar um grande número de objetos que mal cabem na RAM disponível.</p>
+
 
 
 
