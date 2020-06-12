@@ -1844,5 +1844,30 @@ public class CarFacade
 <p>Use o padrão Flyweight apenas quando seu programa precisar suportar um grande número de objetos que mal cabem na RAM disponível.</p>
 
 
+# Mediador(mediator)
 
+<p><b>O que é</b>: Mediator é um padrão de design comportamental que visa reduzir dependências entre objetos, este padão restringe as comunicações diretas entre os objetos e os força a realizar a comunicação apenas através de um objeto mediador. O mediator adiciona um objeto de terceiro para controlar a interação entre os objetos.</p> 
+ 
+ 
+ <p><b>Problema</b>: Você esta tentando criar componentes reutilizáveis, mas a dependência entre os objetos acabou tornando o fenômeno "código espaguete" tentar pegar uma única porção resulta em um conjunto de tudo ou nada</p>
+ 
+ 
+ <p><b>Exemplo do mundo real</b>:</p>
+ 
+ > Os pilotos que se aproximam ou partem de uma área de controle de aeroporto não se comunicam diretamente entre si. Em vez disso, eles fazer a comunicação com o controlador de tráfego aéreo, sem esse controlador os pilotos precisariam estar cientes de todos os aviões nas proximidades do aeroporto, discutindo as prioridades de pouso com um comitê de dezenas de outros pilotos. Isso provavelmente dispararia as estatísticas de acidentes de avião.</p>
+ 
+ <p>Para este cenário, o controlador de tráfego é o mediador entre os pilotos.</p>
+ 
+ 
+ <p><b>Solução</b>: O padrão mediator sugere que você interrompa toda a comunicação direta entre os componentes que deseja tornar independentes um do outro. Em vez disso, esses componentes devem colaborar indiretamente, chamando um objeto mediator especial que redireciona as chamadas para os componentes apropriados. Como resultado, os componentes dependem apenas de uma única classe de mediator em vez de serem acoplados a dezenas de classes.</p>
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 
