@@ -1854,20 +1854,168 @@ public class CarFacade
  
  <p><b>Exemplo do mundo real</b>:</p>
  
- > Os pilotos que se aproximam ou partem de uma área de controle de aeroporto não se comunicam diretamente entre si. Em vez disso, eles fazer a comunicação com o controlador de tráfego aéreo, sem esse controlador os pilotos precisariam estar cientes de todos os aviões nas proximidades do aeroporto, discutindo as prioridades de pouso com um comitê de dezenas de outros pilotos. Isso provavelmente dispararia as estatísticas de acidentes de avião.</p>
+ > Os pilotos que se aproximam ou partem de uma área de controle de aeroporto não se comunicam diretamente entre si. Em vez disso, eles fazem a comunicação com um controlador de tráfego aéreo, sem esse controlador os pilotos precisariam estar cientes de todos os aviões nas proximidades do aeroporto, discutindo as prioridades de pouso com um comitê de dezenas de outros pilotos. Isso provavelmente dispararia as estatísticas de acidentes de avião.</p>
  
  <p>Para este cenário, o controlador de tráfego é o mediador entre os pilotos.</p>
  
  
  <p><b>Solução</b>: O padrão mediator sugere que você interrompa toda a comunicação direta entre os componentes que deseja tornar independentes um do outro. Em vez disso, esses componentes devem colaborar indiretamente, chamando um objeto mediator especial que redireciona as chamadas para os componentes apropriados. Como resultado, os componentes dependem apenas de uma única classe de mediator em vez de serem acoplados a dezenas de classes.</p>
  
+ <p>Para o nosso exemplo foi criado uma cenário de calculadora, onde criamos o request com o tipo de operação e enviamos ao mediator para que através dele, consiga identificar o tipo de request e envie ao service correto. Para implementar este pattern, devemos ter em mente que <b>Mediator</b> é a interfce que define as operações que podem ser chamadas para a comunicação, <b>ConcreteMediator</b> esta é a classe que implementa as operações de comunicação da interface mediator, <b>Colleague</b> esta é uma classe que define um campo protegido que mantém a referência a um objeto mediator, <b>ConcreteColleague</b> estas são as classes se comunicam através do mediator.</p>
  
+<p>Vamos a implementação. Primeiramente vamos criar a nossa interface mediator</p>
+
+```c#
+    public interface IMediator
+    {
+        void Send(object send);
+    }
+```
+
+<p>Após isso, vamos criar o nosso Colleague esta será a classe base para os ConcreteColleague</p>
+
+```c#
+    public abstract class BaseComponent
+    {
+        protected IMediator _mediator;
+
+        public BaseComponent(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
+
+        public void Send()
+        {
+            _mediator.Send(this);
+        }
+    }
+```
+
+<p>Agora faremos os ConcreteColleague, será criado um para cada operação da calculadora, aqui irei deixar somente dois, mas você pode conferir o exemplo completo clicando "AQUI"</p>
+
+```c#
+
+    public class SumComponent : BaseComponent
+    {
+
+        public SumComponent(int firstNumber, int secondNumber, IMediator mediator) : base(mediator)
+        {
+            FirstNumber = firstNumber;
+            SecondNumber = secondNumber;
+        }
+
+        public int FirstNumber { get; set; }
+        public int SecondNumber { get; set; }
+    }
+    
+    public class MultiplicationComponent : BaseComponent
+    {
+
+        public MultiplicationComponent(int firstNumber, int secondNumber, IMediator mediator) : base(mediator)
+        {
+            FirstNumber = firstNumber;
+            SecondNumber = secondNumber;
+        }
+
+        public int FirstNumber { get; set; }
+        public int SecondNumber { get; set; }
+    }
+    
+```
+
+<p>Feito isso iremos implementar o nosso service com todas as operações necessárias</p>
+
+```c#
+    public class SimpleCalculatorService
+    {
+        public void Sum(SumComponent component)
+        {
+            Console.WriteLine($"A soma dos valores é {component.FirstNumber}+{component.SecondNumber} = {component.FirstNumber + component.SecondNumber}");
+        }
+
+        public void Subtraction(SubtractionComponent component)
+        {
+            Console.WriteLine($"A subtração dos valores é {component.FirstNumber}-{component.SecondNumber} = {component.FirstNumber - component.SecondNumber}");
+        }
+
+        public void Multiplication(MultiplicationComponent component)
+        {
+            Console.WriteLine($"A multiplicação dos valores é {component.FirstNumber}*{component.SecondNumber} = {component.FirstNumber * component.SecondNumber}");
+        }
+
+        public void Division(DivisionComponent component)
+        {
+            Console.WriteLine($"A divisão dos valores é {component.FirstNumber}/{component.SecondNumber} = {(component.SecondNumber == 0 ? "Inválida.. Divisão por 0" : $"{component.FirstNumber / component.SecondNumber}")}");
+        }
+    }
+```
+
+<p>Com tudo isso implementado, só esta faltando criar o nosso ConcreteMediator, então vamos a implementação</p>
+
+```c#
+    public class MultiplicationAndDivisionMediator : IMediator
+    {
+        private SimpleCalculatorService _simpleCalculatorService = new SimpleCalculatorService();
+        public void Send(object send)
+        {
+            if (send is MultiplicationComponent)
+                _simpleCalculatorService.Multiplication((MultiplicationComponent)send);
+            else if (send is DivisionComponent)
+                _simpleCalculatorService.Division((DivisionComponent)send);
+            else
+                throw new NotImplementedException();
+        }
+    }
+    
+    public class SumAndSubtractionMediator : IMediator
+    {
+        private SimpleCalculatorService _simpleCalculatorService = new SimpleCalculatorService();
+        public void Send(object send)
+        {
+            if (send is SumComponent)
+                _simpleCalculatorService.Sum((SumComponent)send);
+            else if (send is SubtractionComponent)
+                _simpleCalculatorService.Subtraction((SubtractionComponent)send);
+            else
+                throw new NotImplementedException();
+        }
+    }
+```
+
+<p>Com tudo isso implementado, agora é só realizar a chamada, só precisamos criar o ConcreteMediator e passar para o nosso ConcreteColleague</p>
+
+```c#
+    static void Main(string[] args)
+    {
+        Console.WriteLine("Hello World!");
+        var random = new Random();
+
+        var sumAndSubtractionMediator = new SumAndSubtractionMediator();
+        var sum = new SumComponent(random.Next(-10, 100), random.Next(-10, 100), sumAndSubtractionMediator);
+        var subtraction = new SubtractionComponent(random.Next(-50, 500), random.Next(-50, 500), sumAndSubtractionMediator);
+
+        sum.Send();
+        subtraction.Send();
+
+        var multipicationAndDivisionMediator = new MultiplicationAndDivisionMediator();
+        var multiplication = new MultiplicationComponent(random.Next(-20, 200), random.Next(-20, 200), multipicationAndDivisionMediator);
+        var division = new DivisionComponent(random.Next(-30, 500), random.Next(-20, 600), multipicationAndDivisionMediator);
+
+        multiplication.Send();
+        division.Send();
+
+        Console.ReadKey();
+    }
+```
+
+ <p><b>Saída</b></p>
  
+> <p>Hello World!</p>
+> <p>A soma dos valores é 23+3 = 26</p>
+> <p>A subtraçao dos valores é -34-206 = -240</p>
+> <p>A multiplicaçao dos valores é 8*34 = 272</p>
+> <p>A divisao dos valores é 269/91 = 2</p>
  
- 
- 
- 
- 
- 
+<p>Use o padrão Mediador quando for difícil alterar algumas das classes porque elas estão fortemente acopladas a várias outras classes,  quando não puder reutilizar um componente em um programa diferente, pois é muito dependente de outros componentes, quando se encontrar criando toneladas de subclasses de componentes apenas para reutilizar algum comportamento básico em vários contextos.</p>
  
 
