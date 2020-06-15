@@ -2018,4 +2018,175 @@ public class CarFacade
  
 <p>Use o padrão Mediador quando for difícil alterar algumas das classes porque elas estão fortemente acopladas a várias outras classes,  quando não puder reutilizar um componente em um programa diferente, pois é muito dependente de outros componentes, quando se encontrar criando toneladas de subclasses de componentes apenas para reutilizar algum comportamento básico em vários contextos.</p>
  
+# Observador(observer)
+
+<p><b>O que é</b>: Observer é um padrão de design comportamental que permite realizar um mecanismo de assinatura em outro objeto e assim ser notificado sobre quaisquer eventos que ocorram no objeto que esta sendo observado. Define uma dependência entre objetos para que, sempre que um objeto alterar seu estado, todos os seus dependentes sejam notificados. </p>
+
+
+<p><b>Problema</b>: Imagine que você deseja comprar um celular no modelo X e para isso, você vai a loja todos os dias para saber se o modelo X está disponível, porém a maioria dessas viagens estarão sendo inuteis caso o produto não esteja disponível. Uma outra medida, é a loja notificar todos os clientes, todos os dias sobre os produtos que estão disponíveis, isso iria te salvar de muitas viagens, porém você perderá muito tempo olhando produtos que não são do seu interesse e também a loja iria desperdiçar muitos recursos para notificar clientes que no momento não querem nada.</p>
+
+<p><b>Solução</b>: O padrão observer sugere que você adicione um mecanismo de inscrição a classe onde é possível se inscrever e cancelar a inscrição a qualquer momento, assim você será notificado sobre qualquer alteração da classe.</p>
+
+<p>Para implementar este pattern devemos ter em mente que, <b>Subject</b> é a classe que contém uma lista de observadores inscritos para serem notificados, <b>ConcreteSubject</b> esta é a classe que mantém seu próprio estado, quando ocorrer alguma alteração nela, o objeto chama a operação <b>Notify</b> da classe base(Subject) e notificará todos os seus observadores sobre a alateração, <b>Observer</b> esta é a interface que define uma operação de update que deve ser chamado quando o estado do sujeito for alterado, e por fim, <b>ConcreteObserver</b> esta é a classe que implementa o observador e examina o sujeito para determinar o que é relevante referente a as informações alteradas.</p>
+
+<p>Para o nosso cenário, foi criado um exemplo simples onde o sujeito é uma calculadora que recebe os números e armazena um estado para saber qual operação deve ser realizada, será registrado 4 observadores para monitorar o estado e assim realizar a operação, neste exemplo iremos adicionar e remover os observadores e verificar qual será o resultado.</p>
+
+<p>Para iniciar, vamos implementar a nossa interface IObserver, ela receberá um tipo genérico para que possamos analiza-lo dentro dos observadores</p>
+
+```c#
+    public interface IObserver<T>
+    {
+        void Update(T subject);
+    }
+```
+
+<p>Após isso, iremos implementar a nossa interface de sujeito, onde terá os métodos para adicionar/remover/notificar os observadores.</p>
+
+```c#
+    public interface ISubject<T>
+    {
+        void Attach(IObserver<T> observer);
+
+        void Detach(IObserver<T> observer);
+
+        void Notify(T entity);
+    }
+```
+
+<p>Iremos implementar o SubjectBase para que as classes de sujeito consigam herdar dela e utilizar os seus métodos.</p>
+
+```c#
+    public abstract class SubjectBase<T> : ISubject<T>
+    {
+        private IList<IObserver<T>> _observers = new List<IObserver<T>>();
+        public void Attach(IObserver<T> observer)
+        {
+            _observers.Add(observer);
+        }
+
+        public void Detach(IObserver<T> observer)
+        {
+            _observers.Remove(observer);
+        }
+
+        public void Notify(T entity)
+        {
+            foreach (var item in _observers)
+                item.Update(entity);
+        }
+    }
+```
+
+<p>Feito isso, iremos implementar a nossa SimpleCalculator(sujeito) e herdar da classe SubjectBase.</p>
+
+```c#
+    public class SimpleCalculator: SubjectBase<SimpleCalculator>
+    {
+        public SimpleCalculator(int firstNumber, int secondNumber)
+        {
+            FirstNumber = firstNumber;
+            SecondNumber = secondNumber;
+        }
+
+        public int FirstNumber { get; set; }
+        public int SecondNumber { get; set; }
+        public Operation Operation { get; set; }
+    }
+
+
+    public enum Operation
+    {
+        Sum,
+        Subtraction,
+        Multiplication,
+        Division
+    }
+```
+<p>Agora na nossa SimpleCalculator é possível adicionarmos observadores e notificá-los quando alguma mudança ocorrer. Então vamos criar os observadores(irei exemplificar somente dois, mas você pode consultar o exemplo completo clicando "AQUI")</p>
+
+```c#
+    public class SumObserver : Interfaces.IObserver<SimpleCalculator>
+    {
+        public void Update(SimpleCalculator subject)
+        {
+            if(subject.Operation == Operation.Sum)
+                Console.WriteLine($"A soma dos valores é {subject.FirstNumber}+{subject.SecondNumber} = {subject.FirstNumber + subject.SecondNumber}");
+        }
+    }
+    
+    public class DivisionObserver : Interfaces.IObserver<SimpleCalculator>
+    {
+        public void Update(SimpleCalculator subject)
+        {
+            if (subject.Operation == Operation.Division)
+                Console.WriteLine($"A divisão dos valores é {subject.FirstNumber}/{subject.SecondNumber} = {(subject.SecondNumber == 0 ? "Inválida.. Divisão por 0" : $"{subject.FirstNumber / subject.SecondNumber}")}");
+        }
+    }
+```
+
+<p>Agora, para realizar a chamada, precisamos criar o nosso sujeito e irmos adicionando os observadores através do método "Attach", para remover utilizaremos o "Detach" e para notificar utilizaremos o "Notify".</p>
+
+```c#
+    static void Main(string[] args)
+    {
+        Console.WriteLine("Hello World!");
+        var random = new Random();
+        var subject = new SimpleCalculator(random.Next(-20, 100), random.Next(-10, 50));
+
+        var sum = new SumObserver();
+        var multiplication = new MultiplicationObserver();
+
+        subject.Attach(multiplication);
+        subject.Attach(sum);
+
+        subject.Attach(new DivisionObserver());
+        subject.Attach(new SubtractionObserver());
+
+        Console.WriteLine("\nExemplo sorteando os observadores");
+        for (int i = 0; i < 2; i++)
+        {
+            subject.Operation = (Operation)random.Next(0, 3);
+            subject.Notify(subject);
+        }
+
+        Console.WriteLine("\nExemplo com todos os observadores");
+        for (int i = 0; i < 4; i++)
+        {
+            subject.Operation = (Operation)i;
+            subject.Notify(subject);
+        }
+
+        subject.Detach(sum);
+        subject.Detach(multiplication);
+
+        Console.WriteLine("\nExemplo após remover os observadores de Soma e Multiplicação");
+        for (int i = 0; i < 4; i++)
+        {
+            subject.Operation = (Operation)i;
+            subject.Notify(subject);
+        }
+
+        Console.ReadKey();
+    }
+```
+
+<p><b>Saída</b>:</p>
+
+> <p>Hello World!</p>
+> <p></p>
+> <p>Exemplo sorteando os observadores</p>
+> <p>A subtraçao dos valores é 19-10 = 9</p>
+> <p>A multiplicaçao dos valores é 19*10 = 190</p>
+> <p></p>
+> <p>Exemplo com todos os observadores</p>
+> <p>A soma dos valores é 19+10 = 29</p>
+> <p>A subtraçao dos valores é 19-10 = 9</p>
+> <p>A multiplicaçao dos valores é 19*10 = 190</p>
+> <p>A divisao dos valores é 19/10 = 1</p>
+> <p></p>
+> <p>Exemplo após remover os observadores de Soma e Multiplicaçao</p>
+> <p>A subtraçao dos valores é 19-10 = 9</p>
+> <p>A divisao dos valores é 19/10 = 1</p>
+
+<p>Utilize o padrão Observer quando mudanças no estado de um objeto podem precisar mudar outros objetos, e o atual conjunto de objetos é desconhecido de antemão ou muda dinamicamente, quando alguns objetos em sua aplicação devem observar outros, mas apenas por um tempo limitado ou em casos específicos.</p>
 
