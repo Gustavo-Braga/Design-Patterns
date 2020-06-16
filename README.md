@@ -2190,3 +2190,117 @@ public class CarFacade
 
 <p>Utilize o padrão Observer quando mudanças no estado de um objeto podem precisar mudar outros objetos, e o atual conjunto de objetos é desconhecido de antemão ou muda dinamicamente, quando alguns objetos em sua aplicação devem observar outros, mas apenas por um tempo limitado ou em casos específicos.</p>
 
+# Cadeia de Responsabilidade(chain of responsibility)
+
+<p><b>O que é</b>: Cadeia de Responsabilidade é um padrão de design comportamental que visa passar solicitações ao longo de uma cadeia de manipuladores, ao receber uma solicitação, cada manipulador decide se ira processar a informação ou passa-la ao próximo manipulador. Em outras palavras Cadeia de Responsabilidade, ajuda construir uma cadeia de objetos, onde a solicitação entra em um extremidade e continua indo até encontrar um manipulador adequado.</p>
+
+<p><b>Problema</b>: Imagine que você criou um sistema e para ele é necessário fazer uma autenticação, porque somente os clientes autenticados poderiam realizar as operações no sistema. Depois de um tempo você notou que quando alguém tenta realizar a autenticação e a validação falhar, não há motivos para seguir com as validações, depois de um tempo, você foi informado que não é legal passar dados brutos diretamente para o sistema, e então você adicionou mais uma validação extra. Mais tarde alguém lhe informou sobre a quebra de senha de força bruta e imediatamente você adicionou mais uma validação para filtrar as solicitações repeditas de um mesmo IP. O código começou a virar uma bagunça, cada vez mais inchado e mais difícil de manter e entender, quando você tentava reutilizar alguma verificação acaba que você precisa duplicar uma parte do código. Devido a esses problemas a melhor das opções foi refatorar tudo.</p>
+
+<p><b>Solução</b>: O padrão de cadeia de responsabilidade, permite que um objeto envie um comando sem saber qual objeto receberá e irá manipular, a solicitação é enviada de um objeto para o outro tornando-os parte de uma cadeia e a cada iteração o objeto pode manipular o comando ou transmiti-lo a outro, ou até mesmo realizar os dois. Para a implementação, cada verificação deve ser extraída para uma classe e deve possuir um único método que executa a verificação, essas classes são passadas por parâmetro e dentro delas é possível dinamizar se irá interromper a iteração ou se ira seguir para a próxima validação.</p>
+
+<p>Para implementar este pattern devemos ter em mente que <b>Client</b> é a classe que gera a solicitação e passa para o primeiro manipulador da cadeia, <b>Handler</b> é a classe abstrata que contém o membro para armazenar o próximo manipulador da cadeia para ser possível definir os sucessores, esta classe também contém o método que deve ser implementado pelos outros manipuladores para executar as validações, e por fim, temos os <b>ConcreteHandlers</b> estas são as classes concretas que irão herdar da classe handler e executar as validações conforme o seu negócio.</p>
+
+<p>Para o nosso exemplo, foi criado um cenário simples onde verificamos se um número é par/impar/maior que mil</p>
+
+<p>Inicialmente, vamos criar a nossa interface IHandler</p>
+
+```c#
+    public interface IHandler
+    {
+        void Execute(int request);
+        IHandler Next(IHandler successor);
+    }
+```
+
+<p>Feito isso vamos criar nossa classe abstrata Handler</p>
+
+
+```c#
+    public abstract class AbstractHandler : IHandler
+    {
+        protected IHandler _successor;
+
+        public abstract void Execute(int request);
+
+        public IHandler Next(IHandler successor)
+        {
+             _successor = successor;
+            return this;
+        }
+    }
+```
+
+<p>Observe que ela possui o método next para que seja possível ir para o próximo manipulador da cadeia, e também, possui o método Execute, que irá forçar as subclasses a implementar este método</p>
+
+<p>Agora iremos criar os ConcreteHandlers</p>
+
+```c#
+    public class EvenNumber: AbstractHandler
+    {
+        public override void Execute(int request)
+        {
+            Console.WriteLine($"Número {request} é par: {(request % 2 == 0?"Sim": "Não")}");
+            if (_successor != null)
+                _successor.Execute(request);
+        }
+    }
+    
+    public class OddNumber: AbstractHandler
+    {
+        public override void Execute(int request)
+        {
+            Console.WriteLine($"Número {request} é ímpar: {(request % 2 != 0 ? "Sim" : "Não")}");
+            if (_successor != null)
+                _successor.Execute(request);
+        }
+    }
+    
+    
+    public class GreaterThanAThousand:AbstractHandler
+    {
+        public override void Execute(int request)
+        {
+            Console.WriteLine($"Número {request} é maior que 1000: {(request > 1000 ? "Sim" : "Não")}");
+            if (_successor != null)
+                _successor.Execute(request);
+        }
+    }
+```
+
+<p>Observe que em cada método execute é validado se possui um sucessor, e se possuir, passa para o próximo, nesse momento, você é livre para decidir se deverá ou não passar a diante a validação</p>
+
+<p>Agora é só realizar a chamada do método e em cada ConcreteHandler definir quem será o sucessor</p>
+
+```c#
+    static void Main(string[] args)
+    {
+        Console.WriteLine("Hello World!");
+        var handler = new EvenNumber()
+            .Next(new OddNumber()
+            .Next(new GreaterThanAThousand()));
+
+        for (int i = 0; i < 3; i++)
+        {
+            handler.Execute(new Random().Next(0,9999));
+        }
+
+
+        Console.ReadKey();
+    }
+```
+
+<p><b>Saída</b>:</p>
+
+> <p>Hello World!</p>
+> <p>Número 9091 é par: Nao</p>
+> <p>Número 9091 é ímpar: Sim</p>
+> <p>Número 9091 é maior que 1000: Sim</p>
+> <p>Número 1045 é par: Nao</p>
+> <p>Número 1045 é ímpar: Sim</p>
+> <p>Número 1045 é maior que 1000: Sim</p>
+> <p>Número 5619 é par: Nao</p>
+> <p>Número 5619 é ímpar: Sim</p>
+> <p>Número 5619 é maior que 1000: Sim</p>
+
+
+<p>Use o padrão da Cadeia de Responsabilidade quando se espera que seu programa processe diferentes tipos de solicitações de várias maneiras, mas os tipos exatos de solicitações e suas sequências são desconhecidos previamente, quando for essencial executar vários manipuladores em uma ordem específica, quando o conjunto de manipuladores e sua ordem forem alterados no tempo de execução.</p>
