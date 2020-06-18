@@ -2304,3 +2304,169 @@ public class CarFacade
 
 
 <p>Use o padrão da Cadeia de Responsabilidade quando se espera que seu programa processe diferentes tipos de solicitações de várias maneiras, mas os tipos exatos de solicitações e suas sequências são desconhecidos previamente, quando for essencial executar vários manipuladores em uma ordem específica, quando o conjunto de manipuladores e sua ordem forem alterados no tempo de execução.</p>
+
+# Comando(command)
+
+<p><b>O que é</b>: Command é um padrão de design comportamental que permite encapsular ações em objetos. Fornece um meio para separar o cliente do destinatário. Esta padrão permite encapsular uma solicitação para fazer algo em algum objeto específico, os objetos não sabem quais ações estão sendo executadas, eles apenas visualizam um método "execute" e será executada suas solicitações.</p>
+
+<p><b>Problema</b>: Imagine que você precise emitir uma solicitação para um objeto, porém você não sabe nada sobre a operação solicitada e nem quem é o destinatário dessa solicitação.</p>
+
+<p><b>Solução</b>: O Command desacopla o objeto que chama a operação daquele que sabe como executá-la, a classe de solicitação possui um método "execute" que simplismente chama a ação do receiver. Os clientes dos objetos command tratam cada objeto como "caixa preta" pois eles simplesmete executam o metodo "execute".</p>
+
+<p>Para realizar esta implementação devemos ter em mente que <b>Client</b> é a classe que cria e executa os objetos de command, <b>Invoker</b> é a classe que solicita o command para executar a ação, <b>Command</b> é a interface que especifica a operação "execute", <b>ConcreteCommand</b> esta é a classe que implementa a interface Command e o método execute que será executado no receiber e por fim <b>Receiver</b> que é a classe que executa a ação associada a solicitação.</p>
+
+<p>Para o nosso cenário, foi criado um exemplo simples para as funções de uma calculadora</p>
+
+<p>Primeiramente, vamos iniciar criando a nossa interface Command</p>
+
+```c#
+   public interface ICommand
+   {
+       void Execute();
+   }
+```
+
+<p>Agora, vamos criar o nosso receiver que é a classe que executará as ações</p>
+
+```c#
+   public class SimpleCalculator
+   {
+       public SimpleCalculator(int firstNumber, int secondNumber)
+       {
+           FirstNumber = firstNumber;
+           SecondNumber = secondNumber;
+       }
+
+       public int FirstNumber { get; set; }
+       public int SecondNumber { get; set; }
+
+       public void Sum()
+       {
+           Console.WriteLine($"A soma dos valores é {FirstNumber}+{SecondNumber} = {FirstNumber + SecondNumber}");
+       }
+
+       public void Subtraction()
+       {
+           Console.WriteLine($"A subtração dos valores é {FirstNumber}-{SecondNumber} = {FirstNumber - SecondNumber}");
+       }
+
+       public void Multiplication()
+       {
+           Console.WriteLine($"A multiplicação dos valores é {FirstNumber}*{SecondNumber} = {FirstNumber * SecondNumber}");
+       }
+
+       public void Division()
+       {
+           Console.WriteLine($"A divisão dos valores é {FirstNumber}/{SecondNumber} = {(SecondNumber == 0 ? "Inválida.. Divisão por 0" : $"{FirstNumber / SecondNumber}")}");
+       }
+
+   }
+```
+
+<p>Feito isso, vamos criar os nossos ConcreteCommand, será criado um para cada método da calculadora, porém aqui irei exemplificar somente dois, você pode consultar o exemplo completo clicando "AQUI"</p>
+
+```c#
+   public class SubtractionCommand : ICommand
+   {
+       private readonly SimpleCalculator _simpleCalculator;
+
+       public SubtractionCommand(SimpleCalculator simpleCalculator)
+       {
+           _simpleCalculator = simpleCalculator;
+       }
+
+       public void Execute()
+       {
+           _simpleCalculator.Subtraction();
+       }
+   }
+
+
+   public class MultiplicationCommand : ICommand
+   {
+       private readonly SimpleCalculator _simpleCalculator;
+
+       public MultiplicationCommand(SimpleCalculator simpleCalculator)
+       {
+           _simpleCalculator = simpleCalculator;
+       }
+
+       public void Execute()
+       {
+           _simpleCalculator.Multiplication();
+       }
+   }
+```
+ 
+ <p>Perceba que o método execute sabe o que deve ser executado, é ele quem tem conhecimento sobre a lógica do negócio</p>
+ 
+ <p>Agora, iremos criar o nosso Invoker</p>
+ 
+```c#
+  public class InvokerCommand
+  {
+      public List<ICommand> _commands = new List<ICommand>();
+
+      public InvokerCommand()
+      {
+      }
+
+      public InvokerCommand SetCommand(ICommand command)
+      {
+          _commands.Add(command);
+          return this;
+      }
+
+      public void Execute()
+      {
+          foreach (var item in _commands)
+              item.Execute();
+      }
+  }
+```
+
+
+<p>Repare que ele possui uma lista com todos os commands necessários e também é flexível para você adicionar/remover commands, sendo assim você também pode definir uma ordem de execução. Perceba também que o método execute nao tem conhecimento sobre regras de negócio ele somente executa a operação do command.</p>
+
+<p>Por fim, iremos ao nosso client para criar os commands e realizar as chamadas, nesse cenário é o método main</p>
+
+```c#
+   static void Main(string[] args)
+   {
+       Console.WriteLine("Hello World!");
+       var random = new Random();
+       var simpleCalculator = new SimpleCalculator(random.Next(-5, 30), random.Next(-5, 30));
+       var invoke = new InvokerCommand()
+           .SetCommand(new SumCommand(simpleCalculator))
+           .SetCommand(new DivisionCommand(simpleCalculator))
+           .SetCommand(new SubtractionCommand(simpleCalculator))
+           .SetCommand(new MultiplicationCommand(simpleCalculator));
+
+       Console.WriteLine("Executa operações");
+       invoke.Execute();
+
+
+       Console.ReadKey();
+   }
+```
+
+
+<p><b>Saída</b></p>
+
+> <p>Hello World!</p>
+> <p>Executa operaçoes</p>
+> <p>A soma dos valores é 28+28 = 56</p>
+> <p>A divisao dos valores é 28/28 = 1</p>
+> <p>A subtraçao dos valores é 28-28 = 0</p>
+> <p>A multiplicaçao dos valores é 28*28 = 784</p>
+
+<p> Use o padrão Comando quando desejar parametrizar objetos com operações, quando desejar enfileirar operações, agendar sua execução ou executá-las remotamente, quando desejar implementar operações reversíveis.</p>
+
+
+
+
+
+
+
+
+
