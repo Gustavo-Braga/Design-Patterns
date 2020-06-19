@@ -2462,8 +2462,163 @@ public class CarFacade
 
 <p> Use o padrão Comando quando desejar parametrizar objetos com operações, quando desejar enfileirar operações, agendar sua execução ou executá-las remotamente, quando desejar implementar operações reversíveis.</p>
 
+# Iterador(iterator)
+
+<p><b>O que é</b>: O Iterator é um padrão de design comportamental que permite obter uma maneira de acessar os elementos de um objeto de coleção de maneira sequencial, sem a necessidade de conhecer sua representação subjacente, por exemplo lista, pilha, árvore, matriz etc...</p>
+
+<p><b>Problema</b>: Imagine que você precise percorrer uma coleção de objetos, independente do tipo, se é uma lista ou uma coleção em estrutura de árvore, você precisa percorrer sequencialmente os elementos de maneira que não repita os itens.</p>
+
+<p><b>Solução</b>: A idéia principal do padrão Iterator é extrair o comportamento de travessia de uma coleção, ele implementa o próprio algoritimo de travessia e encapsula todos os detalhes. O padrão Iterator assume a responsabilidade de acessar sequencialmente os elementos.</p>
+
+<p>Para implementar este padrão devemos ter em mente que <b>Client</b> é a classe que contém a coleção de objetos e usa a operação Next para recuperar os itens da sequência, <b>Iterador</b> é a interface que define operações para acessar os elementos, <b>ConcreteIterator</b> esta é a classe que implementa a interface iterador, <b>Aggregate</b> é a interface que define as operações para criar um iterador, <b>ConcreteAggregate</b> é a classe que implementa a interface aggregate.</p>
 
 
+<p>Para o nosso exemplo foi criado uma coleção de objetos</p>
+
+<p>Inicialmente, vamos criar a nossa interface IIterator, para definir os métodos de acesso a nossa coleção</p>
+
+```c#
+    public interface IIterator
+    {
+        object First();
+        object Next();
+        object Current();
+        int GetIndex();
+    }
+```
+
+<p>Agora, vamos criar nossa interface Aggregate para definir a operação para criar um Iterador</p>
+
+```c#
+    public interface IAggregate
+    {
+        IIterator CreateIterator();
+    }
+```
+
+<p>Feito isso, vamos implementar o nosso ConcreteAggregate onde será implementado os métodos para inserir um elemento e para obter a quantidade de elementos.</p>
+
+```c#
+ public class AggregateCollection : IAggregate
+ {
+    private ArrayList _items = new ArrayList();
+    public IIterator CreateIterator()
+    {
+        return new IteratorCollection(this);
+    }
+
+    public int Count()
+    {
+        return _items.Count;
+    }
+
+    public object this[int index]
+    {
+        get { return _items[index]; }
+        set { _items.Insert(index, value); }
+    }
+
+    public void Add(object value)
+    {
+        _items.Insert(Count(), value);
+    }
+
+ }
+```
+
+<p>Aqui implementamos os métodos para acessar os registros e para inserir um novo elemento, repare que ela faz uma referência ao IteratorCollection(ConcreteIterator) porém nós ainda não criamos, vamos cria-lo agora.</p>
+
+```c#
+  public class IteratorCollection : IIterator
+  {
+      private AggregateCollection _aggregate;
+      private int _current = 0;
+
+      public IteratorCollection(AggregateCollection aggregate)
+      {
+          _aggregate = aggregate;
+      }
+
+      public object First()
+      {
+          return _aggregate[0];
+      }
+
+      public object Next()
+      {
+          object ret = null;
+          if (_current < _aggregate.Count() - 1)
+          {
+              ret = _aggregate[++_current];
+          }
+
+          return ret;
+      }
+
+      public object Current()
+      {
+          return _aggregate[_current];
+      }
+
+      public int GetIndex()
+      {
+          return _current;
+      }
+  }
+```
+
+<p>Repare que o nosso ConcreteIterator possui uma referência ao ConcreteAggregate e utilizaos seus métodos para acessar o próximo registro, obter o index/atual/primeiro esta classe define os meios para acessar a nossa coleção que está no ConcreteAggregate.</p>
+
+<p>Feito isso nós finalizamos a implementação do nosso iterador, agora é só realizar a chamada e utilizar seus métodos. Devemos lembrar que, ConcreteAggregate é a nossa coleção em si e devemos utilizar o ConcreteIterator para percorrermos os itens dessa coleção.</p>
+
+```c#
+   static void Main(string[] args)
+    {
+        Console.WriteLine("Hello World!");
+        var collection = new AggregateCollection();
+        collection[0] = "item A";
+        collection[1] = "item B";
+        collection[2] = "item C";
+
+        Console.WriteLine($"Quantidade de itens = {collection.Count()}");
+
+
+        collection.Add("item D");
+        collection.Add("item E");
+        collection.Add("item F");
+
+        Console.WriteLine($"Quantidade de itens = {collection.Count()}");
+
+        var iterator = collection.CreateIterator();
+
+        var item = iterator.First();
+
+        while(item != null)
+        {
+            Console.WriteLine(item);
+            item = iterator.Next();
+        }
+
+
+        Console.ReadKey();
+    }
+}
+```
+
+<p><b>Saída</b></p>
+
+
+> <p>Hello World!</p>
+> <p>Quantidade de itens = 3</p>
+> <p>Quantidade de itens = 6</p>
+> <p>item A</p>
+> <p>item B</p>
+> <p>item C</p>
+> <p>item D</p>
+> <p>item E</p>
+> <p>item F</p>
+
+<p>Use o padrão Iterator quando sua coleção tiver uma estrutura de dados complexa, mas você deseja ocultar sua complexidade dos clientes (por motivos de conveniência ou segurança). Use quando deseja reduzir a duplicação do código transversal em seu aplicativo,quando desejar que seu código possa atravessar diferentes estruturas de dados ou quando tipos dessas estruturas forem desconhecidos anteriormente.</p>
 
 
 
