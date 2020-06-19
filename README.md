@@ -2620,8 +2620,160 @@ public class CarFacade
 
 <p>Use o padrão Iterator quando sua coleção tiver uma estrutura de dados complexa, mas você deseja ocultar sua complexidade dos clientes (por motivos de conveniência ou segurança). Use quando deseja reduzir a duplicação do código transversal em seu aplicativo, quando desejar que seu código possa atravessar diferentes estruturas de dados ou quando os tipos dessas estruturas forem desconhecidos anteriormente.</p>
 
+# Lembrança(memento)
 
+<p><b>O que é</b>: Memento é um padrão de design comportamental que permite capturar e armazenar o estado atual do objeto, para que seja possível restaurá-lo posteriormente.</p>
 
+<p><b>Problema</b>: Imagine que você precise de um histórico do objeto, onde você tenha que armazenar todas as alterações que o objeto sofreu, ou até mesmo se você precisar executar uma operação de desfazer/reverter.</p>
+
+<p><b>Solução</b>: O padrão de memento delega a criação do estado do objeto, para o proprietário da classe(objeto de origem), portanto, em vez de outros objetos tentarem copiar o estado do editor(de fora), a própria classe cria o seu objeto de memento, pois ela tem acesso total ao seu próprio objeto. O padrão sugere armazenar a cópia do estado do objeto em um objeto especial chamado de "memento", o objeto original deve criar um cópia de si mesmo e retornar esse objeto especial(memento) para que ele possa ser gerenciado através de uma classe "cuidadora" onde nela armazenará uma pilha(LIFO - ultimo a entrar, primeiro a sair) com os mementos.</p>
+
+<p>Para implementar este padrão, devemos ter em mente que, <b>Originator</b> é a classe que cria o objeto de lembrança com o seu estado atual, <b>Memento</b> é a interface que contém as abstrações necessárias para implementação do ConcreteMemento, <b>ConcreteMemento</b> esta é classe que contém as informações sobre o estado salvo no objeto originator, <b>Caretaker</b> esta é a classe usada para armazenar os objetos mementos onde haverá uma pilha com os elementos.</p>
+
+<p>Para o nosso exemplo, iremos criar um cenário onde será salvo um histórico do objeto pessoa, armazenando todos os seus estados.<p>
+ 
+ <p>Inicialmente, vamos criar as interfaces para o objeto memento e para o nosso originador.<p>
+ 
+```c#
+   public interface IMemento
+   {
+       IOriginator GetState();
+       DateTime GetDate();
+       void Show();
+   }
+   
+   public interface IOriginator
+   {
+       IMemento Save();
+   }
+```
+
+<p>Agora, iremos criar o nosso objeto originador "Person".</p>
+
+```c#
+   public class Person: IOriginator
+   {
+       public string Name { get; set; }
+       public int Age { get; set; }
+       public string Description { get; set; }
+
+       public IMemento Save()
+       {
+           return new PersonMemento((Person)MemberwiseClone());
+       }
+   }
+```
+
+<p>Observe que o método Save retorna uma interface do IMemento e neste método é criado a classe concreta de memento(PersonMemento que não temos ainda), agora vamos implementar a classe PersonMemento.</p>
+
+```c#
+  public class PersonMemento : IMemento
+  {
+      private Person _person;
+      public DateTime Date { get; private set; }
+
+      public PersonMemento(Person person)
+      {
+          _person = person;
+          Date = DateTime.Now;
+      }
+
+      public IOriginator GetState()
+      {
+          return _person;
+      }
+
+      public DateTime GetDate()
+      {
+          return Date;
+      }
+
+      public void Show()
+      {
+          Console.WriteLine($"Pessoa: {_person.Name}, de {_person.Age} anos, {_person.Description}");
+      }
+  }
+```
+
+<p>Repare que o objeto de memento possui a data em que está sendo criado, e no construtor é passado o objeto originador, assim conseguimos "tirar uma foto" do estado atual do objeto.</p>
+
+<p>Com isso feito, temos tudo o que é necessário para implementar o nosso Caretaker que é o responsável por gerenciar esses estados.</p>
+
+```c#
+    public class Caretaker
+    {
+        private Stack<IMemento> _stack = new Stack<IMemento>();
+        private IOriginator _originator;
+        public Caretaker(IOriginator originator)
+        {
+            _originator = originator;
+        }
+
+        public void Backup()
+        {
+            _stack.Push(_originator.Save());
+        }
+
+        public void Undo()
+        {
+            _stack.Pop();
+        }
+
+        public void ShowHistory()
+        {
+            foreach (var item in _stack)
+            {
+                Console.WriteLine($"{item.GetDate().ToString("dd/MM/yyyy HH:mm:ss")}");
+                item.Show();
+            }
+        }
+    }
+```
+
+<p>Observe que o Caretaker mantém uma pilha dos objetos de memento, e também possui uma referência ao nosso objeto originador. Observe que o método Backup ativa o método Save que é criado no objeto originador e assim inserindo o retorno do método na pilha de lembranças, com isso conseguimos manter seu histórico.</p>
+
+<p>Feito isso, agora é só chamar os método e verificar sua usabilidade.</p>
+
+```c#
+       static void Main(string[] args)
+        {
+            Console.WriteLine("Hello World!");
+            var person = new Person();
+            var caretaker = new Caretaker(person);
+            person.Name = "Gustavo";
+            caretaker.Backup();
+            person.Age = 23;
+            caretaker.Backup();
+            person.Description = "lorem ipsum";
+            caretaker.Backup();
+            person.Description = "lorem ipsum - 2";
+            caretaker.Backup();
+            caretaker.ShowHistory();
+            
+            caretaker.Undo();
+            caretaker.Undo();
+            caretaker.Undo();
+            
+            caretaker.ShowHistory();
+            Console.ReadKey();
+        }
+```
+
+<p><b>Saída</b></p>
+
+> <p>Hello World!</p>
+> <p>19/06/2020 19:26:56</p>
+> <p>Pessoa: Gustavo, de 23 anos, lorem ipsum - 2</p>
+> <p>19/06/2020 19:26:56</p>
+> <p>Pessoa: Gustavo, de 23 anos, lorem ipsum</p>
+> <p>19/06/2020 19:26:56</p>
+> <p>Pessoa: Gustavo, de 23 anos,</p>
+> <p>19/06/2020 19:26:56</p>
+> <p>Pessoa: Gustavo, de 0 anos,</p>
+> <p>19/06/2020 19:26:56</p>
+> <p>Pessoa: Gustavo, de 0 anos,</p>
+
+<p>Use o padrão Memento quando desejar produzir capturas instantâneas do estado do objeto para poder restaurar um estado anterior do objeto ou quando o acesso direto aos campos getters/setters do objeto violar seu encapsulamento.</p>
 
 
 
