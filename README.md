@@ -2567,7 +2567,7 @@ public class CarFacade
   }
 ```
 
-<p>Repare que o nosso ConcreteIterator possui uma referência ao ConcreteAggregate e utilizaos seus métodos para acessar o próximo registro, obter o index/atual/primeiro esta classe define os meios para acessar a nossa coleção que está no ConcreteAggregate.</p>
+<p>Repare que o nosso ConcreteIterator possui uma referência ao ConcreteAggregate e utilizamos seus métodos para acessar o próximo registro, para obter o index, atual, primeiro, etc... Esta classe define os meios para acessar a nossa coleção que está no ConcreteAggregate.</p>
 
 <p>Feito isso nós finalizamos a implementação do nosso iterador, agora é só realizar a chamada e utilizar seus métodos. Devemos lembrar que, ConcreteAggregate é a nossa coleção em si e devemos utilizar o ConcreteIterator para percorrermos os itens dessa coleção.</p>
 
@@ -2618,7 +2618,7 @@ public class CarFacade
 > <p>item E</p>
 > <p>item F</p>
 
-<p>Use o padrão Iterator quando sua coleção tiver uma estrutura de dados complexa, mas você deseja ocultar sua complexidade dos clientes (por motivos de conveniência ou segurança). Use quando deseja reduzir a duplicação do código transversal em seu aplicativo,quando desejar que seu código possa atravessar diferentes estruturas de dados ou quando tipos dessas estruturas forem desconhecidos anteriormente.</p>
+<p>Use o padrão Iterator quando sua coleção tiver uma estrutura de dados complexa, mas você deseja ocultar sua complexidade dos clientes (por motivos de conveniência ou segurança). Use quando deseja reduzir a duplicação do código transversal em seu aplicativo, quando desejar que seu código possa atravessar diferentes estruturas de dados ou quando os tipos dessas estruturas forem desconhecidos anteriormente.</p>
 
 
 
