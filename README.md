@@ -2313,7 +2313,7 @@ public class CarFacade
 
 <p><b>Solução</b>: O Command desacopla o objeto que chama a operação daquele que sabe como executá-la, a classe de solicitação possui um método "execute" que simplismente chama a ação do receiver. Os clientes dos objetos command tratam cada objeto como "caixa preta" pois eles simplesmete executam o metodo "execute".</p>
 
-<p>Para realizar esta implementação devemos ter em mente que <b>Client</b> é a classe que cria e executa os objetos de command, <b>Invoker</b> é a classe que solicita o command para executar a ação, <b>Command</b> é a interface que especifica a operação "execute", <b>ConcreteCommand</b> esta é a classe que implementa a interface Command e o método execute que será executado no receiber e por fim <b>Receiver</b> que é a classe que executa a ação associada a solicitação.</p>
+<p>Para realizar esta implementação devemos ter em mente que <b>Client</b> é a classe que cria e executa os objetos de command, <b>Invoker</b> é a classe que solicita o command para executar a ação, <b>Command</b> é a interface que especifica a operação "execute", <b>ConcreteCommand</b> esta é a classe que implementa a interface Command e o método execute que será executado no receiver e por fim <b>Receiver</b> que é a classe que executa a ação associada a solicitação.</p>
 
 <p>Para o nosso cenário, foi criado um exemplo simples para as funções de uma calculadora</p>
 
@@ -2426,7 +2426,7 @@ public class CarFacade
 ```
 
 
-<p>Repare que ele possui uma lista com todos os commands necessários e também é flexível para você adicionar/remover commands, sendo assim você também pode definir uma ordem de execução. Perceba também que o método execute nao tem conhecimento sobre regras de negócio ele somente executa a operação do command.</p>
+<p>Repare que ele possui uma lista com todos os commands necessários e também é flexível para você adicionar/remover commands, sendo assim você também pode definir uma ordem de execução. Perceba também que o método execute não tem conhecimento sobre regras de negócio ele somente executa a operação do command.</p>
 
 <p>Por fim, iremos ao nosso client para criar os commands e realizar as chamadas, nesse cenário é o método main</p>
 
