@@ -2776,4 +2776,197 @@ public class CarFacade
 <p>Use o padrão Memento quando desejar produzir capturas instantâneas do estado do objeto para poder restaurar um estado anterior do objeto ou quando o acesso direto aos campos getters/setters do objeto violar seu encapsulamento.</p>
 
 
+# Método de Modelo(template method)
+
+<p><b>O que é</b>: O Template Method é um padrão de design comportamental que define o esqueleto de como um algoritmo pode ser executado na superclasse, mas permite que as subclasses substituam essas etapas sem alterar sua estrutura.</p>
+
+<p><b>Problema</b>: Imagine que você esteja trabalhando com dois componentes diferentes, mas que possuem muitos métodos em comum(as vezes são comuns até em termos de negócio), porém para realizar a implementação de um componente, não se tinha em mente que existiria o outro, então não foi pensado em nenhuma estrutura para a criação desses componentes. Portanto, a criação desses componentes resultaram em muito código duplicado o que pode vir a apresentar muitas falhas, principalmente se você precisar alterar um método e se esquecer que o outro também existe(duplicado).</p>
+
+<p><b>Solução</b>: O padrão template method sugere que você divida esses algoritmos em uma série de etapas e transforme essas etapas em métodos que poderão ser chamados através de um único método "Template Method". Basicamente você deve criar uma superclasse contendo todas as etapas em comum e deixando-as em um método "virtual" para que possa ser substituída por uma outra subclasse, a única etapa que não pode ser manipulada é o "Template Method" pois ele é a estrutura principal "o esqueleto".</p>
+
+<p>Para realizar esta implementação devemos ter em mente que, <b>AbstractClass</b> é a classe abstrata que contém o Template Method e as operações para cada etapa, <b>ConcreteClass</b> são as subclasses que heram da AbstractClass e implementa os métodos conforme necessário <b>se</b> for necessário.</p>
+
+<p>Para o nosso exemplo, foi criado um cenário simples onde será aberto dois tipos de arquivos diferentes, um CSV e um PDF, a implementação para abrir e consumir os dados do arquivo são muito semelhantes então criaremos um FileBase(AbstractClass).</p>
+
+<p>Inicialmente, vamos verificar tudo o que há em comum para abrir um arquivo, então podemos considerar que: OpenFile; CloseFile; ExtractData; ParseData. Podemos considerar que esses métodos são comuns independente do tipo de arquivo a ser aberto, a final precisamos abrir o arquivo, extrair os dados, converter os dados e depois fechar o arquivo. Então será isso que implementaremos na nossa classe base.</p>
+
+```c#
+    public abstract class FileBase
+    {
+        public Dictionary<string, IEnumerable<int>> TemplateMethod(string directory)
+        {
+            var response = new Dictionary<string, IEnumerable<int>>();
+            OpenFile(directory);
+            var index = 1;
+            foreach (var item in ExtractData().Skip(1))
+            {
+                response.Add($"Linha - {index}", ParseData(item));
+                index++;
+            }
+            CloseFile(directory);
+            return response;
+        }
+
+
+        public virtual void OpenFile(string directory)
+        {
+            Console.WriteLine($"Abre arquivo no diretório {directory}");
+        }
+
+        public virtual void CloseFile(string directory)
+        {
+            Console.WriteLine($"Fecha arquivo no diretório {directory}");
+        }
+
+        public virtual IEnumerable<string> ExtractData()
+        {
+            return new List<string>()
+            {
+                "um,dois,três,quatro,cinco,seis,sete,oito,nove,dez",
+                "1,2,3,4,5,6,7,8,9,10",
+                "1,2,3,4,5,6,7,8,9,10",
+                "1,2,3,4,5,6,7,8,9,10",
+                "1,2,3,4,5,6,7,8,9,10",
+                "1,2,3,4,5,6,7,8,9,10"
+            };
+        }
+
+        public virtual IEnumerable<int> ParseData(string row)
+        {
+            var response = new List<int>();
+            foreach (var item in row.Split(','))
+                response.Add(int.Parse(item));
+
+            return response;
+        }
+    }
+```
+
+ - O objetivo desse exemplo, é mostrar como poderíamos utilizar o Template Method, devido a isso não foi implementado a abertura e conversão de um arquivo de verdade, estamos fazendo somente para exemplificar o pattern.
+
+<p>Observe que cada etapa é um método virtual, o que significa que poderá ser substituído por uma subclasse, a final cada uma terá sua particularidade, mas a estrutura, o esqueleto para abrir um arquivo será sempre igual e está presente no nosso Template Method que não pode ser substituído por uma subclasse.</p>
+
+
+<p>Feito isso, iremos implementar a abertura para o arquivo CSV.</p>
+
+```c#
+ public class CsvFile : FileBase
+ {
+
+     public override void OpenFile(string directory)
+     {
+         Console.WriteLine($"Abre arquivo CSV no diretório ~~ {directory}");
+     }
+
+     public override void CloseFile(string directory)
+     {
+         Console.WriteLine($"Fecha arquivo CSV no diretório ~~ {directory}");
+     }
+
+     public override IEnumerable<string> ExtractData()
+     {
+         return new List<string>()
+         {
+             "A,B,C",
+             "1,2,3",
+             "1,2,3",
+             "1,2,3",
+             "1,2,3",
+             "1,2,3"
+         };
+     }
+ }
+```
+
+<p>Observe que para realizar a abertura, fechamento e extrair os dados de um arquivo, temos uma lógica diferente da implementada na classe base, e por isso houve a necessidade de realizar a implementação.</p>
+
+<p>Agora iremos criar o nosso PDFFile.</p>
+
+```c#
+public class PdfFile : FileBase
+{
+
+    public override void OpenFile(string directory)
+    {
+        Console.WriteLine($"Abre arquivo PDF no diretório ~~ {directory}");
+    }
+
+    public override void CloseFile(string directory)
+    {
+        Console.WriteLine($"Fecha arquivo PDF no diretório ~~ {directory}");
+    }
+
+}
+```
+
+<p>Observe que aqui, a lógica diferente é somente para abrir e fechar o arquivo.</p>
+
+<p>Com isso implementado, conseguimos realizar a implementação do pattern Template Method, agora é só realizar a chamada do método.</p>
+
+```c#
+ static void Main(string[] args)
+ {
+     Console.WriteLine("Hello World!");
+     var pflFile = new PdfFile();
+     var pdfValues = pflFile.TemplateMethod("diretório para arquivo pdf");
+     Console.WriteLine("Resultado pdf File");
+     foreach (var row in pdfValues)
+     {
+         Console.WriteLine(row.Key);
+         foreach (var item in row.Value)
+             Console.Write($"  {item}");
+         Console.WriteLine();
+     }
+
+     var csvFile = new CsvFile();
+     var csvValues = csvFile.TemplateMethod("diretório para arquivo csv");
+     Console.WriteLine("Resultado csv File");
+     foreach (var row in csvValues)
+     {
+         Console.WriteLine(row.Key);
+         foreach (var item in row.Value)
+             Console.Write($"  {item}");
+         Console.WriteLine();
+     }
+
+     Console.ReadKey();
+ }
+```
+
+<p><b>Saída</b></p>
+
+> <p>Hello World!</p>
+> <p>Abre arquivo PDF no diretório ~~ diretório para arquivo pdf</p>
+> <p>Fecha arquivo PDF no diretório ~~ diretório para arquivo pdf</p>
+> <p>Resultado pdf File</p>
+> <p>Linha - 1</p>
+> <p>  1  2  3  4  5  6  7  8  9  10</p>
+> <p>Linha - 2</p>
+> <p>  1  2  3  4  5  6  7  8  9  10</p>
+> <p>Linha - 3</p>
+> <p>  1  2  3  4  5  6  7  8  9  10</p>
+> <p>Linha - 4</p>
+> <p>  1  2  3  4  5  6  7  8  9  10</p>
+> <p>Linha - 5</p>
+> <p>  1  2  3  4  5  6  7  8  9  10</p>
+> <p>Abre arquivo CSV no diretório ~~ diretório para arquivo csv</p>
+> <p>Fecha arquivo CSV no diretório ~~ diretório para arquivo csv</p>
+> <p>Resultado csv File</p>
+> <p>Linha - 1</p>
+> <p>  1  2  3</p>
+> <p>Linha - 2</p>
+> <p>  1  2  3</p>
+> <p>Linha - 3</p>
+> <p>  1  2  3</p>
+> <p>Linha - 4</p>
+> <p>  1  2  3</p>
+> <p>Linha - 5</p>
+> <p>  1  2  3</p>
+
+<p>Use o padrão Template Method quando desejar permitir que os clientes estendam apenas etapas específicas de um algoritmo, mas não o algoritmo inteiro ou sua estrutura, quando tiver várias classes que contêm algoritmos quase idênticos, com algumas pequenas diferenças. Como resultado, pode ser necessário modificar todas as classes quando o algoritmo for alterado.</p>
+
+
+
+
+
 
