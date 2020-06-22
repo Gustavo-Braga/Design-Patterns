@@ -50,7 +50,7 @@ refactoring.guru</a>)</h6>
   <li>Iterador(iterator)</li>
   <li>Lembrança(memento)</li>
   <li>Método de Modelo(template method)</li>
-  <li>Estado(stade)</li>
+  <li>Estado(state)</li>
   <li>Estratégia(strategy)</li>
   <li>Visitante(visitor)</li>
 </ul>
@@ -2964,6 +2964,142 @@ public class PdfFile : FileBase
 > <p>  1  2  3</p>
 
 <p>Use o padrão Template Method quando desejar permitir que os clientes estendam apenas etapas específicas de um algoritmo, mas não o algoritmo inteiro ou sua estrutura, quando tiver várias classes que contêm algoritmos quase idênticos, com algumas pequenas diferenças. Como resultado, pode ser necessário modificar todas as classes quando o algoritmo for alterado.</p>
+
+
+# Estado(state)
+
+<p><b>O que é</b>: State é um padrão de design comportamental que permite alterar o comportamento de um objeto de acordo com o seu estado atual, a cada vez que o estado muda,  um novo comportamento pode ser tomado.</p>
+
+<p><b>Problema</b>: Este padrão está relacionado ao conceito de uma máquina de estado finito, ou seja, quando seu código esta cheio de if/else e switch case, tomando vários comportamentos diferentes alterando o comportamento da lógica de negócio.</p>
+
+<p><b>Solução</b>: O padrão State sugere que você crie novas classes para cada comportamento possível de estados, você deve criar uma classe extraindo todos os comportamentos específicos para cada estado em particular, ao invés de implementar tudo no objeto original. O objeto original deve manter uma referência a um objeto de estado(que representa o estado atual) delegando todo o trabalho a ele.</p>
+
+<p>Para implementar esse pattern, devemos ter em mente que <b>State</b> é uma interface utilizada para acessar as funcionalidades que serão utilizadas pelos estados, <b>Context</b> é a classe que contém o objeto de estado concreto e fornece o comportamento de acordo com o seu estado atual e por fim <b>ConcreteState</b> que é a classe implementada pela interface State e fornece o comportamento para cada determinado estado do objeto Context.</p>
+
+<p>Para o nosso exemplo, foi criado um cenário simples onde de acordo com o tipo de operação, será aplicada uma regra de matemática.</p>
+
+<p>Inicialmente, iremos criar a interface de estado.</p>
+
+```c#
+ public interface IStateSimpleCalculator
+ {
+     void Execute(SimpleCalculator context);
+ }
+ ```
+ 
+ <p>Observe que para o método execute é passado o objeto SimpleCalculator, ele é o nosso context, vamos cria-lo.</p>
+ 
+```c#
+public class SimpleCalculator
+{
+    private IStateSimpleCalculator _stateSimpleCalculator;
+
+    public SimpleCalculator(int firstNumber, int secondNumber)
+    {
+        FirstNumber = firstNumber;
+        SecondNumber = secondNumber;
+    }
+
+    public int FirstNumber { get; set; }
+    public int SecondNumber { get; set; }
+
+    public Operation Operation { get; set; }
+
+    public void SetState(IStateSimpleCalculator state)
+    {
+        _stateSimpleCalculator = state;
+    }
+
+    public void ExecuteState()
+    {
+        _stateSimpleCalculator?.Execute(this);
+    }
+}
+
+public enum Operation
+{
+    Sum,
+    Subtraction,
+    Multiplication,
+    Division
+}
+```
+
+<p>Observe que o nosso Context possui uma referência a interface de state e também possui os métodos para inserir(SetState) e executar(ExecuteState) um estado.</p>
+
+<p>Feito isso, temos a nossa interface de State que será implementado por cada objeto de estado possível e também, temos o nosso Context, o mesmo deve ser passado para cada objeto de estado, para que se possa tomar alguma ação com base nele.</p>
+ 
+ <p>Agora, iremos implementar os objetos de stado, irei exemplificar somente dois, mas você pode consultar o exemplo completo, clicando "aqui".</p>
+ 
+ ```c#
+public class DivisionState : IStateSimpleCalculator
+{
+   public void Execute(SimpleCalculator context)
+   {
+       Console.WriteLine($"Resultado da divisão é: {context.FirstNumber} / {context.SecondNumber} = {(context.SecondNumber == 0 ? "Inválida.. Divisão por 0" : $"{context.FirstNumber / context.SecondNumber}")}");
+   }
+}
+    
+public class SumState : IStateSimpleCalculator
+{
+   public void Execute(SimpleCalculator context)
+   {
+       Console.WriteLine($"Resultado da soma é: {context.FirstNumber} + {context.SecondNumber} = {context.FirstNumber + context.SecondNumber}");
+   }
+}    
+ ```
+ 
+ <p>Feito isso, é só validar qual o tipo de operação e qual estado será inserido ao nosso context. Quando tivermos a informação de qual estado deve ser inserido, é só passar o objeto concreto para o context, através do método SetState e para executar é através do método ExecuteState.</p>
+ 
+ ```c#
+static void Main(string[] args)
+{
+    Console.WriteLine("Hello World!");
+    var intRandom = new Random();
+
+    for (int i = 0; i < Enum.GetNames(typeof(Operation)).Length; i++)
+    {
+        var simpleCalculator = new SimpleCalculator(intRandom.Next(-2, 20), intRandom.Next(-2, 20))
+        {
+            Operation = (Operation)i
+        };
+
+        switch (simpleCalculator.Operation)
+        {
+            case Operation.Multiplication:
+                simpleCalculator.SetState(new MultiplicationState());
+                break;
+            case Operation.Division:
+                simpleCalculator.SetState(new DivisionState());
+                break;
+            case Operation.Subtraction:
+                simpleCalculator.SetState(new SubtractionState());
+                break;
+            case Operation.Sum:
+                simpleCalculator.SetState(new SumState());
+                break;
+        }
+
+        simpleCalculator.ExecuteState();
+    }
+
+    Console.ReadKey();
+}
+ 
+ ```
+ 
+ <p></b>Saída</b></p>
+ 
+> <p>Hello World!</p>
+> <p>Resultado da soma é: 8 + 18 = 26</p>
+> <p>Resultado da subtraçao é: 4 - 3 = 1</p>
+> <p>Resultado da multiplicaçao é: 5 * 1 = 5</p>
+> <p>Resultado da divisao é: 15 / 13 = 1</p>
+
+<p>Use o padrão State quando você tiver um objeto que se comporte de maneira diferente dependendo do estado atual, o número de estados seja enorme e o código específico do estado seja alterado com freqüência. Quando tiver uma classe poluída com condicionais massivas que alteram o comportamento da classe de acordo com os valores atuais dos campos da classe.</p>
+ 
+ 
+
 
 
 
