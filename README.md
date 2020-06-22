@@ -2974,7 +2974,7 @@ public class PdfFile : FileBase
 
 <p><b>Solução</b>: O padrão State sugere que você crie novas classes para cada comportamento possível de estados, você deve criar uma classe extraindo todos os comportamentos específicos para cada estado em particular, ao invés de implementar tudo no objeto original. O objeto original deve manter uma referência a um objeto de estado(que representa o estado atual) delegando todo o trabalho a ele.</p>
 
-<p>Para implementar esse pattern, devemos ter em mente que <b>State</b> é uma interface utilizada para acessar as funcionalidades que serão utilizadas pelos estados, <b>Context</b> é a classe que contém o objeto de estado concreto e fornece o comportamento de acordo com o seu estado atual e por fim <b>ConcreteState</b> que é a classe implementada pela interface State e fornece o comportamento para cada determinado estado do objeto Context.</p>
+<p>Para implementar esse pattern, devemos ter em mente que <b>State</b> é uma interface utilizada para acessar as funcionalidades que serão utilizadas pelos estados, <b>Context</b> é a classe que contém o objeto de estado concreto e fornece o comportamento de acordo com o seu estado atual, e por fim <b>ConcreteState</b> que é a classe implementada pela interface State e fornece o comportamento para cada determinado estado do objeto Context.</p>
 
 <p>Para o nosso exemplo, foi criado um cenário simples onde de acordo com o tipo de operação, será aplicada uma regra de matemática.</p>
 
@@ -3096,7 +3096,7 @@ static void Main(string[] args)
 > <p>Resultado da multiplicaçao é: 5 * 1 = 5</p>
 > <p>Resultado da divisao é: 15 / 13 = 1</p>
 
-<p>Use o padrão State quando você tiver um objeto que se comporte de maneira diferente dependendo do estado atual, o número de estados seja enorme e o código específico do estado seja alterado com freqüência. Quando tiver uma classe poluída com condicionais massivas que alteram o comportamento da classe de acordo com os valores atuais dos campos da classe.</p>
+<p>Use o padrão State quando você tiver um objeto que se comporte de maneira diferente dependendo do estado atual, o número de estados seja enorme e o código específico do estado seja alterado com frequência. Quando tiver uma classe poluída com condicionais massivas que alteram o comportamento da classe de acordo com os valores atuais dos campos da classe.</p>
  
  
 
