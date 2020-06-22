@@ -50,7 +50,7 @@ refactoring.guru</a>)</h6>
   <li>Iterador(iterator)</li>
   <li>Lembrança(memento)</li>
   <li>Método de Modelo(template method)</li>
-  <li>Estado(stade)</li>
+  <li>Estado(state)</li>
   <li>Estratégia(strategy)</li>
   <li>Visitante(visitor)</li>
 </ul>
@@ -1842,6 +1842,1576 @@ public class CarFacade
 > <p>Possui arma: SSG 08</p>
 
 <p>Use o padrão Flyweight apenas quando seu programa precisar suportar um grande número de objetos que mal cabem na RAM disponível.</p>
+
+
+# Mediador(mediator)
+
+<p><b>O que é</b>: Mediator é um padrão de design comportamental que visa reduzir dependências entre objetos, este padão restringe as comunicações diretas entre os objetos e os força a realizar a comunicação apenas através de um objeto mediador. O mediator adiciona um objeto de terceiro para controlar a interação entre os objetos.</p> 
+ 
+ 
+ <p><b>Problema</b>: Você esta tentando criar componentes reutilizáveis, mas a dependência entre os objetos acabou tornando o fenômeno "código espaguete" tentar pegar uma única porção resulta em um conjunto de tudo ou nada</p>
+ 
+ 
+ <p><b>Exemplo do mundo real</b>:</p>
+ 
+ > Os pilotos que se aproximam ou partem de uma área de controle de aeroporto não se comunicam diretamente entre si. Em vez disso, eles fazem a comunicação com um controlador de tráfego aéreo, sem esse controlador os pilotos precisariam estar cientes de todos os aviões nas proximidades do aeroporto, discutindo as prioridades de pouso com um comitê de dezenas de outros pilotos. Isso provavelmente dispararia as estatísticas de acidentes de avião.</p>
+ 
+ <p>Para este cenário, o controlador de tráfego é o mediador entre os pilotos.</p>
+ 
+ 
+ <p><b>Solução</b>: O padrão mediator sugere que você interrompa toda a comunicação direta entre os componentes que deseja tornar independentes um do outro. Em vez disso, esses componentes devem colaborar indiretamente, chamando um objeto mediator especial que redireciona as chamadas para os componentes apropriados. Como resultado, os componentes dependem apenas de uma única classe de mediator em vez de serem acoplados a dezenas de classes.</p>
+ 
+ <p>Para o nosso exemplo foi criado uma cenário de calculadora, onde criamos o request com o tipo de operação e enviamos ao mediator para que através dele, consiga identificar o tipo de request e envie ao service correto. Para implementar este pattern, devemos ter em mente que <b>Mediator</b> é a interfce que define as operações que podem ser chamadas para a comunicação, <b>ConcreteMediator</b> esta é a classe que implementa as operações de comunicação da interface mediator, <b>Colleague</b> esta é uma classe que define um campo protegido que mantém a referência a um objeto mediator, <b>ConcreteColleague</b> estas são as classes se comunicam através do mediator.</p>
+ 
+<p>Vamos a implementação. Primeiramente vamos criar a nossa interface mediator</p>
+
+```c#
+    public interface IMediator
+    {
+        void Send(object send);
+    }
+```
+
+<p>Após isso, vamos criar o nosso Colleague esta será a classe base para os ConcreteColleague</p>
+
+```c#
+    public abstract class BaseComponent
+    {
+        protected IMediator _mediator;
+
+        public BaseComponent(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
+
+        public void Send()
+        {
+            _mediator.Send(this);
+        }
+    }
+```
+
+<p>Agora faremos os ConcreteColleague, será criado um para cada operação da calculadora, aqui irei deixar somente dois, mas você pode conferir o exemplo completo clicando "AQUI"</p>
+
+```c#
+
+    public class SumComponent : BaseComponent
+    {
+
+        public SumComponent(int firstNumber, int secondNumber, IMediator mediator) : base(mediator)
+        {
+            FirstNumber = firstNumber;
+            SecondNumber = secondNumber;
+        }
+
+        public int FirstNumber { get; set; }
+        public int SecondNumber { get; set; }
+    }
+    
+    public class MultiplicationComponent : BaseComponent
+    {
+
+        public MultiplicationComponent(int firstNumber, int secondNumber, IMediator mediator) : base(mediator)
+        {
+            FirstNumber = firstNumber;
+            SecondNumber = secondNumber;
+        }
+
+        public int FirstNumber { get; set; }
+        public int SecondNumber { get; set; }
+    }
+    
+```
+
+<p>Feito isso iremos implementar o nosso service com todas as operações necessárias</p>
+
+```c#
+    public class SimpleCalculatorService
+    {
+        public void Sum(SumComponent component)
+        {
+            Console.WriteLine($"A soma dos valores é {component.FirstNumber}+{component.SecondNumber} = {component.FirstNumber + component.SecondNumber}");
+        }
+
+        public void Subtraction(SubtractionComponent component)
+        {
+            Console.WriteLine($"A subtração dos valores é {component.FirstNumber}-{component.SecondNumber} = {component.FirstNumber - component.SecondNumber}");
+        }
+
+        public void Multiplication(MultiplicationComponent component)
+        {
+            Console.WriteLine($"A multiplicação dos valores é {component.FirstNumber}*{component.SecondNumber} = {component.FirstNumber * component.SecondNumber}");
+        }
+
+        public void Division(DivisionComponent component)
+        {
+            Console.WriteLine($"A divisão dos valores é {component.FirstNumber}/{component.SecondNumber} = {(component.SecondNumber == 0 ? "Inválida.. Divisão por 0" : $"{component.FirstNumber / component.SecondNumber}")}");
+        }
+    }
+```
+
+<p>Com tudo isso implementado, só esta faltando criar o nosso ConcreteMediator, então vamos a implementação</p>
+
+```c#
+    public class MultiplicationAndDivisionMediator : IMediator
+    {
+        private SimpleCalculatorService _simpleCalculatorService = new SimpleCalculatorService();
+        public void Send(object send)
+        {
+            if (send is MultiplicationComponent)
+                _simpleCalculatorService.Multiplication((MultiplicationComponent)send);
+            else if (send is DivisionComponent)
+                _simpleCalculatorService.Division((DivisionComponent)send);
+            else
+                throw new NotImplementedException();
+        }
+    }
+    
+    public class SumAndSubtractionMediator : IMediator
+    {
+        private SimpleCalculatorService _simpleCalculatorService = new SimpleCalculatorService();
+        public void Send(object send)
+        {
+            if (send is SumComponent)
+                _simpleCalculatorService.Sum((SumComponent)send);
+            else if (send is SubtractionComponent)
+                _simpleCalculatorService.Subtraction((SubtractionComponent)send);
+            else
+                throw new NotImplementedException();
+        }
+    }
+```
+
+<p>Com tudo isso implementado, agora é só realizar a chamada, só precisamos criar o ConcreteMediator e passar para o nosso ConcreteColleague</p>
+
+```c#
+    static void Main(string[] args)
+    {
+        Console.WriteLine("Hello World!");
+        var random = new Random();
+
+        var sumAndSubtractionMediator = new SumAndSubtractionMediator();
+        var sum = new SumComponent(random.Next(-10, 100), random.Next(-10, 100), sumAndSubtractionMediator);
+        var subtraction = new SubtractionComponent(random.Next(-50, 500), random.Next(-50, 500), sumAndSubtractionMediator);
+
+        sum.Send();
+        subtraction.Send();
+
+        var multipicationAndDivisionMediator = new MultiplicationAndDivisionMediator();
+        var multiplication = new MultiplicationComponent(random.Next(-20, 200), random.Next(-20, 200), multipicationAndDivisionMediator);
+        var division = new DivisionComponent(random.Next(-30, 500), random.Next(-20, 600), multipicationAndDivisionMediator);
+
+        multiplication.Send();
+        division.Send();
+
+        Console.ReadKey();
+    }
+```
+
+ <p><b>Saída</b></p>
+ 
+> <p>Hello World!</p>
+> <p>A soma dos valores é 23+3 = 26</p>
+> <p>A subtraçao dos valores é -34-206 = -240</p>
+> <p>A multiplicaçao dos valores é 8*34 = 272</p>
+> <p>A divisao dos valores é 269/91 = 2</p>
+ 
+<p>Use o padrão Mediador quando for difícil alterar algumas das classes porque elas estão fortemente acopladas a várias outras classes,  quando não puder reutilizar um componente em um programa diferente, pois é muito dependente de outros componentes, quando se encontrar criando toneladas de subclasses de componentes apenas para reutilizar algum comportamento básico em vários contextos.</p>
+ 
+# Observador(observer)
+
+<p><b>O que é</b>: Observer é um padrão de design comportamental que permite realizar um mecanismo de assinatura em outro objeto e assim ser notificado sobre quaisquer eventos que ocorram no objeto que esta sendo observado. Define uma dependência entre objetos para que, sempre que um objeto alterar seu estado, todos os seus dependentes sejam notificados. </p>
+
+
+<p><b>Problema</b>: Imagine que você deseja comprar um celular no modelo X e para isso, você vai a loja todos os dias para saber se o modelo X está disponível, porém a maioria dessas viagens estarão sendo inuteis caso o produto não esteja disponível. Uma outra medida, é a loja notificar todos os clientes, todos os dias sobre os produtos que estão disponíveis, isso iria te salvar de muitas viagens, porém você perderá muito tempo olhando produtos que não são do seu interesse e também a loja iria desperdiçar muitos recursos para notificar clientes que no momento não querem nada.</p>
+
+<p><b>Solução</b>: O padrão observer sugere que você adicione um mecanismo de inscrição a classe onde é possível se inscrever e cancelar a inscrição a qualquer momento, assim você será notificado sobre qualquer alteração da classe.</p>
+
+<p>Para implementar este pattern devemos ter em mente que, <b>Subject</b> é a classe que contém uma lista de observadores inscritos para serem notificados, <b>ConcreteSubject</b> esta é a classe que mantém seu próprio estado, quando ocorrer alguma alteração nela, o objeto chama a operação <b>Notify</b> da classe base(Subject) e notificará todos os seus observadores sobre a alateração, <b>Observer</b> esta é a interface que define uma operação de update que deve ser chamado quando o estado do sujeito for alterado, e por fim, <b>ConcreteObserver</b> esta é a classe que implementa o observador e examina o sujeito para determinar o que é relevante referente a as informações alteradas.</p>
+
+<p>Para o nosso cenário, foi criado um exemplo simples onde o sujeito é uma calculadora que recebe os números e armazena um estado para saber qual operação deve ser realizada, será registrado 4 observadores para monitorar o estado e assim realizar a operação, neste exemplo iremos adicionar e remover os observadores e verificar qual será o resultado.</p>
+
+<p>Para iniciar, vamos implementar a nossa interface IObserver, ela receberá um tipo genérico para que possamos analiza-lo dentro dos observadores</p>
+
+```c#
+    public interface IObserver<T>
+    {
+        void Update(T subject);
+    }
+```
+
+<p>Após isso, iremos implementar a nossa interface de sujeito, onde terá os métodos para adicionar/remover/notificar os observadores.</p>
+
+```c#
+    public interface ISubject<T>
+    {
+        void Attach(IObserver<T> observer);
+
+        void Detach(IObserver<T> observer);
+
+        void Notify(T entity);
+    }
+```
+
+<p>Iremos implementar o SubjectBase para que as classes de sujeito consigam herdar dela e utilizar os seus métodos.</p>
+
+```c#
+    public abstract class SubjectBase<T> : ISubject<T>
+    {
+        private IList<IObserver<T>> _observers = new List<IObserver<T>>();
+        public void Attach(IObserver<T> observer)
+        {
+            _observers.Add(observer);
+        }
+
+        public void Detach(IObserver<T> observer)
+        {
+            _observers.Remove(observer);
+        }
+
+        public void Notify(T entity)
+        {
+            foreach (var item in _observers)
+                item.Update(entity);
+        }
+    }
+```
+
+<p>Feito isso, iremos implementar a nossa SimpleCalculator(sujeito) e herdar da classe SubjectBase.</p>
+
+```c#
+    public class SimpleCalculator: SubjectBase<SimpleCalculator>
+    {
+        public SimpleCalculator(int firstNumber, int secondNumber)
+        {
+            FirstNumber = firstNumber;
+            SecondNumber = secondNumber;
+        }
+
+        public int FirstNumber { get; set; }
+        public int SecondNumber { get; set; }
+        public Operation Operation { get; set; }
+    }
+
+
+    public enum Operation
+    {
+        Sum,
+        Subtraction,
+        Multiplication,
+        Division
+    }
+```
+<p>Agora na nossa SimpleCalculator é possível adicionarmos observadores e notificá-los quando alguma mudança ocorrer. Então vamos criar os observadores(irei exemplificar somente dois, mas você pode consultar o exemplo completo clicando "AQUI")</p>
+
+```c#
+    public class SumObserver : Interfaces.IObserver<SimpleCalculator>
+    {
+        public void Update(SimpleCalculator subject)
+        {
+            if(subject.Operation == Operation.Sum)
+                Console.WriteLine($"A soma dos valores é {subject.FirstNumber}+{subject.SecondNumber} = {subject.FirstNumber + subject.SecondNumber}");
+        }
+    }
+    
+    public class DivisionObserver : Interfaces.IObserver<SimpleCalculator>
+    {
+        public void Update(SimpleCalculator subject)
+        {
+            if (subject.Operation == Operation.Division)
+                Console.WriteLine($"A divisão dos valores é {subject.FirstNumber}/{subject.SecondNumber} = {(subject.SecondNumber == 0 ? "Inválida.. Divisão por 0" : $"{subject.FirstNumber / subject.SecondNumber}")}");
+        }
+    }
+```
+
+<p>Agora, para realizar a chamada, precisamos criar o nosso sujeito e irmos adicionando os observadores através do método "Attach", para remover utilizaremos o "Detach" e para notificar utilizaremos o "Notify".</p>
+
+```c#
+    static void Main(string[] args)
+    {
+        Console.WriteLine("Hello World!");
+        var random = new Random();
+        var subject = new SimpleCalculator(random.Next(-20, 100), random.Next(-10, 50));
+
+        var sum = new SumObserver();
+        var multiplication = new MultiplicationObserver();
+
+        subject.Attach(multiplication);
+        subject.Attach(sum);
+
+        subject.Attach(new DivisionObserver());
+        subject.Attach(new SubtractionObserver());
+
+        Console.WriteLine("\nExemplo sorteando os observadores");
+        for (int i = 0; i < 2; i++)
+        {
+            subject.Operation = (Operation)random.Next(0, 3);
+            subject.Notify(subject);
+        }
+
+        Console.WriteLine("\nExemplo com todos os observadores");
+        for (int i = 0; i < 4; i++)
+        {
+            subject.Operation = (Operation)i;
+            subject.Notify(subject);
+        }
+
+        subject.Detach(sum);
+        subject.Detach(multiplication);
+
+        Console.WriteLine("\nExemplo após remover os observadores de Soma e Multiplicação");
+        for (int i = 0; i < 4; i++)
+        {
+            subject.Operation = (Operation)i;
+            subject.Notify(subject);
+        }
+
+        Console.ReadKey();
+    }
+```
+
+<p><b>Saída</b>:</p>
+
+> <p>Hello World!</p>
+> <p></p>
+> <p>Exemplo sorteando os observadores</p>
+> <p>A subtraçao dos valores é 19-10 = 9</p>
+> <p>A multiplicaçao dos valores é 19*10 = 190</p>
+> <p></p>
+> <p>Exemplo com todos os observadores</p>
+> <p>A soma dos valores é 19+10 = 29</p>
+> <p>A subtraçao dos valores é 19-10 = 9</p>
+> <p>A multiplicaçao dos valores é 19*10 = 190</p>
+> <p>A divisao dos valores é 19/10 = 1</p>
+> <p></p>
+> <p>Exemplo após remover os observadores de Soma e Multiplicaçao</p>
+> <p>A subtraçao dos valores é 19-10 = 9</p>
+> <p>A divisao dos valores é 19/10 = 1</p>
+
+<p>Utilize o padrão Observer quando mudanças no estado de um objeto podem precisar mudar outros objetos, e o atual conjunto de objetos é desconhecido de antemão ou muda dinamicamente, quando alguns objetos em sua aplicação devem observar outros, mas apenas por um tempo limitado ou em casos específicos.</p>
+
+# Cadeia de Responsabilidade(chain of responsibility)
+
+<p><b>O que é</b>: Cadeia de Responsabilidade é um padrão de design comportamental que visa passar solicitações ao longo de uma cadeia de manipuladores, ao receber uma solicitação, cada manipulador decide se ira processar a informação ou passa-la ao próximo manipulador. Em outras palavras Cadeia de Responsabilidade, ajuda construir uma cadeia de objetos, onde a solicitação entra em um extremidade e continua indo até encontrar um manipulador adequado.</p>
+
+<p><b>Problema</b>: Imagine que você criou um sistema e para ele é necessário fazer uma autenticação, porque somente os clientes autenticados poderiam realizar as operações no sistema. Depois de um tempo você notou que quando alguém tenta realizar a autenticação e a validação falhar, não há motivos para seguir com as validações, depois de um tempo, você foi informado que não é legal passar dados brutos diretamente para o sistema, e então você adicionou mais uma validação extra. Mais tarde alguém lhe informou sobre a quebra de senha de força bruta e imediatamente você adicionou mais uma validação para filtrar as solicitações repeditas de um mesmo IP. O código começou a virar uma bagunça, cada vez mais inchado e mais difícil de manter e entender, quando você tentava reutilizar alguma verificação acaba que você precisa duplicar uma parte do código. Devido a esses problemas a melhor das opções foi refatorar tudo.</p>
+
+<p><b>Solução</b>: O padrão de cadeia de responsabilidade, permite que um objeto envie um comando sem saber qual objeto receberá e irá manipular, a solicitação é enviada de um objeto para o outro tornando-os parte de uma cadeia e a cada iteração o objeto pode manipular o comando ou transmiti-lo a outro, ou até mesmo realizar os dois. Para a implementação, cada verificação deve ser extraída para uma classe e deve possuir um único método que executa a verificação, essas classes são passadas por parâmetro e dentro delas é possível dinamizar se irá interromper a iteração ou se ira seguir para a próxima validação.</p>
+
+<p>Para implementar este pattern devemos ter em mente que <b>Client</b> é a classe que gera a solicitação e passa para o primeiro manipulador da cadeia, <b>Handler</b> é a classe abstrata que contém o membro para armazenar o próximo manipulador da cadeia para ser possível definir os sucessores, esta classe também contém o método que deve ser implementado pelos outros manipuladores para executar as validações, e por fim, temos os <b>ConcreteHandlers</b> estas são as classes concretas que irão herdar da classe handler e executar as validações conforme o seu negócio.</p>
+
+<p>Para o nosso exemplo, foi criado um cenário simples onde verificamos se um número é par/impar/maior que mil</p>
+
+<p>Inicialmente, vamos criar a nossa interface IHandler</p>
+
+```c#
+    public interface IHandler
+    {
+        void Execute(int request);
+        IHandler Next(IHandler successor);
+    }
+```
+
+<p>Feito isso vamos criar nossa classe abstrata Handler</p>
+
+
+```c#
+    public abstract class AbstractHandler : IHandler
+    {
+        protected IHandler _successor;
+
+        public abstract void Execute(int request);
+
+        public IHandler Next(IHandler successor)
+        {
+             _successor = successor;
+            return this;
+        }
+    }
+```
+
+<p>Observe que ela possui o método next para que seja possível ir para o próximo manipulador da cadeia, e também, possui o método Execute, que irá forçar as subclasses a implementar este método</p>
+
+<p>Agora iremos criar os ConcreteHandlers</p>
+
+```c#
+    public class EvenNumber: AbstractHandler
+    {
+        public override void Execute(int request)
+        {
+            Console.WriteLine($"Número {request} é par: {(request % 2 == 0?"Sim": "Não")}");
+            if (_successor != null)
+                _successor.Execute(request);
+        }
+    }
+    
+    public class OddNumber: AbstractHandler
+    {
+        public override void Execute(int request)
+        {
+            Console.WriteLine($"Número {request} é ímpar: {(request % 2 != 0 ? "Sim" : "Não")}");
+            if (_successor != null)
+                _successor.Execute(request);
+        }
+    }
+    
+    
+    public class GreaterThanAThousand:AbstractHandler
+    {
+        public override void Execute(int request)
+        {
+            Console.WriteLine($"Número {request} é maior que 1000: {(request > 1000 ? "Sim" : "Não")}");
+            if (_successor != null)
+                _successor.Execute(request);
+        }
+    }
+```
+
+<p>Observe que em cada método execute é validado se possui um sucessor, e se possuir, passa para o próximo, nesse momento, você é livre para decidir se deverá ou não passar a diante a validação</p>
+
+<p>Agora é só realizar a chamada do método e em cada ConcreteHandler definir quem será o sucessor</p>
+
+```c#
+    static void Main(string[] args)
+    {
+        Console.WriteLine("Hello World!");
+        var handler = new EvenNumber()
+            .Next(new OddNumber()
+            .Next(new GreaterThanAThousand()));
+
+        for (int i = 0; i < 3; i++)
+        {
+            handler.Execute(new Random().Next(0,9999));
+        }
+
+
+        Console.ReadKey();
+    }
+```
+
+<p><b>Saída</b>:</p>
+
+> <p>Hello World!</p>
+> <p>Número 9091 é par: Nao</p>
+> <p>Número 9091 é ímpar: Sim</p>
+> <p>Número 9091 é maior que 1000: Sim</p>
+> <p>Número 1045 é par: Nao</p>
+> <p>Número 1045 é ímpar: Sim</p>
+> <p>Número 1045 é maior que 1000: Sim</p>
+> <p>Número 5619 é par: Nao</p>
+> <p>Número 5619 é ímpar: Sim</p>
+> <p>Número 5619 é maior que 1000: Sim</p>
+
+
+<p>Use o padrão da Cadeia de Responsabilidade quando se espera que seu programa processe diferentes tipos de solicitações de várias maneiras, mas os tipos exatos de solicitações e suas sequências são desconhecidos previamente, quando for essencial executar vários manipuladores em uma ordem específica, quando o conjunto de manipuladores e sua ordem forem alterados no tempo de execução.</p>
+
+# Comando(command)
+
+<p><b>O que é</b>: Command é um padrão de design comportamental que permite encapsular ações em objetos. Fornece um meio para separar o cliente do destinatário. Esta padrão permite encapsular uma solicitação para fazer algo em algum objeto específico, os objetos não sabem quais ações estão sendo executadas, eles apenas visualizam um método "execute" e será executada suas solicitações.</p>
+
+<p><b>Problema</b>: Imagine que você precise emitir uma solicitação para um objeto, porém você não sabe nada sobre a operação solicitada e nem quem é o destinatário dessa solicitação.</p>
+
+<p><b>Solução</b>: O Command desacopla o objeto que chama a operação daquele que sabe como executá-la, a classe de solicitação possui um método "execute" que simplismente chama a ação do receiver. Os clientes dos objetos command tratam cada objeto como "caixa preta" pois eles simplesmete executam o metodo "execute".</p>
+
+<p>Para realizar esta implementação devemos ter em mente que <b>Client</b> é a classe que cria e executa os objetos de command, <b>Invoker</b> é a classe que solicita o command para executar a ação, <b>Command</b> é a interface que especifica a operação "execute", <b>ConcreteCommand</b> esta é a classe que implementa a interface Command e o método execute que será executado no receiver e por fim <b>Receiver</b> que é a classe que executa a ação associada a solicitação.</p>
+
+<p>Para o nosso cenário, foi criado um exemplo simples para as funções de uma calculadora</p>
+
+<p>Primeiramente, vamos iniciar criando a nossa interface Command</p>
+
+```c#
+   public interface ICommand
+   {
+       void Execute();
+   }
+```
+
+<p>Agora, vamos criar o nosso receiver que é a classe que executará as ações</p>
+
+```c#
+   public class SimpleCalculator
+   {
+       public SimpleCalculator(int firstNumber, int secondNumber)
+       {
+           FirstNumber = firstNumber;
+           SecondNumber = secondNumber;
+       }
+
+       public int FirstNumber { get; set; }
+       public int SecondNumber { get; set; }
+
+       public void Sum()
+       {
+           Console.WriteLine($"A soma dos valores é {FirstNumber}+{SecondNumber} = {FirstNumber + SecondNumber}");
+       }
+
+       public void Subtraction()
+       {
+           Console.WriteLine($"A subtração dos valores é {FirstNumber}-{SecondNumber} = {FirstNumber - SecondNumber}");
+       }
+
+       public void Multiplication()
+       {
+           Console.WriteLine($"A multiplicação dos valores é {FirstNumber}*{SecondNumber} = {FirstNumber * SecondNumber}");
+       }
+
+       public void Division()
+       {
+           Console.WriteLine($"A divisão dos valores é {FirstNumber}/{SecondNumber} = {(SecondNumber == 0 ? "Inválida.. Divisão por 0" : $"{FirstNumber / SecondNumber}")}");
+       }
+
+   }
+```
+
+<p>Feito isso, vamos criar os nossos ConcreteCommand, será criado um para cada método da calculadora, porém aqui irei exemplificar somente dois, você pode consultar o exemplo completo clicando "AQUI"</p>
+
+```c#
+   public class SubtractionCommand : ICommand
+   {
+       private readonly SimpleCalculator _simpleCalculator;
+
+       public SubtractionCommand(SimpleCalculator simpleCalculator)
+       {
+           _simpleCalculator = simpleCalculator;
+       }
+
+       public void Execute()
+       {
+           _simpleCalculator.Subtraction();
+       }
+   }
+
+
+   public class MultiplicationCommand : ICommand
+   {
+       private readonly SimpleCalculator _simpleCalculator;
+
+       public MultiplicationCommand(SimpleCalculator simpleCalculator)
+       {
+           _simpleCalculator = simpleCalculator;
+       }
+
+       public void Execute()
+       {
+           _simpleCalculator.Multiplication();
+       }
+   }
+```
+ 
+ <p>Perceba que o método execute sabe o que deve ser executado, é ele quem tem conhecimento sobre a lógica do negócio</p>
+ 
+ <p>Agora, iremos criar o nosso Invoker</p>
+ 
+```c#
+  public class InvokerCommand
+  {
+      public List<ICommand> _commands = new List<ICommand>();
+
+      public InvokerCommand()
+      {
+      }
+
+      public InvokerCommand SetCommand(ICommand command)
+      {
+          _commands.Add(command);
+          return this;
+      }
+
+      public void Execute()
+      {
+          foreach (var item in _commands)
+              item.Execute();
+      }
+  }
+```
+
+
+<p>Repare que ele possui uma lista com todos os commands necessários e também é flexível para você adicionar/remover commands, sendo assim você também pode definir uma ordem de execução. Perceba também que o método execute não tem conhecimento sobre regras de negócio ele somente executa a operação do command.</p>
+
+<p>Por fim, iremos ao nosso client para criar os commands e realizar as chamadas, nesse cenário é o método main</p>
+
+```c#
+   static void Main(string[] args)
+   {
+       Console.WriteLine("Hello World!");
+       var random = new Random();
+       var simpleCalculator = new SimpleCalculator(random.Next(-5, 30), random.Next(-5, 30));
+       var invoke = new InvokerCommand()
+           .SetCommand(new SumCommand(simpleCalculator))
+           .SetCommand(new DivisionCommand(simpleCalculator))
+           .SetCommand(new SubtractionCommand(simpleCalculator))
+           .SetCommand(new MultiplicationCommand(simpleCalculator));
+
+       Console.WriteLine("Executa operações");
+       invoke.Execute();
+
+
+       Console.ReadKey();
+   }
+```
+
+
+<p><b>Saída</b></p>
+
+> <p>Hello World!</p>
+> <p>Executa operaçoes</p>
+> <p>A soma dos valores é 28+28 = 56</p>
+> <p>A divisao dos valores é 28/28 = 1</p>
+> <p>A subtraçao dos valores é 28-28 = 0</p>
+> <p>A multiplicaçao dos valores é 28*28 = 784</p>
+
+<p> Use o padrão Comando quando desejar parametrizar objetos com operações, quando desejar enfileirar operações, agendar sua execução ou executá-las remotamente, quando desejar implementar operações reversíveis.</p>
+
+# Iterador(iterator)
+
+<p><b>O que é</b>: O Iterator é um padrão de design comportamental que permite obter uma maneira de acessar os elementos de um objeto de coleção de maneira sequencial, sem a necessidade de conhecer sua representação subjacente, por exemplo lista, pilha, árvore, matriz etc...</p>
+
+<p><b>Problema</b>: Imagine que você precise percorrer uma coleção de objetos, independente do tipo, se é uma lista ou uma coleção em estrutura de árvore, você precisa percorrer sequencialmente os elementos de maneira que não repita os itens.</p>
+
+<p><b>Solução</b>: A idéia principal do padrão Iterator é extrair o comportamento de travessia de uma coleção, ele implementa o próprio algoritimo de travessia e encapsula todos os detalhes. O padrão Iterator assume a responsabilidade de acessar sequencialmente os elementos.</p>
+
+<p>Para implementar este padrão devemos ter em mente que <b>Client</b> é a classe que contém a coleção de objetos e usa a operação Next para recuperar os itens da sequência, <b>Iterador</b> é a interface que define operações para acessar os elementos, <b>ConcreteIterator</b> esta é a classe que implementa a interface iterador, <b>Aggregate</b> é a interface que define as operações para criar um iterador, <b>ConcreteAggregate</b> é a classe que implementa a interface aggregate.</p>
+
+
+<p>Para o nosso exemplo foi criado uma coleção de objetos</p>
+
+<p>Inicialmente, vamos criar a nossa interface IIterator, para definir os métodos de acesso a nossa coleção</p>
+
+```c#
+    public interface IIterator
+    {
+        object First();
+        object Next();
+        object Current();
+        int GetIndex();
+    }
+```
+
+<p>Agora, vamos criar nossa interface Aggregate para definir a operação para criar um Iterador</p>
+
+```c#
+    public interface IAggregate
+    {
+        IIterator CreateIterator();
+    }
+```
+
+<p>Feito isso, vamos implementar o nosso ConcreteAggregate onde será implementado os métodos para inserir um elemento e para obter a quantidade de elementos.</p>
+
+```c#
+ public class AggregateCollection : IAggregate
+ {
+    private ArrayList _items = new ArrayList();
+    public IIterator CreateIterator()
+    {
+        return new IteratorCollection(this);
+    }
+
+    public int Count()
+    {
+        return _items.Count;
+    }
+
+    public object this[int index]
+    {
+        get { return _items[index]; }
+        set { _items.Insert(index, value); }
+    }
+
+    public void Add(object value)
+    {
+        _items.Insert(Count(), value);
+    }
+
+ }
+```
+
+<p>Aqui implementamos os métodos para acessar os registros e para inserir um novo elemento, repare que ela faz uma referência ao IteratorCollection(ConcreteIterator) porém nós ainda não criamos, vamos cria-lo agora.</p>
+
+```c#
+  public class IteratorCollection : IIterator
+  {
+      private AggregateCollection _aggregate;
+      private int _current = 0;
+
+      public IteratorCollection(AggregateCollection aggregate)
+      {
+          _aggregate = aggregate;
+      }
+
+      public object First()
+      {
+          return _aggregate[0];
+      }
+
+      public object Next()
+      {
+          object ret = null;
+          if (_current < _aggregate.Count() - 1)
+          {
+              ret = _aggregate[++_current];
+          }
+
+          return ret;
+      }
+
+      public object Current()
+      {
+          return _aggregate[_current];
+      }
+
+      public int GetIndex()
+      {
+          return _current;
+      }
+  }
+```
+
+<p>Repare que o nosso ConcreteIterator possui uma referência ao ConcreteAggregate e utilizamos seus métodos para acessar o próximo registro, para obter o index, atual, primeiro, etc... Esta classe define os meios para acessar a nossa coleção que está no ConcreteAggregate.</p>
+
+<p>Feito isso nós finalizamos a implementação do nosso iterador, agora é só realizar a chamada e utilizar seus métodos. Devemos lembrar que, ConcreteAggregate é a nossa coleção em si e devemos utilizar o ConcreteIterator para percorrermos os itens dessa coleção.</p>
+
+```c#
+   static void Main(string[] args)
+    {
+        Console.WriteLine("Hello World!");
+        var collection = new AggregateCollection();
+        collection[0] = "item A";
+        collection[1] = "item B";
+        collection[2] = "item C";
+
+        Console.WriteLine($"Quantidade de itens = {collection.Count()}");
+
+
+        collection.Add("item D");
+        collection.Add("item E");
+        collection.Add("item F");
+
+        Console.WriteLine($"Quantidade de itens = {collection.Count()}");
+
+        var iterator = collection.CreateIterator();
+
+        var item = iterator.First();
+
+        while(item != null)
+        {
+            Console.WriteLine(item);
+            item = iterator.Next();
+        }
+
+
+        Console.ReadKey();
+    }
+}
+```
+
+<p><b>Saída</b></p>
+
+
+> <p>Hello World!</p>
+> <p>Quantidade de itens = 3</p>
+> <p>Quantidade de itens = 6</p>
+> <p>item A</p>
+> <p>item B</p>
+> <p>item C</p>
+> <p>item D</p>
+> <p>item E</p>
+> <p>item F</p>
+
+<p>Use o padrão Iterator quando sua coleção tiver uma estrutura de dados complexa, mas você deseja ocultar sua complexidade dos clientes (por motivos de conveniência ou segurança). Use quando deseja reduzir a duplicação do código transversal em seu aplicativo, quando desejar que seu código possa atravessar diferentes estruturas de dados ou quando os tipos dessas estruturas forem desconhecidos anteriormente.</p>
+
+# Lembrança(memento)
+
+<p><b>O que é</b>: Memento é um padrão de design comportamental que permite capturar e armazenar o estado atual do objeto, para que seja possível restaurá-lo posteriormente.</p>
+
+<p><b>Problema</b>: Imagine que você precise de um histórico do objeto, onde você tenha que armazenar todas as alterações que o objeto sofreu, ou até mesmo se você precisar executar uma operação de desfazer/reverter.</p>
+
+<p><b>Solução</b>: O padrão de memento delega a criação do estado do objeto, para o proprietário da classe(objeto de origem), portanto, em vez de outros objetos tentarem copiar o estado do editor(de fora), a própria classe cria o seu objeto de memento, pois ela tem acesso total ao seu próprio objeto. O padrão sugere armazenar a cópia do estado do objeto em um objeto especial chamado de "memento", o objeto original deve criar um cópia de si mesmo e retornar esse objeto especial(memento) para que ele possa ser gerenciado através de uma classe "cuidadora" onde nela armazenará uma pilha(LIFO - ultimo a entrar, primeiro a sair) com os mementos.</p>
+
+<p>Para implementar este padrão, devemos ter em mente que, <b>Originator</b> é a classe que cria o objeto de lembrança com o seu estado atual, <b>Memento</b> é a interface que contém as abstrações necessárias para implementação do ConcreteMemento, <b>ConcreteMemento</b> esta é classe que contém as informações sobre o estado salvo no objeto originator, <b>Caretaker</b> esta é a classe usada para armazenar os objetos mementos onde haverá uma pilha com os elementos.</p>
+
+<p>Para o nosso exemplo, iremos criar um cenário onde será salvo um histórico do objeto pessoa, armazenando todos os seus estados.<p>
+ 
+ <p>Inicialmente, vamos criar as interfaces para o objeto memento e para o nosso originador.<p>
+ 
+```c#
+   public interface IMemento
+   {
+       IOriginator GetState();
+       DateTime GetDate();
+       void Show();
+   }
+   
+   public interface IOriginator
+   {
+       IMemento Save();
+   }
+```
+
+<p>Agora, iremos criar o nosso objeto originador "Person".</p>
+
+```c#
+   public class Person: IOriginator
+   {
+       public string Name { get; set; }
+       public int Age { get; set; }
+       public string Description { get; set; }
+
+       public IMemento Save()
+       {
+           return new PersonMemento((Person)MemberwiseClone());
+       }
+   }
+```
+
+<p>Observe que o método Save retorna uma interface do IMemento e neste método é criado a classe concreta de memento(PersonMemento que não temos ainda), agora vamos implementar a classe PersonMemento.</p>
+
+```c#
+  public class PersonMemento : IMemento
+  {
+      private Person _person;
+      public DateTime Date { get; private set; }
+
+      public PersonMemento(Person person)
+      {
+          _person = person;
+          Date = DateTime.Now;
+      }
+
+      public IOriginator GetState()
+      {
+          return _person;
+      }
+
+      public DateTime GetDate()
+      {
+          return Date;
+      }
+
+      public void Show()
+      {
+          Console.WriteLine($"Pessoa: {_person.Name}, de {_person.Age} anos, {_person.Description}");
+      }
+  }
+```
+
+<p>Repare que o objeto de memento possui a data em que está sendo criado, e no construtor é passado o objeto originador, assim conseguimos "tirar uma foto" do estado atual do objeto.</p>
+
+<p>Com isso feito, temos tudo o que é necessário para implementar o nosso Caretaker que é o responsável por gerenciar esses estados.</p>
+
+```c#
+    public class Caretaker
+    {
+        private Stack<IMemento> _stack = new Stack<IMemento>();
+        private IOriginator _originator;
+        public Caretaker(IOriginator originator)
+        {
+            _originator = originator;
+        }
+
+        public void Backup()
+        {
+            _stack.Push(_originator.Save());
+        }
+
+        public void Undo()
+        {
+            _stack.Pop();
+        }
+
+        public void ShowHistory()
+        {
+            foreach (var item in _stack)
+            {
+                Console.WriteLine($"{item.GetDate().ToString("dd/MM/yyyy HH:mm:ss")}");
+                item.Show();
+            }
+        }
+    }
+```
+
+<p>Observe que o Caretaker mantém uma pilha dos objetos de memento, e também possui uma referência ao nosso objeto originador. Observe que o método Backup ativa o método Save que é criado no objeto originador e assim inserindo o retorno do método na pilha de lembranças, com isso conseguimos manter seu histórico.</p>
+
+<p>Feito isso, agora é só chamar os método e verificar sua usabilidade.</p>
+
+```c#
+       static void Main(string[] args)
+        {
+            Console.WriteLine("Hello World!");
+            var person = new Person();
+            var caretaker = new Caretaker(person);
+            person.Name = "Gustavo";
+            caretaker.Backup();
+            person.Age = 23;
+            caretaker.Backup();
+            person.Description = "lorem ipsum";
+            caretaker.Backup();
+            person.Description = "lorem ipsum - 2";
+            caretaker.Backup();
+            caretaker.ShowHistory();
+            
+            caretaker.Undo();
+            caretaker.Undo();
+            caretaker.Undo();
+            
+            caretaker.ShowHistory();
+            Console.ReadKey();
+        }
+```
+
+<p><b>Saída</b></p>
+
+> <p>Hello World!</p>
+> <p>19/06/2020 19:26:56</p>
+> <p>Pessoa: Gustavo, de 23 anos, lorem ipsum - 2</p>
+> <p>19/06/2020 19:26:56</p>
+> <p>Pessoa: Gustavo, de 23 anos, lorem ipsum</p>
+> <p>19/06/2020 19:26:56</p>
+> <p>Pessoa: Gustavo, de 23 anos,</p>
+> <p>19/06/2020 19:26:56</p>
+> <p>Pessoa: Gustavo, de 0 anos,</p>
+> <p>19/06/2020 19:26:56</p>
+> <p>Pessoa: Gustavo, de 0 anos,</p>
+
+<p>Use o padrão Memento quando desejar produzir capturas instantâneas do estado do objeto para poder restaurar um estado anterior do objeto ou quando o acesso direto aos campos getters/setters do objeto violar seu encapsulamento.</p>
+
+
+# Método de Modelo(template method)
+
+<p><b>O que é</b>: O Template Method é um padrão de design comportamental que define o esqueleto de como um algoritmo pode ser executado na superclasse, mas permite que as subclasses substituam essas etapas sem alterar sua estrutura.</p>
+
+<p><b>Problema</b>: Imagine que você esteja trabalhando com dois componentes diferentes, mas que possuem muitos métodos em comum(as vezes são comuns até em termos de negócio), porém para realizar a implementação de um componente, não se tinha em mente que existiria o outro, então não foi pensado em nenhuma estrutura para a criação desses componentes. Portanto, a criação desses componentes resultaram em muito código duplicado o que pode vir a apresentar muitas falhas, principalmente se você precisar alterar um método e se esquecer que o outro também existe(duplicado).</p>
+
+<p><b>Solução</b>: O padrão template method sugere que você divida esses algoritmos em uma série de etapas e transforme essas etapas em métodos que poderão ser chamados através de um único método "Template Method". Basicamente você deve criar uma superclasse contendo todas as etapas em comum e deixando-as em um método "virtual" para que possa ser substituída por uma outra subclasse, a única etapa que não pode ser manipulada é o "Template Method" pois ele é a estrutura principal "o esqueleto".</p>
+
+<p>Para realizar esta implementação devemos ter em mente que, <b>AbstractClass</b> é a classe abstrata que contém o Template Method e as operações para cada etapa, <b>ConcreteClass</b> são as subclasses que heram da AbstractClass e implementa os métodos conforme necessário <b>se</b> for necessário.</p>
+
+<p>Para o nosso exemplo, foi criado um cenário simples onde será aberto dois tipos de arquivos diferentes, um CSV e um PDF, a implementação para abrir e consumir os dados do arquivo são muito semelhantes então criaremos um FileBase(AbstractClass).</p>
+
+<p>Inicialmente, vamos verificar tudo o que há em comum para abrir um arquivo, então podemos considerar que: OpenFile; CloseFile; ExtractData; ParseData. Podemos considerar que esses métodos são comuns independente do tipo de arquivo a ser aberto, a final precisamos abrir o arquivo, extrair os dados, converter os dados e depois fechar o arquivo. Então será isso que implementaremos na nossa classe base.</p>
+
+```c#
+    public abstract class FileBase
+    {
+        public Dictionary<string, IEnumerable<int>> TemplateMethod(string directory)
+        {
+            var response = new Dictionary<string, IEnumerable<int>>();
+            OpenFile(directory);
+            var index = 1;
+            foreach (var item in ExtractData().Skip(1))
+            {
+                response.Add($"Linha - {index}", ParseData(item));
+                index++;
+            }
+            CloseFile(directory);
+            return response;
+        }
+
+
+        public virtual void OpenFile(string directory)
+        {
+            Console.WriteLine($"Abre arquivo no diretório {directory}");
+        }
+
+        public virtual void CloseFile(string directory)
+        {
+            Console.WriteLine($"Fecha arquivo no diretório {directory}");
+        }
+
+        public virtual IEnumerable<string> ExtractData()
+        {
+            return new List<string>()
+            {
+                "um,dois,três,quatro,cinco,seis,sete,oito,nove,dez",
+                "1,2,3,4,5,6,7,8,9,10",
+                "1,2,3,4,5,6,7,8,9,10",
+                "1,2,3,4,5,6,7,8,9,10",
+                "1,2,3,4,5,6,7,8,9,10",
+                "1,2,3,4,5,6,7,8,9,10"
+            };
+        }
+
+        public virtual IEnumerable<int> ParseData(string row)
+        {
+            var response = new List<int>();
+            foreach (var item in row.Split(','))
+                response.Add(int.Parse(item));
+
+            return response;
+        }
+    }
+```
+
+ - O objetivo desse exemplo, é mostrar como poderíamos utilizar o Template Method, devido a isso não foi implementado a abertura e conversão de um arquivo de verdade, estamos fazendo somente para exemplificar o pattern.
+
+<p>Observe que cada etapa é um método virtual, o que significa que poderá ser substituído por uma subclasse, a final cada uma terá sua particularidade, mas a estrutura, o esqueleto para abrir um arquivo será sempre igual e está presente no nosso Template Method que não pode ser substituído por uma subclasse.</p>
+
+
+<p>Feito isso, iremos implementar a abertura para o arquivo CSV.</p>
+
+```c#
+ public class CsvFile : FileBase
+ {
+
+     public override void OpenFile(string directory)
+     {
+         Console.WriteLine($"Abre arquivo CSV no diretório ~~ {directory}");
+     }
+
+     public override void CloseFile(string directory)
+     {
+         Console.WriteLine($"Fecha arquivo CSV no diretório ~~ {directory}");
+     }
+
+     public override IEnumerable<string> ExtractData()
+     {
+         return new List<string>()
+         {
+             "A,B,C",
+             "1,2,3",
+             "1,2,3",
+             "1,2,3",
+             "1,2,3",
+             "1,2,3"
+         };
+     }
+ }
+```
+
+<p>Observe que para realizar a abertura, fechamento e extrair os dados de um arquivo, temos uma lógica diferente da implementada na classe base, e por isso houve a necessidade de realizar a implementação.</p>
+
+<p>Agora iremos criar o nosso PDFFile.</p>
+
+```c#
+public class PdfFile : FileBase
+{
+
+    public override void OpenFile(string directory)
+    {
+        Console.WriteLine($"Abre arquivo PDF no diretório ~~ {directory}");
+    }
+
+    public override void CloseFile(string directory)
+    {
+        Console.WriteLine($"Fecha arquivo PDF no diretório ~~ {directory}");
+    }
+
+}
+```
+
+<p>Observe que aqui, a lógica diferente é somente para abrir e fechar o arquivo.</p>
+
+<p>Com isso implementado, conseguimos realizar a implementação do pattern Template Method, agora é só realizar a chamada do método.</p>
+
+```c#
+ static void Main(string[] args)
+ {
+     Console.WriteLine("Hello World!");
+     var pflFile = new PdfFile();
+     var pdfValues = pflFile.TemplateMethod("diretório para arquivo pdf");
+     Console.WriteLine("Resultado pdf File");
+     foreach (var row in pdfValues)
+     {
+         Console.WriteLine(row.Key);
+         foreach (var item in row.Value)
+             Console.Write($"  {item}");
+         Console.WriteLine();
+     }
+
+     var csvFile = new CsvFile();
+     var csvValues = csvFile.TemplateMethod("diretório para arquivo csv");
+     Console.WriteLine("Resultado csv File");
+     foreach (var row in csvValues)
+     {
+         Console.WriteLine(row.Key);
+         foreach (var item in row.Value)
+             Console.Write($"  {item}");
+         Console.WriteLine();
+     }
+
+     Console.ReadKey();
+ }
+```
+
+<p><b>Saída</b></p>
+
+> <p>Hello World!</p>
+> <p>Abre arquivo PDF no diretório ~~ diretório para arquivo pdf</p>
+> <p>Fecha arquivo PDF no diretório ~~ diretório para arquivo pdf</p>
+> <p>Resultado pdf File</p>
+> <p>Linha - 1</p>
+> <p>  1  2  3  4  5  6  7  8  9  10</p>
+> <p>Linha - 2</p>
+> <p>  1  2  3  4  5  6  7  8  9  10</p>
+> <p>Linha - 3</p>
+> <p>  1  2  3  4  5  6  7  8  9  10</p>
+> <p>Linha - 4</p>
+> <p>  1  2  3  4  5  6  7  8  9  10</p>
+> <p>Linha - 5</p>
+> <p>  1  2  3  4  5  6  7  8  9  10</p>
+> <p>Abre arquivo CSV no diretório ~~ diretório para arquivo csv</p>
+> <p>Fecha arquivo CSV no diretório ~~ diretório para arquivo csv</p>
+> <p>Resultado csv File</p>
+> <p>Linha - 1</p>
+> <p>  1  2  3</p>
+> <p>Linha - 2</p>
+> <p>  1  2  3</p>
+> <p>Linha - 3</p>
+> <p>  1  2  3</p>
+> <p>Linha - 4</p>
+> <p>  1  2  3</p>
+> <p>Linha - 5</p>
+> <p>  1  2  3</p>
+
+<p>Use o padrão Template Method quando desejar permitir que os clientes estendam apenas etapas específicas de um algoritmo, mas não o algoritmo inteiro ou sua estrutura, quando tiver várias classes que contêm algoritmos quase idênticos, com algumas pequenas diferenças. Como resultado, pode ser necessário modificar todas as classes quando o algoritmo for alterado.</p>
+
+
+# Estado(state)
+
+<p><b>O que é</b>: State é um padrão de design comportamental que permite alterar o comportamento de um objeto de acordo com o seu estado atual, a cada vez que o estado muda,  um novo comportamento pode ser tomado.</p>
+
+<p><b>Problema</b>: Este padrão está relacionado ao conceito de uma máquina de estado finito, ou seja, quando seu código esta cheio de if/else e switch case, tomando vários comportamentos diferentes alterando o comportamento da lógica de negócio.</p>
+
+<p><b>Solução</b>: O padrão State sugere que você crie novas classes para cada comportamento possível de estados, você deve criar uma classe extraindo todos os comportamentos específicos para cada estado em particular, ao invés de implementar tudo no objeto original. O objeto original deve manter uma referência a um objeto de estado(que representa o estado atual) delegando todo o trabalho a ele.</p>
+
+<p>Para implementar esse pattern, devemos ter em mente que <b>State</b> é uma interface utilizada para acessar as funcionalidades que serão utilizadas pelos estados, <b>Context</b> é a classe que contém o objeto de estado concreto e fornece o comportamento de acordo com o seu estado atual, e por fim <b>ConcreteState</b> que é a classe implementada pela interface State e fornece o comportamento para cada determinado estado do objeto Context.</p>
+
+<p>Para o nosso exemplo, foi criado um cenário simples onde de acordo com o tipo de operação, será aplicada uma regra de matemática.</p>
+
+<p>Inicialmente, iremos criar a interface de estado.</p>
+
+```c#
+ public interface IStateSimpleCalculator
+ {
+     void Execute(SimpleCalculator context);
+ }
+ ```
+ 
+ <p>Observe que para o método execute é passado o objeto SimpleCalculator, ele é o nosso context, vamos cria-lo.</p>
+ 
+```c#
+public class SimpleCalculator
+{
+    private IStateSimpleCalculator _stateSimpleCalculator;
+
+    public SimpleCalculator(int firstNumber, int secondNumber)
+    {
+        FirstNumber = firstNumber;
+        SecondNumber = secondNumber;
+    }
+
+    public int FirstNumber { get; set; }
+    public int SecondNumber { get; set; }
+
+    public Operation Operation { get; set; }
+
+    public void SetState(IStateSimpleCalculator state)
+    {
+        _stateSimpleCalculator = state;
+    }
+
+    public void ExecuteState()
+    {
+        _stateSimpleCalculator?.Execute(this);
+    }
+}
+
+public enum Operation
+{
+    Sum,
+    Subtraction,
+    Multiplication,
+    Division
+}
+```
+
+<p>Observe que o nosso Context possui uma referência a interface de state e também possui os métodos para inserir(SetState) e executar(ExecuteState) um estado.</p>
+
+<p>Feito isso, temos a nossa interface de State que será implementado por cada objeto de estado possível e também, temos o nosso Context, o mesmo deve ser passado para cada objeto de estado, para que se possa tomar alguma ação com base nele.</p>
+ 
+ <p>Agora, iremos implementar os objetos de stado, irei exemplificar somente dois, mas você pode consultar o exemplo completo, clicando "aqui".</p>
+ 
+ ```c#
+public class DivisionState : IStateSimpleCalculator
+{
+   public void Execute(SimpleCalculator context)
+   {
+       Console.WriteLine($"Resultado da divisão é: {context.FirstNumber} / {context.SecondNumber} = {(context.SecondNumber == 0 ? "Inválida.. Divisão por 0" : $"{context.FirstNumber / context.SecondNumber}")}");
+   }
+}
+    
+public class SumState : IStateSimpleCalculator
+{
+   public void Execute(SimpleCalculator context)
+   {
+       Console.WriteLine($"Resultado da soma é: {context.FirstNumber} + {context.SecondNumber} = {context.FirstNumber + context.SecondNumber}");
+   }
+}    
+ ```
+ 
+ <p>Feito isso, é só validar qual o tipo de operação e qual estado será inserido ao nosso context. Quando tivermos a informação de qual estado deve ser inserido, é só passar o objeto concreto para o context, através do método SetState e para executar é através do método ExecuteState.</p>
+ 
+ ```c#
+static void Main(string[] args)
+{
+    Console.WriteLine("Hello World!");
+    var intRandom = new Random();
+
+    for (int i = 0; i < Enum.GetNames(typeof(Operation)).Length; i++)
+    {
+        var simpleCalculator = new SimpleCalculator(intRandom.Next(-2, 20), intRandom.Next(-2, 20))
+        {
+            Operation = (Operation)i
+        };
+
+        switch (simpleCalculator.Operation)
+        {
+            case Operation.Multiplication:
+                simpleCalculator.SetState(new MultiplicationState());
+                break;
+            case Operation.Division:
+                simpleCalculator.SetState(new DivisionState());
+                break;
+            case Operation.Subtraction:
+                simpleCalculator.SetState(new SubtractionState());
+                break;
+            case Operation.Sum:
+                simpleCalculator.SetState(new SumState());
+                break;
+        }
+
+        simpleCalculator.ExecuteState();
+    }
+
+    Console.ReadKey();
+}
+ 
+ ```
+ 
+ <p></b>Saída</b></p>
+ 
+> <p>Hello World!</p>
+> <p>Resultado da soma é: 8 + 18 = 26</p>
+> <p>Resultado da subtraçao é: 4 - 3 = 1</p>
+> <p>Resultado da multiplicaçao é: 5 * 1 = 5</p>
+> <p>Resultado da divisao é: 15 / 13 = 1</p>
+
+<p>Use o padrão State quando você tiver um objeto que se comporte de maneira diferente dependendo do estado atual, o número de estados seja enorme e o código específico do estado seja alterado com frequência. Quando tiver uma classe poluída com condicionais massivas que alteram o comportamento da classe de acordo com os valores atuais dos campos da classe.</p>
+ 
+# Estratégia(strategy)
+
+ <p></b>O que é</b>: Strategy é um padrão de design comportamental que lhe permite definir uma família de algoritimos, onde você coloca cada um em uma classe separada, fazendo com que seja possível selecioná-los e executá-los.</p>
+ 
+<p><b>Problema</b>: O objetivo de representar objetos de estratégia, é que você consiga variar o conjunto de estratégia referênte ao contexto, assim você consegue escolher o comportamento que será seguido de acordo com o fluxo/rumo que está sendo tomado, sendo assim, pode-se notar que irá diminuir o acoplamento entre as classes e também vai de encontro ao princípio de "open-closed(SOLID)".</p>
+
+<p><b>Solução</b>: O padrão strategy sugere que você extraia o comportamento específico de um contexto em várias classes separadas de estratégias. A classe original de contexto deve possuir uma referência as classes de estratégia, para que seja possível delegar todo o trabalho a elas. A classe de contexto não tem conhecimento sobre as classes concretas de estratégias e sim da sua interface, tornando possível o contexto executar qualquer estratégia desejada.</p>
+
+<p>Para implementar este pattern, devemos ter em mente que, <b>Strategy</b> é a interface usada pelo contexto para chamar os algoritmos desejados, <b>Context</b> é a classe que possui a referência a interfce Strategy, onde é possível ser configurada em tempo de execução de acordo com a necessidade e por fim <b>ConcreteStrategy</b> é a classe que contém os detalhes da implementação.</p>
+
+<p>Para o nosso exemplo, foi criado um cenário simples onde será executado as operações de uma calculadora.</p>
+
+<p>Inicialmente iremos criar a nossa interface de strategy</p>
+
+```c#
+ public interface IStrategy
+ {
+     string Execute();
+ }
+```
+
+<p>Agora, iremos criar uma classe de contexto, onde o objetivo é executar as operações de uma calculadora e armazenar o resultado dentro de uma lista, para isso, criaremos o contexto da seguinte maneira.</p>
+
+```c#
+public class CalculatorContext
+{
+   private IList<IStrategy> _strategies = new List<IStrategy>();
+
+   public CalculatorContext SetStrategy(IStrategy strategy)
+   {
+       _strategies.Add(strategy);
+       return this;
+   }
+
+   public IEnumerable<string> Execute()
+   {
+       var response = new List<string>();
+       foreach (var item in _strategies)
+           response.Add(item.Execute());
+
+       return response;
+   }
+}
+```
+
+<p>Observe que o contexto armazena uma referência a uma lista de estratégias, onde pode ser passada uma a uma por parâmetro através do método SetStrategy, com isso, conseguimos criar o método Execute que irá executar uma por uma das estratégias informadas</p>
+
+<p>Agora, iremos criar as estratégias, irei exemplificar somente duas, mas você pode consultar o exemplo completo clicando "aqui"</p>
+
+```c#
+public class DivisionStrategy : IStrategy
+{
+    public DivisionStrategy(int firstNumber, int secondNumber)
+    {
+        FirstNumber = firstNumber;
+        SecondNumber = secondNumber;
+    }
+
+    private int FirstNumber { get; set; }
+    private int SecondNumber { get; set; }
+
+    public string Execute()
+    {
+        return $"Resultado da divisão é: {FirstNumber} / {SecondNumber} = {(SecondNumber == 0 ? "Inválida.. Divisão por 0" : $"{FirstNumber / SecondNumber}")}";
+    }
+}
+
+
+public class MultiplicationStrategy : IStrategy
+{
+    public MultiplicationStrategy(int firstNumber, int secondNumber)
+    {
+        FirstNumber = firstNumber;
+        SecondNumber = secondNumber;
+    }
+
+    private int FirstNumber { get; set; }
+    private int SecondNumber { get; set; }
+
+    public string Execute()
+    {
+        return $"Resultado da multplicação é: {FirstNumber} * {SecondNumber} = {FirstNumber * SecondNumber}";
+    }
+}
+```
+
+<p>Observe que se quiséssemos adicionar mais parâmetros isso seria possível, aqui somos livres para implementar da maneria que for necessário. Caso haja a necessiadade de realizar a comunicação com algum outro service, você consegue realizar a implementação.</p>
+
+<p>Agora, é só chamar o nosso contexto, passando as estratégias necessárias e chamar o método execute.</p>
+
+```c#
+static void Main(string[] args)
+{
+    Console.WriteLine("Hello World!");
+    var random = new Random();
+    var firstNumber = random.Next(-10, 30);
+    var secondNumber = random.Next(-20, 40);
+
+    var context = new CalculatorContext();
+
+    context
+        .SetStrategy(new SumStrategy(firstNumber, secondNumber))
+        .SetStrategy(new SubtractionStrategy(firstNumber, secondNumber))
+        .SetStrategy(new MultiplicationStrategy(firstNumber, secondNumber))
+        .SetStrategy(new DivisionStrategy(firstNumber, secondNumber));
+
+    foreach (var item in context.Execute())
+        Console.WriteLine(item);
+
+
+    Console.ReadKey();
+}
+```
+
+<p><b>Saída</b></p>
+
+> <p>Hello World!</p>
+> <p>Resultado da soma é: 8 + 4 = 12</p>
+> <p>Resultado da subtraçao é: 8 - 4 = 4</p>
+> <p>Resultado da multplicaçao é: 8 * 4 = 32</p>
+> <p>Resultado da divisao é: 8 / 4 = 2</p>
+
+<p>Use o padrão Strategy quando desejar usar diferentes variantes de um algoritmo dentro de um objeto e poder alternar de um algoritmo para outro durante o tempo de execução, quando tiver muitas classes semelhantes que diferem apenas na maneira como elas executam algum comportamento. Use o padrão para isolar a lógica de negócios de uma classe dos detalhes de implementação de algoritmos que podem não ser tão importantes no contexto dessa lógica.</p>
+
+# Visitante(visitor)
+
+<p><b>O que é</b>: Visitor é um padrão de design comportamental que permite separar algoritmos dos objetos nos quais eles operam. Permite que seja adicionado mais operações sem precisar modificar os objetos.</p>
+
+<p><b>Problema</b>: Imagine que você possua uma classe grande, complexa e em produção. Surgiu uma nova demanda, em que você precisaria realizar uma implementação nesta classe para que seja possível extraí-la em um formato X. A primeira coisa que você pensou, foi adicionar um método a esta classe, para realizar a exportação, porém, o arquiteto não deixou, pois não queria correr o risco, de que uma nova implementação ocasionasse em um bug em algum outro local do sistema, a final, você estaria alterando a classe original. Outro ponto negativo, é que muito provavelmente haveria a necessidade de exportar também para o formato Y e a final, não tinha muito sentido acrescentar o código de exportação dentro dessas classes de nó, pois essa não era sua finalidade.</p>
+
+<p><b>Solução</b>: O padrão visitor sugere que você coloque esse comportamento em uma classe separada chamada visitor, ao invés de integrá-lo a classe original, com isso o objeto original deve simplesmente chamar o método do visitor sendo passado como argumento, assim, o visitor teria acesso a todos os dados necessários do objeto.</p>
+
+<p>Para implementar este padrão, devemos ter em mente que, <b>Client</b> é a classe que tem acesso aos objetos da estrutura e pode informar qual visitante determinado objeto irá receber, no nosso caso, será o metodo Main, <b>Element</b> esta é a interface que define o método Accept, onde será passado como parâmetro um visitor, <b>ConcreteElement</b> esta é a classe "original" onde você poderá instrui-la a aceitar um visitante para executar determinadas ações, <b>Visitor</b> esta é a interface para especificar os objetos concretos, e por fim, <b>ConcreteVisitor</b> essas são as classes que iram implemetar a interface Visitor.</p>
+
+<p>Para o nosso exemplo, foi criado um cenário, onde há duas classes que executam operações de calculadora, e elas só poderãm ser modificadas, somente com base em um visitor(pois o arquiteto nao deixou mexer nelas). Para um dos visitantes deve transformar as classes em um JSON e o outro deve pegar o nome de suas propriedades.</p>
+
+<p>Inicialmente, vamos criar as classes de ConcreteElement</p>
+
+```c#
+public class MultiplyNumerics
+{
+    public int FirstNumber { get; set; }
+    public int SecondNumber { get; set; }
+
+    public MultiplyNumerics(int firstNumber, int secondNumber)
+    {
+        FirstNumber = firstNumber;
+        SecondNumber = secondNumber;
+    }
+
+    public int Multply()
+    {
+        return FirstNumber * SecondNumber;
+    }
+}
+    
+public class SumDecimals
+{
+    public decimal FirstNumber { get; set; }
+    public decimal SecondNumber { get; set; }
+
+    public SumDecimals(decimal firstNumber, decimal secondNumber)
+    {
+        FirstNumber = firstNumber;
+        SecondNumber = secondNumber;
+    }
+
+    public decimal Sum()
+    {
+        return FirstNumber + SecondNumber;
+    }
+}    
+``` 
+
+<p>Agora, iremos criar a nossa interface de Visitor.</p>
+
+```c#
+public interface IVisitor
+{
+    void VisitElement(MultiplyNumerics multiplyNumerics);
+    void VisitElement(SumDecimals sumDecimals);
+}
+```
+
+<p>Observe que cada método possui o mesmo nome, eles só diferen nos parâmetros que recebem, pois é um para cada tipo de ConcreteElement.</p>
+
+<p>Com isso, conseguimos implementar os nossos ConcreteVisitors.</p>
+
+```c#
+public class VisitorGetPropertyName : IVisitor
+{
+    public void VisitElement(MultiplyNumerics multiplyNumerics)
+    {
+        Console.WriteLine($"Visitante {this.GetType()}, obtem {multiplyNumerics.GetType()}");
+    }
+
+    public void VisitElement(SumDecimals sumDecimals)
+    {
+        Console.WriteLine($"Visitante {this.GetType()}, obtem {sumDecimals.GetType()}");
+    }
+}
+
+public class VisitorTransformIntoJson: IVisitor
+{
+    public void VisitElement(MultiplyNumerics multiplyNumerics)
+    {
+        Console.WriteLine($"Resultado da multiplicação: {multiplyNumerics.Multply()}");
+        Console.WriteLine(JsonConvert.SerializeObject(multiplyNumerics));
+    }
+
+    public void VisitElement(SumDecimals sumDecimals)
+    {
+        Console.WriteLine($"Resultado da soma: {sumDecimals.Sum()}");
+        Console.WriteLine(JsonConvert.SerializeObject(sumDecimals));
+    }
+}
+```
+
+<p>Feito isso, temos o nosso Visitor e os ConcreteVisitors, porém o nosso ConcreteElement não consegue acessar esses visitores, devemos implementar a interface Element e ajustar o nosso ConcreteElement com a nova interface.</p>
+
+```c#
+public interface IElement
+{
+    void Accept(IVisitor visitor);
+}
+```
+
+<p>Agora é só ajustar o nosso ConcreteElement inserindo esta nova interface e ajustando o método Accept</p>
+
+```c#
+public class MultiplyNumerics : IElement
+{
+    public int FirstNumber { get; set; }
+    public int SecondNumber { get; set; }
+
+    public MultiplyNumerics(int firstNumber, int secondNumber)
+    {
+        FirstNumber = firstNumber;
+        SecondNumber = secondNumber;
+    }
+
+    public int Multply()
+    {
+        return FirstNumber * SecondNumber;
+    }
+
+    public void Accept(IVisitor visitor)
+    {
+        visitor.VisitElement(this);
+    }
+}
+
+public class SumDecimals : IElement
+{
+   public decimal FirstNumber { get; set; }
+   public decimal SecondNumber { get; set; }
+
+   public SumDecimals(decimal firstNumber, decimal secondNumber)
+   {
+       FirstNumber = firstNumber;
+       SecondNumber = secondNumber;
+   }
+
+   public decimal Sum()
+   {
+       return FirstNumber + SecondNumber;
+   }
+
+   public void Accept(IVisitor visitor)
+   {
+       visitor.VisitElement(this);
+   }
+}
+
+```
+
+<p>Agora, finalizamos a implementação, basta somente realizar a chamada e informar um visitor ao nosso ConcreteElement.</p>
+
+```c#
+static void Main(string[] args)
+{
+    Console.WriteLine("Hello World!");
+    var client = new List<IElement>
+    {
+        new MultiplyNumerics(20,30),
+        new SumDecimals(53.42M,43.99M)
+    };
+
+    var transformIntoJson = new VisitorTransformIntoJson();
+    foreach (var item in client)
+        item.Accept(transformIntoJson);
+
+    var getPropertyName = new VisitorGetPropertyName();
+    foreach (var item in client)
+        item.Accept(getPropertyName);
+
+    Console.ReadKey();
+}
+```
+
+<p><b>Saída</b></p>
+
+> <p>Hello World!</p>
+> <p>Resultado da multiplicaçao: 600</p>
+> <p>{"FirstNumber":20,"SecondNumber":30}</p>
+> <p>Resultado da soma: 97,41</p>
+> <p>{"FirstNumber":53.42,"SecondNumber":43.99}</p>
+> <p>Visitante Design.Pattern.Visitor.Visitor.VisitorGetPropertyName, obtem Design.Pattern.Visitor.Element.MultiplyNumerics</p>
+> <p>Visitante Design.Pattern.Visitor.Visitor.VisitorGetPropertyName, obtem Design.Pattern.Visitor.Element.SumDecimals</p>
+
+<p>Use o Visitor quando precisar executar uma operação em todos os elementos de uma estrutura de objeto complexa (por exemplo, uma árvore de objetos), para limpar a lógica de negócios dos comportamentos auxiliares. Quando um comportamento fizer sentido apenas em algumas classes de uma hierarquia de classes, mas não em outras.</p>
+
+
+
 
 
 
