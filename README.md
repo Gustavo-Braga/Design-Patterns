@@ -3098,7 +3098,129 @@ static void Main(string[] args)
 
 <p>Use o padrão State quando você tiver um objeto que se comporte de maneira diferente dependendo do estado atual, o número de estados seja enorme e o código específico do estado seja alterado com frequência. Quando tiver uma classe poluída com condicionais massivas que alteram o comportamento da classe de acordo com os valores atuais dos campos da classe.</p>
  
+# Estratégia(strategy)
+
+ <p></b>O que é</b>: Strategy é um padrão de design comportamental que lhe permite definir uma família de algoritimos, onde você coloca cada um em uma classe separada, fazendo com que seja possível selecioná-los e executá-los.</p>
  
+<p><b>Problema</b>: O objetivo de representar objetos de estratégia, é que você consiga variar o conjunto de estratégia referênte ao contexto, assim você consegue escolher o comportamento que será seguido de acordo com o fluxo/rumo que está sendo tomado, sendo assim, pode-se notar que irá diminuir o acoplamento entre as classes e também vai de encontro ao princípio de "open-closed(SOLID)".</p>
+
+<p><b>Solução</b>: O padrão strategy sugere que você extraia o comportamento específico de um contexto em várias classes separadas de estratégias. A classe original de contexto deve possuir uma referência as classes de estratégia, para que seja possível delegar todo o trabalho a elas. A classe de contexto não tem conhecimento sobre as classes concretas de estratégias e sim da sua interface, tornando possível o contexto executar qualquer estratégia desejada.</p>
+
+<p>Para implementar este pattern, devemos ter em mente que, <b>Strategy</b> é a interface usada pelo contexto para chamar os algoritmos desejados, <b>Context</b> é a classe que possui a referência a interfce Strategy, onde é possível ser configurada em tempo de execução de acordo com a necessidade e por fim <b>ConcreteStrategy</b> é a classe que contém os detalhes da implementação.</p>
+
+<p>Para o nosso exemplo, foi criado um cenário simples onde será executado as operações de uma calculadora.</p>
+
+<p>Inicialmente iremos criar a nossa interface de strategy</p>
+
+```c#
+ public interface IStrategy
+ {
+     string Execute();
+ }
+```
+
+<p>Agora, iremos criar uma classe de contexto, onde o objetivo é executar as operações de uma calculadora e armazenar o resultado dentro de uma lista, para isso, criaremos o contexto da seguinte maneira.</p>
+
+```c#
+public class CalculatorContext
+{
+   private IList<IStrategy> _strategies = new List<IStrategy>();
+
+   public CalculatorContext SetStrategy(IStrategy strategy)
+   {
+       _strategies.Add(strategy);
+       return this;
+   }
+
+   public IEnumerable<string> Execute()
+   {
+       var response = new List<string>();
+       foreach (var item in _strategies)
+           response.Add(item.Execute());
+
+       return response;
+   }
+}
+```
+
+<p>Observe que o contexto armazena uma referência a uma lista de estratégias, onde pode ser passada uma a uma por parâmetro através do método SetStrategy, com isso, conseguimos criar o método Execute que irá executar uma por uma das estratégias informadas</p>
+
+<p>Agora, iremos criar as estratégias, irei exemplificar somente duas, mas você pode consultar o exemplo completo clicando "aqui"</p>
+
+```c#
+public class DivisionStrategy : IStrategy
+{
+    public DivisionStrategy(int firstNumber, int secondNumber)
+    {
+        FirstNumber = firstNumber;
+        SecondNumber = secondNumber;
+    }
+
+    private int FirstNumber { get; set; }
+    private int SecondNumber { get; set; }
+
+    public string Execute()
+    {
+        return $"Resultado da divisão é: {FirstNumber} / {SecondNumber} = {(SecondNumber == 0 ? "Inválida.. Divisão por 0" : $"{FirstNumber / SecondNumber}")}";
+    }
+}
+
+
+public class MultiplicationStrategy : IStrategy
+{
+    public MultiplicationStrategy(int firstNumber, int secondNumber)
+    {
+        FirstNumber = firstNumber;
+        SecondNumber = secondNumber;
+    }
+
+    private int FirstNumber { get; set; }
+    private int SecondNumber { get; set; }
+
+    public string Execute()
+    {
+        return $"Resultado da multplicação é: {FirstNumber} * {SecondNumber} = {FirstNumber * SecondNumber}";
+    }
+}
+```
+
+<p>Observe que se quiséssemos adicionar mais parâmetros isso seria possível, aqui somos livres para implementar da maneria que for necessário. Caso haja a necessiadade de realizar a comunicação com algum outro service, você consegue realizar a implementação.</p>
+
+<p>Agora, é só chamar o nosso contexto, passando as estratégias necessárias e chamar o método execute.</p>
+
+```c#
+static void Main(string[] args)
+{
+    Console.WriteLine("Hello World!");
+    var random = new Random();
+    var firstNumber = random.Next(-10, 30);
+    var secondNumber = random.Next(-20, 40);
+
+    var context = new CalculatorContext();
+
+    context
+        .SetStrategy(new SumStrategy(firstNumber, secondNumber))
+        .SetStrategy(new SubtractionStrategy(firstNumber, secondNumber))
+        .SetStrategy(new MultiplicationStrategy(firstNumber, secondNumber))
+        .SetStrategy(new DivisionStrategy(firstNumber, secondNumber));
+
+    foreach (var item in context.Execute())
+        Console.WriteLine(item);
+
+
+    Console.ReadKey();
+}
+```
+
+<p><b>Saída</b></p>
+
+> <p>Hello World!</p>
+> <p>Resultado da soma é: 8 + 4 = 12</p>
+> <p>Resultado da subtraçao é: 8 - 4 = 4</p>
+> <p>Resultado da multplicaçao é: 8 * 4 = 32</p>
+> <p>Resultado da divisao é: 8 / 4 = 2</p>
+
+<p>Use o padrão Strategy quando desejar usar diferentes variantes de um algoritmo dentro de um objeto e poder alternar de um algoritmo para outro durante o tempo de execução, quando tiver muitas classes semelhantes que diferem apenas na maneira como elas executam algum comportamento. Use o padrão para isolar a lógica de negócios de uma classe dos detalhes de implementação de algoritmos que podem não ser tão importantes no contexto dessa lógica.</p>
 
 
 
