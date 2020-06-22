@@ -3222,6 +3222,194 @@ static void Main(string[] args)
 
 <p>Use o padrão Strategy quando desejar usar diferentes variantes de um algoritmo dentro de um objeto e poder alternar de um algoritmo para outro durante o tempo de execução, quando tiver muitas classes semelhantes que diferem apenas na maneira como elas executam algum comportamento. Use o padrão para isolar a lógica de negócios de uma classe dos detalhes de implementação de algoritmos que podem não ser tão importantes no contexto dessa lógica.</p>
 
+# Visitante(visitor)
+
+<p><b>O que é</b>: Visitor é um padrão de design comportamental que permite separar algoritmos dos objetos nos quais eles operam. Permite que seja adicionado mais operações sem precisar modificar os objetos.</p>
+
+<p><b>Problema</b>: Imagine que você possua uma classe grande, complexa e em produção. Surgiu uma nova demanda, em que você precisaria realizar uma implementação nesta classe para que seja possível extraí-la em um formato X. A primeira coisa que você pensou, foi adicionar um método a esta classe, para realizar a exportação, porém, o arquiteto não deixou, pois não queria correr o risco, de que uma nova implementação ocasionasse em um bug em algum outro local do sistema, a final, você estaria alterando a classe original. Outro ponto negativo, é que muito provavelmente haveria a necessidade de exportar também para o formato Y e a final, não tinha muito sentido acrescentar o código de exportação dentro dessas classes de nó, pois essa não era sua finalidade.</p>
+
+<p><b>Solução</b>: O padrão visitor sugere que você coloque esse comportamento em uma classe separada chamada visitor, ao invés de integrá-lo a classe original, com isso o objeto original deve simplesmente chamar o método do visitor sendo passado como argumento, assim, o visitor teria acesso a todos os dados necessários do objeto.</p>
+
+<p>Para implementar este padrão, devemos ter em mente que, <b>Client</b> é a classe que tem acesso aos objetos da estrutura e pode informar qual visitante determinado objeto irá receber, no nosso caso, será o metodo Main, <b>Element</b> esta é a interface que define o método Accept, onde será passado como parâmetro um visitor, <b>ConcreteElement</b> esta é a classe "original" onde você poderá instrui-la a aceitar um visitante para executar determinadas ações, <b>Visitor</b> esta é a interface para especificar os objetos concretos, e por fim, <b>ConcreteVisitor</b> essas são as classes que iram implemetar a interface Visitor.</p>
+
+<p>Para o nosso exemplo, foi criado um cenário, onde há duas classes que executam operações de calculadora, e elas só poderãm ser modificadas, somente com base em um visitor(pois o arquiteto nao deixou mexer nelas). Para um dos visitantes deve transformar as classes em um JSON e o outro deve pegar o nome de suas propriedades.</p>
+
+<p>Inicialmente, vamos criar as classes de ConcreteElement</p>
+
+```c#
+public class MultiplyNumerics
+{
+    public int FirstNumber { get; set; }
+    public int SecondNumber { get; set; }
+
+    public MultiplyNumerics(int firstNumber, int secondNumber)
+    {
+        FirstNumber = firstNumber;
+        SecondNumber = secondNumber;
+    }
+
+    public int Multply()
+    {
+        return FirstNumber * SecondNumber;
+    }
+}
+    
+public class SumDecimals
+{
+    public decimal FirstNumber { get; set; }
+    public decimal SecondNumber { get; set; }
+
+    public SumDecimals(decimal firstNumber, decimal secondNumber)
+    {
+        FirstNumber = firstNumber;
+        SecondNumber = secondNumber;
+    }
+
+    public decimal Sum()
+    {
+        return FirstNumber + SecondNumber;
+    }
+}    
+``` 
+
+<p>Agora, iremos criar a nossa interface de Visitor.</p>
+
+```c#
+public interface IVisitor
+{
+    void VisitElement(MultiplyNumerics multiplyNumerics);
+    void VisitElement(SumDecimals sumDecimals);
+}
+```
+
+<p>Observe que cada método possui o mesmo nome, eles só diferen nos parâmetros que recebem, pois é um para cada tipo de ConcreteElement.</p>
+
+<p>Com isso, conseguimos implementar os nossos ConcreteVisitors.</p>
+
+```c#
+public class VisitorGetPropertyName : IVisitor
+{
+    public void VisitElement(MultiplyNumerics multiplyNumerics)
+    {
+        Console.WriteLine($"Visitante {this.GetType()}, obtem {multiplyNumerics.GetType()}");
+    }
+
+    public void VisitElement(SumDecimals sumDecimals)
+    {
+        Console.WriteLine($"Visitante {this.GetType()}, obtem {sumDecimals.GetType()}");
+    }
+}
+
+public class VisitorTransformIntoJson: IVisitor
+{
+    public void VisitElement(MultiplyNumerics multiplyNumerics)
+    {
+        Console.WriteLine($"Resultado da multiplicação: {multiplyNumerics.Multply()}");
+        Console.WriteLine(JsonConvert.SerializeObject(multiplyNumerics));
+    }
+
+    public void VisitElement(SumDecimals sumDecimals)
+    {
+        Console.WriteLine($"Resultado da soma: {sumDecimals.Sum()}");
+        Console.WriteLine(JsonConvert.SerializeObject(sumDecimals));
+    }
+}
+```
+
+<p>Feito isso, temos o nosso Visitor e os ConcreteVisitors, porém o nosso ConcreteElement não consegue acessar esses visitores, devemos implementar a interface Element e ajustar o nosso ConcreteElement com a nova interface.</p>
+
+```c#
+public interface IElement
+{
+    void Accept(IVisitor visitor);
+}
+```
+
+<p>Agora é só ajustar o nosso ConcreteElement inserindo esta nova interface e ajustando o método Accept</p>
+
+```c#
+public class MultiplyNumerics : IElement
+{
+    public int FirstNumber { get; set; }
+    public int SecondNumber { get; set; }
+
+    public MultiplyNumerics(int firstNumber, int secondNumber)
+    {
+        FirstNumber = firstNumber;
+        SecondNumber = secondNumber;
+    }
+
+    public int Multply()
+    {
+        return FirstNumber * SecondNumber;
+    }
+
+    public void Accept(IVisitor visitor)
+    {
+        visitor.VisitElement(this);
+    }
+}
+
+public class SumDecimals : IElement
+{
+   public decimal FirstNumber { get; set; }
+   public decimal SecondNumber { get; set; }
+
+   public SumDecimals(decimal firstNumber, decimal secondNumber)
+   {
+       FirstNumber = firstNumber;
+       SecondNumber = secondNumber;
+   }
+
+   public decimal Sum()
+   {
+       return FirstNumber + SecondNumber;
+   }
+
+   public void Accept(IVisitor visitor)
+   {
+       visitor.VisitElement(this);
+   }
+}
+
+```
+
+<p>Agora, finalizamos a implementação, basta somente realizar a chamada e informar um visitor ao nosso ConcreteElement.</p>
+
+```c#
+static void Main(string[] args)
+{
+    Console.WriteLine("Hello World!");
+    var client = new List<IElement>
+    {
+        new MultiplyNumerics(20,30),
+        new SumDecimals(53.42M,43.99M)
+    };
+
+    var transformIntoJson = new VisitorTransformIntoJson();
+    foreach (var item in client)
+        item.Accept(transformIntoJson);
+
+    var getPropertyName = new VisitorGetPropertyName();
+    foreach (var item in client)
+        item.Accept(getPropertyName);
+
+    Console.ReadKey();
+}
+```
+
+<p><b>Saída</b></p>
+
+> <p>Hello World!</p>
+> <p>Resultado da multiplicaçao: 600</p>
+> <p>{"FirstNumber":20,"SecondNumber":30}</p>
+> <p>Resultado da soma: 97,41</p>
+> <p>{"FirstNumber":53.42,"SecondNumber":43.99}</p>
+> <p>Visitante Design.Pattern.Visitor.Visitor.VisitorGetPropertyName, obtem Design.Pattern.Visitor.Element.MultiplyNumerics</p>
+> <p>Visitante Design.Pattern.Visitor.Visitor.VisitorGetPropertyName, obtem Design.Pattern.Visitor.Element.SumDecimals</p>
+
+<p>Use o Visitor quando precisar executar uma operação em todos os elementos de uma estrutura de objeto complexa (por exemplo, uma árvore de objetos), para limpar a lógica de negócios dos comportamentos auxiliares. Quando um comportamento fizer sentido apenas em algumas classes de uma hierarquia de classes, mas não em outras.</p>
+
 
 
 
