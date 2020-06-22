@@ -6,7 +6,6 @@ namespace Design.Pattern.Visitor.Element
     {
         public int FirstNumber { get; set; }
         public int SecondNumber { get; set; }
-        private readonly string Name = "Multipicação";
 
         public MultiplyNumerics(int firstNumber, int secondNumber)
         {

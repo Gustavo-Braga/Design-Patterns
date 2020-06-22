@@ -6,7 +6,6 @@ namespace Design.Pattern.Visitor.Element
     {
         public decimal FirstNumber { get; set; }
         public decimal SecondNumber { get; set; }
-        private readonly string Name = "Somar";
 
         public SumDecimals(decimal firstNumber, decimal secondNumber)
         {
