@@ -24,24 +24,24 @@ refactoring.guru</a>)</h6>
 
 # Tipos de padrões de projeto
 
-* [Criacional](#-Criacional)
-* Estrutural
-* Comportamental
+* [Criacional](#Criacional)
+* [Estrutural](#Estrutural)
+* [Comportamental](#Comportamental)
 
 Criacional
-----------
+--
 
 <p>Refere-se a mecanismos para a criação de objetos, tem como objetivo abstrair a instancia dos objetos, de maneira que permita a flexibilidade e reutilização do código existente.</p>
 
- * [Singleton](#-Singleton)
- * Protótipo(prototype)
+ * [Singleton](#Singleton)
+ * [Protótipo(prototype)](#Protótipo(prototype))
  * Constutor(builder)
  * Método de Fábrica(factory method)
  * Fábrica Abstrata(abstract factory)
 
 
 Singleton
----------
+--
 
 **O que é**: Singleton é um padrão de design criacional que lhe permite que apenas uma instância desse tipo de objeto exista.
 
@@ -94,7 +94,8 @@ Console.WriteLine($"Somente uma instância de ProductRepository: {repository.Tab
 
 Use o padrão singleton quando, necessitar de somente uma instância disponível para as classes do sistema, por exemplo, uma classe de banco de dados. 
 
-# Protótipo(prototype)
+Protótipo(prototype)
+--
 
 <p><b>O que é</b>: protótipo é um padrão de design criacional que permite criar novos objetos a partir de um modelo original, permite 
 copiar objetos sem tornar o código dependente de suas classes</p>
