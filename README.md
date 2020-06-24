@@ -36,8 +36,8 @@ Criacional
  * [Singleton](#singleton)
  * [Protótipo(prototype)](#protótipoprototype)
  * [Constutor(builder)](#constutorbuilder)
- * [Método de Fábrica(factory method)](#metodo-de-fabricafactory-method)
- * [Fábrica Abstrata(abstract factory)](#fabrica-abstrataabstract-factory)
+ * [Método de Fábrica(factory method)](#método-de-fábricafactory-method)
+ * [Fábrica Abstrata(abstract factory)](#fábrica-abstrataabstract-factory)
 
 
 [Singleton](#criacional)
