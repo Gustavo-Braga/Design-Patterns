@@ -24,7 +24,7 @@ refactoring.guru</a>)</h6>
 
 # Tipos de padrões de projeto
 
-* [Criacional](#-criacional)
+* [Criacional](#-Criacional)
 * Estrutural
 * Comportamental
 
@@ -33,7 +33,7 @@ Criacional
 
 <p>Refere-se a mecanismos para a criação de objetos, tem como objetivo abstrair a instancia dos objetos, de maneira que permita a flexibilidade e reutilização do código existente.</p>
 
- * [Singleton](#-singleton)
+ * [Singleton](#-Singleton)
  * Protótipo(prototype)
  * Constutor(builder)
  * Método de Fábrica(factory method)
