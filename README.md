@@ -24,9 +24,9 @@ refactoring.guru</a>)</h6>
 
 # Tipos de padrões de projeto
 
-* [Criacional](#Criacional)
-* [Estrutural](#Estrutural)
-* [Comportamental](#Comportamental)
+* [Criacional](#criacional)
+* [Estrutural](#estrutural)
+* [Comportamental](#comportamental)
 
 Criacional
 --
@@ -36,11 +36,11 @@ Criacional
  * [Singleton](#singleton)
  * [Protótipo(prototype)](#protótipoprototype)
  * [Constutor(builder)](#constutorbuilder)
- * Método de Fábrica(factory method)
- * Fábrica Abstrata(abstract factory)
+ * [Método de Fábrica(factory method)](#metodo-de-fabricafactory-method)
+ * [Fábrica Abstrata(abstract factory)](#fabrica-abstrataabstract-factory)
 
 
-[Singleton](#Criacional)
+[Singleton](#criacional)
 --
 
 **O que é**: Singleton é um padrão de design criacional que lhe permite que apenas uma instância desse tipo de objeto exista.
@@ -94,7 +94,7 @@ Console.WriteLine($"Somente uma instância de ProductRepository: {repository.Tab
 
 Use o padrão singleton quando, necessitar de somente uma instância disponível para as classes do sistema, por exemplo, uma classe de banco de dados. 
 
-[Protótipo(prototype)](#Criacional)
+[Protótipo(prototype)](#criacional)
 --
 
 <p><b>O que é</b>: protótipo é um padrão de design criacional que permite criar novos objetos a partir de um modelo original, permite 
@@ -218,7 +218,8 @@ copiar objetos sem tornar o código dependente de suas classes</p>
 
 <p>Use o padrão protóripo quando necessitar copiar objetos sem depender da sua classe concreta. O padrão protótipo torna bem mais simples a criação de novos objetos complexos</p>  
 
-# Constutor(builder)
+[Constutor(builder)](#criacional)
+--
 
 <p><b>O que é</b>: Contrutor é um padrão de design criacional que permite construir objetos complexos passo a passo, o padrão construtor descreve uma maneira simples de separar o objeto de sua construção
  
@@ -428,7 +429,8 @@ public class TruckBuilder
  
 <p>Use o padrão construtor quando deseja se livrar de construtores com 10 parâmetros opcionais. Quando desejar que seu código possa criar representações diferentes sobre algum produto(como o nosso exemplo, carro e caminhão). O padrão construtor pode ser aplicado quando a construção de várias representações do produto envolve etapas semelhantes que diferem apenas nos detalhes.</p>
 
-# Método de Fábrica(factory method)
+[Método de Fábrica(factory method)](#criacional)
+--
 
 <p><b>O que é</b>: O Método de Fábrica é um padrão de design criacional que utiliza métodos de fábrica para criar objetos sem precisar especificar a sua classe exata, ele nos fornece uma interface para criar objetos em uma superclasse, mas permite que suas subclasses alterem o tipo do objeto.</p>
 
@@ -534,7 +536,8 @@ public class TruckBuilder
 
 <p>A utilização do padrão Factory é útil quando você precisa criar objetos dinamicamente sem conhecer a classe de implementação, somente usando sua interface, ou também quando existe algum processamento genérico em uma classe, mas a subclasse necessária é decidida dinamicamente no tempo de execução, em outras palavras, quando o cliente não sabe de que subclasse exata ele pode precisar</p>
 
-# Fábrica Abstrata(abstract factory)
+[Fábrica Abstrata(abstract factory)](#criacional)
+--
 
 <p><b>O que é</b>: O padrão de Fábrica Abstrata é um padrão criacional que permite produzir famílias de objetos sem especificar suas classes concretas, este padrão fornece uma maneira de encapsular um grupo de fábricas individuais mas relacionadas, sem especificar suas classes concretas</p>
 
