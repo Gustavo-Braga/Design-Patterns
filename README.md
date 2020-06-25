@@ -1884,6 +1884,7 @@ Refere-se a mecanismos para atribuir responsabilidades entre os objetos, definin
   * [Visitante(visitor)](#visitantevisitor)
 
 [Mediador(mediator)](#comportamental)
+--
 
 **O que é**: Mediator é um padrão de design comportamental que visa reduzir dependências entre objetos, este padão restringe as comunicações diretas entre os objetos e os força a realizar a comunicação apenas através de um objeto mediador. O mediator adiciona um objeto de terceiro para controlar a interação entre os objetos.
  
@@ -2669,6 +2670,7 @@ static void Main(string[] args)
 Use o padrão Iterator quando sua coleção tiver uma estrutura de dados complexa, mas você deseja ocultar sua complexidade dos clientes (por motivos de conveniência ou segurança). Use quando deseja reduzir a duplicação do código transversal em seu aplicativo, quando desejar que seu código possa atravessar diferentes estruturas de dados ou quando os tipos dessas estruturas forem desconhecidos anteriormente.
 
 [Lembrança(memento)](#comportamental)
+--
 
 **O que é**: Memento é um padrão de design comportamental que permite capturar e armazenar o estado atual do objeto, para que seja possível restaurá-lo posteriormente.
 
@@ -3154,6 +3156,7 @@ static void Main(string[] args)
 Use o padrão State quando você tiver um objeto que se comporte de maneira diferente dependendo do estado atual, o número de estados seja enorme e o código específico do estado seja alterado com frequência. Quando tiver uma classe poluída com condicionais massivas que alteram o comportamento da classe de acordo com os valores atuais dos campos da classe.
  
 [Estratégia(strategy)](#comportamental)
+--
 
 **O que é**: Strategy é um padrão de design comportamental que lhe permite definir uma família de algoritimos, onde você coloca cada um em uma classe separada, fazendo com que seja possível selecioná-los e executá-los.
  
