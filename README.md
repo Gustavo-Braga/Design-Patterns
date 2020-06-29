@@ -20,9 +20,7 @@ Os padrões de projeto podem ser facilmente encontrados na internet(como este po
 
 Devemos implementar os patterns para resolver os nossos problemas e não criar problemas para que seja possível resolver com o pattern.
 
-<img src="https://github.com/Gustavo-Braga/Design-Patterns/blob/feature/CreateReadme/src/BackEnd/image1.jpg">
- <h6><align="center">(fonte: <a href="https://refactoring.guru/design-patterns/criticism" target="_blank">
-refactoring.guru</a>)</h6>
+[![](https://github.com/Gustavo-Braga/Design-Patterns/blob/master/src/BackEnd/image1.jpg)](https://refactoring.guru/design-patterns/criticism)
 
 
 # Tipos de padrões de projeto
@@ -34,7 +32,7 @@ refactoring.guru</a>)</h6>
 [Criacional](#tipos-de-padrões-de-projeto)
 --
 
-Refere-se a mecanismos para a criação de objetos, tem como objetivo abstrair a instancia dos objetos, de maneira que permita a flexibilidade e reutilização do código existente.
+Refere-se a mecanismos para a criação de objetos, tem como objetivo abstrair a instância dos objetos, de maneira que permita a flexibilidade e reutilização do código existente.
 
  * [Singleton](#singleton)
  * [Protótipo(prototype)](#protótipoprototype)
@@ -84,7 +82,7 @@ public static ProductRepository GetInstance(string tableName)
 }
 ```
 
-Com isto implementado, todas as chamadas ao ProductRepository ira retornar a mesma instancia salva na variável "\_instance", deste modo, para realizar a chamada ao método, fica da seguinte maneira:
+Com isto implementado, todas as chamadas ao ProductRepository irá retornar a mesma instancia salva na variável "\_instance", deste modo, para realizar a chamada ao método, fica da seguinte maneira:
 
  ```c#
 var repository = ProductRepository.GetInstance("Product");
@@ -97,7 +95,7 @@ Console.WriteLine($"Somente uma instância de ProductRepository: {repository.Tab
 > <p>Somente uma instância de ProductRepository: Product</p>
 
 
-Use o padrão singleton quando, necessitar de somente uma instância disponível para as classes do sistema, por exemplo, uma classe de banco de dados. 
+**Quando usar**: Use o padrão singleton quando, necessitar de somente uma instância disponível para as classes do sistema, por exemplo, uma classe de banco de dados. 
 
 [Protótipo(prototype)](#criacional)
 --
@@ -171,7 +169,7 @@ static void Main(string[] args)
 }
 ```
 
-Agora, irei mostrar sem a utilização da interface IEmployee e sim com a utilização da interface ICloneable.
+Agora, irei mostrar sem a utilização da interface IEmployee e, sim com a utilização da interface ICloneable.
 
 Na classe em que deseja realizar a clonagem, herde a interface ICloneable.
 
@@ -226,7 +224,7 @@ Em c# a classe Object(que é a classe base de todas as classes) nos fornece o m�
 > <p>Beltrano, 0,602327118442546, C#, JS</p>
 
 
-se o padrão protóripo quando necessitar copiar objetos sem depender da sua classe concreta. O padrão protótipo torna bem mais simples a criação de novos objetos complexos. 
+**Quando usar**: Use o padrão protóripo quando necessitar copiar objetos sem depender da sua classe concreta. O padrão protótipo torna bem mais simples a criação de novos objetos complexos. 
 
 [Constutor(builder)](#criacional)
 --
@@ -368,7 +366,7 @@ private static void Main(string[] args)
 > <p>Modelo: Sedan, Ano: 2020, Cor: Vermelho, Acessórios: Neon, Capa para bancos, Alarme</p>
  
  
-**Alternativa sem diretor(consequentemente mais fácil**:
+**Alternativa sem diretor(consequentemente mais fácil)**:
 
 Para este segundo exemplo, iremos criar a classe TruckBuilder que irá representar o nosso veículo, expecíficamente um caminhão. A classe TruckBuilder deve conter um atributo privado do tipo Vehicle e **não** precisa herdar a interface IVehicleBuilder(para este exemplo). A classe TruckBuilder irá conter os métodos para criar o objeto do tipo Vehicle e em todos os métodos deverá retornar a própria classe, com isso fica mais fácil e intuitivo para realizar a montagem do objeto.
  
@@ -439,7 +437,7 @@ private static void Main(string[] args)
 > <p>Modelo: FH-420, Ano: 2020, Cor: Black, Acessórios:</p>
 > <p>Modelo: FH-420, Ano: 2020, Cor: Black, Acessórios: Geladeira, Capa para bancos, Alarme</p>
  
-Use o padrão construtor quando deseja se livrar de construtores com 10 parâmetros opcionais. Quando desejar que seu código possa criar representações diferentes sobre algum produto(como o nosso exemplo, carro e caminhão). O padrão construtor pode ser aplicado quando a construção de várias representações do produto envolve etapas semelhantes que diferem apenas nos detalhes.
+**Quando usar**: Use o padrão construtor quando deseja se livrar de construtores com 10 parâmetros opcionais. Quando desejar que seu código possa criar representações diferentes sobre algum produto(como o nosso exemplo, carro e caminhão). O padrão construtor pode ser aplicado quando a construção de várias representações do produto envolve etapas semelhantes que diferem apenas nos detalhes.
 
 [Método de Fábrica(factory method)](#criacional)
 --
@@ -548,7 +546,7 @@ private static void Main(string[] args)
 > <p>O valor para o transporte de caminhao é 180</p>
 > <p>O valor para o transporte marítimo é 14400</p>
 
-A utilização do padrão Factory é útil quando você precisa criar objetos dinamicamente sem conhecer a classe de implementação, somente usando sua interface, ou também quando existe algum processamento genérico em uma classe, mas a subclasse necessária é decidida dinamicamente no tempo de execução, em outras palavras, quando o cliente não sabe de que subclasse exata ele pode precisar.
+**Quando usar**: A utilização do padrão Factory é útil quando você precisa criar objetos dinamicamente sem conhecer a classe de implementação, somente usando sua interface, ou também quando existe algum processamento genérico em uma classe, mas a subclasse necessária é decidida dinamicamente no tempo de execução, em outras palavras, quando o cliente não sabe de que subclasse exata ele pode precisar.
 
 [Fábrica Abstrata(abstract factory)](#criacional)
 --
@@ -762,7 +760,7 @@ static void Main(string[] args)
 > <p>Este é um Sofá Vitoriano, com o tamanho 1/2 m</p>
 > <p>Este é um Sofá Vitoriano</p>
 
-Use o Abstract Factory quando seu código precisar trabalhar com várias famílias de produtos relacionados, mas você não deseja que ele dependa das classes concretas desses produtos.
+**Quando usar**: Use o Abstract Factory quando seu código precisar trabalhar com várias famílias de produtos relacionados, mas você não deseja que ele dependa das classes concretas desses produtos.
 
 [Estrutural](#tipos-de-padrões-de-projeto)
 --
