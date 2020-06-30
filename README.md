@@ -2053,7 +2053,7 @@ static void Main(string[] args)
 > <p>A multiplicaçao dos valores é 8*34 = 272</p>
 > <p>A divisao dos valores é 269/91 = 2</p>
  
-Use o padrão Mediador quando for difícil alterar algumas das classes porque elas estão fortemente acopladas a várias outras classes,  quando não puder reutilizar um componente em um programa diferente, pois é muito dependente de outros componentes, quando se encontrar criando toneladas de subclasses de componentes apenas para reutilizar algum comportamento básico em vários contextos.
+**Quando usar**: Use o padrão Mediador quando for difícil alterar algumas das classes porque elas estão fortemente acopladas a várias outras classes,  quando não puder reutilizar um componente em um programa diferente, pois é muito dependente de outros componentes, quando se encontrar criando toneladas de subclasses de componentes apenas para reutilizar algum comportamento básico em vários contextos.
  
 [Observador(observer)](#comportamental)
 --
@@ -2228,14 +2228,14 @@ static void Main(string[] args)
 > <p>A subtraçao dos valores é 19-10 = 9</p>
 > <p>A divisao dos valores é 19/10 = 1</p>
 
-Utilize o padrão Observer quando mudanças no estado de um objeto podem precisar mudar outros objetos, e o atual conjunto de objetos é desconhecido de antemão ou muda dinamicamente, quando alguns objetos em sua aplicação devem observar outros, mas apenas por um tempo limitado ou em casos específicos.
+**Quando usar**: Utilize o padrão Observer quando mudanças no estado de um objeto podem precisar mudar outros objetos, e o atual conjunto de objetos é desconhecido de antemão ou muda dinamicamente, quando alguns objetos em sua aplicação devem observar outros, mas apenas por um tempo limitado ou em casos específicos.
 
 [Cadeia de Responsabilidade(chain of responsibility)](#comportamental)
 --
 
 **O que é**: Cadeia de Responsabilidade é um padrão de design comportamental que visa passar solicitações ao longo de uma cadeia de manipuladores, ao receber uma solicitação, cada manipulador decide se ira processar a informação ou passa-la ao próximo manipulador. Em outras palavras Cadeia de Responsabilidade, ajuda construir uma cadeia de objetos, onde a solicitação entra em um extremidade e continua indo até encontrar um manipulador adequado.
 
-**Problema**: Imagine que você criou um sistema e para ele é necessário fazer uma autenticação, porque somente os clientes autenticados poderiam realizar as operações no sistema. Depois de um tempo você notou que quando alguém tenta realizar a autenticação e a validação falhar, não há motivos para seguir com as validações, depois de um tempo, você foi informado que não é legal passar dados brutos diretamente para o sistema, e então você adicionou mais uma validação extra. Mais tarde alguém lhe informou sobre a quebra de senha de força bruta e imediatamente você adicionou mais uma validação para filtrar as solicitações repeditas de um mesmo IP. O código começou a virar uma bagunça, cada vez mais inchado e mais difícil de manter e entender, quando você tentava reutilizar alguma verificação acaba que você precisa duplicar uma parte do código. Devido a esses problemas a melhor das opções foi refatorar tudo.
+**Problema**: Imagine que você criou um sistema e para ele é necessário fazer uma autenticação, porque somente os clientes autenticados poderiam realizar as operações no sistema. Depois de um tempo você notou que quando alguém tenta realizar a autenticação e a validação falhar, não há motivos para seguir com as validações, depois de um tempo, você foi informado que não é legal passar dados brutos diretamente para o sistema e, então você adicionou mais uma validação extra. Mais tarde alguém lhe informou sobre a quebra de senha de força bruta e imediatamente você adicionou mais uma validação para filtrar as solicitações repeditas de um mesmo IP. O código começou a virar uma bagunça, cada vez mais inchado e mais difícil de manter e entender, quando você tentava reutilizar alguma verificação acaba que você precisa duplicar uma parte do código. Devido a esses problemas a melhor das opções foi refatorar tudo.
 
 * [Verifique o código completo](https://github.com/Gustavo-Braga/Design-Patterns/tree/master/src/BackEnd/Design.Pattern.ChainOfResponsibility)
 
@@ -2243,7 +2243,7 @@ Utilize o padrão Observer quando mudanças no estado de um objeto podem precisa
 
 Para implementar este pattern devemos ter em mente que **Client** é a classe que gera a solicitação e passa para o primeiro manipulador da cadeia, **Handler** é a classe abstrata que contém o membro para armazenar o próximo manipulador da cadeia para ser possível definir os sucessores, esta classe também contém o método que deve ser implementado pelos outros manipuladores para executar as validações, e por fim, temos os **ConcreteHandlers** estas são as classes concretas que irão herdar da classe handler e executar as validações conforme o seu negócio.
 
-Para o nosso exemplo, foi criado um cenário simples onde verificamos se um número é par/impar/maior que mil.
+Para o nosso exemplo, foi criado um cenário simples onde verificamos se um número é par, impar ou maior que mil.
 
 Inicialmente, vamos criar a nossa interface IHandler.
 
@@ -2310,7 +2310,7 @@ public class GreaterThanAThousand:AbstractHandler
 }
 ```
 
-Observe que em cada método execute é validado se possui um sucessor, e se possuir, passa para o próximo, nesse momento, você é livre para decidir se deverá ou não passar a diante a validação.
+Observe que em cada método execute é validado se possui um sucessor e, se possuir, passa para o próximo, nesse momento, você é livre para decidir se deverá ou não passar a diante a validação.
 
 Agora é só realizar a chamada do método e em cada ConcreteHandler definir quem será o sucessor.
 
@@ -2346,7 +2346,7 @@ static void Main(string[] args)
 > <p>Número 5619 é maior que 1000: Sim</p>
 
 
-Use o padrão da Cadeia de Responsabilidade quando se espera que seu programa processe diferentes tipos de solicitações de várias maneiras, mas os tipos exatos de solicitações e suas sequências são desconhecidos previamente, quando for essencial executar vários manipuladores em uma ordem específica, quando o conjunto de manipuladores e sua ordem forem alterados no tempo de execução.
+**Quando usar**:  Use o padrão da Cadeia de Responsabilidade quando se espera que seu programa processe diferentes tipos de solicitações de várias maneiras, mas os tipos exatos de solicitações e suas sequências são desconhecidos previamente, quando for essencial executar vários manipuladores em uma ordem específica, quando o conjunto de manipuladores e sua ordem forem alterados no tempo de execução.
 
 [Comando(command)](#comportamental)
 --
@@ -2505,7 +2505,7 @@ static void Main(string[] args)
 > <p>A subtraçao dos valores é 28-28 = 0</p>
 > <p>A multiplicaçao dos valores é 28*28 = 784</p>
 
-Use o padrão Comando quando desejar parametrizar objetos com operações, quando desejar enfileirar operações, agendar sua execução ou executá-las remotamente, quando desejar implementar operações reversíveis.
+**Quando usar**: Use o padrão Comando quando desejar parametrizar objetos com operações, quando desejar enfileirar operações, agendar sua execução ou executá-las remotamente, quando desejar implementar operações reversíveis.
 
 [Iterador(iterator)](#comportamental)
 --
@@ -2664,7 +2664,7 @@ static void Main(string[] args)
 > <p>item E</p>
 > <p>item F</p>
 
-Use o padrão Iterator quando sua coleção tiver uma estrutura de dados complexa, mas você deseja ocultar sua complexidade dos clientes (por motivos de conveniência ou segurança). Use quando deseja reduzir a duplicação do código transversal em seu aplicativo, quando desejar que seu código possa atravessar diferentes estruturas de dados ou quando os tipos dessas estruturas forem desconhecidos anteriormente.
+**Quando usar**: Use o padrão Iterator quando sua coleção tiver uma estrutura de dados complexa, mas você deseja ocultar sua complexidade dos clientes (por motivos de conveniência ou segurança). Use quando deseja reduzir a duplicação do código transversal em seu aplicativo, quando desejar que seu código possa atravessar diferentes estruturas de dados ou quando os tipos dessas estruturas forem desconhecidos anteriormente.
 
 [Lembrança(memento)](#comportamental)
 --
@@ -2744,7 +2744,7 @@ public class PersonMemento : IMemento
 }
 ```
 
-Repare que o objeto de memento possui a data em que está sendo criado, e no construtor é passado o objeto originador, assim conseguimos "tirar uma foto" do estado atual do objeto.
+Repare que o objeto de memento possui a data em que está sendo criado e, no construtor é passado o objeto originador, assim conseguimos "tirar uma foto" do estado atual do objeto.
 
 Com isso feito, temos tudo o que é necessário para implementar o nosso Caretaker que é o responsável por gerenciar esses estados.
 
@@ -2779,7 +2779,7 @@ public class Caretaker
 }
 ```
 
-Observe que o Caretaker mantém uma pilha dos objetos de memento, e também possui uma referência ao nosso objeto originador. Observe que o método Backup ativa o método Save que é criado no objeto originador e assim inserindo o retorno do método na pilha de lembranças, com isso conseguimos manter seu histórico.
+Observe que o Caretaker mantém uma pilha dos objetos de memento e, também possui uma referência ao nosso objeto originador. Observe que o método Backup ativa o método Save que é criado no objeto originador e assim inserindo o retorno do método na pilha de lembranças, com isso conseguimos manter seu histórico.
 
 Feito isso, agora é só chamar os método e verificar sua usabilidade.
 
@@ -2822,7 +2822,7 @@ static void Main(string[] args)
 > <p>19/06/2020 19:26:56</p>
 > <p>Pessoa: Gustavo, de 0 anos,</p>
 
-Use o padrão Memento quando desejar produzir capturas instantâneas do estado do objeto para poder restaurar um estado anterior do objeto ou quando o acesso direto aos campos getters/setters do objeto violar seu encapsulamento.
+**Quando usar**: Use o padrão Memento quando desejar produzir capturas instantâneas do estado do objeto para poder restaurar um estado anterior do objeto ou quando o acesso direto aos campos getters/setters do objeto violar seu encapsulamento.
 
 
 [Método de Modelo(template method)](#comportamental)
@@ -2836,7 +2836,7 @@ Use o padrão Memento quando desejar produzir capturas instantâneas do estado d
 
 **Solução**: O padrão template method sugere que você divida esses algoritmos em uma série de etapas e transforme essas etapas em métodos que poderão ser chamados através de um único método "Template Method". Basicamente você deve criar uma superclasse contendo todas as etapas em comum e deixando-as em um método "virtual" para que possa ser substituída por uma outra subclasse, a única etapa que não pode ser manipulada é o "Template Method" pois ele é a estrutura principal "o esqueleto".
 
-Para realizar esta implementação devemos ter em mente que,**AbstractClass** é a classe abstrata que contém o Template Method e as operações para cada etapa, **ConcreteClass** são as subclasses que heram da AbstractClass e implementa os métodos conforme necessário **se** for necessário.
+Para realizar esta implementação devemos ter em mente que, **AbstractClass** é a classe abstrata que contém o Template Method e as operações para cada etapa, **ConcreteClass** são as subclasses que heram da AbstractClass e implementa os métodos conforme necessário **se** for necessário.
 
 Para o nosso exemplo, foi criado um cenário simples onde será aberto dois tipos de arquivos diferentes, um CSV e um PDF, a implementação para abrir e consumir os dados do arquivo são muito semelhantes então criaremos um FileBase(AbstractClass).
 
@@ -3014,13 +3014,13 @@ static void Main(string[] args)
 > <p>Linha - 5</p>
 > <p>  1  2  3</p>
 
-Use o padrão Template Method quando desejar permitir que os clientes estendam apenas etapas específicas de um algoritmo, mas não o algoritmo inteiro ou sua estrutura, quando tiver várias classes que contêm algoritmos quase idênticos, com algumas pequenas diferenças. Como resultado, pode ser necessário modificar todas as classes quando o algoritmo for alterado.
+**Quando usar**: Use o padrão Template Method quando desejar permitir que os clientes estendam apenas etapas específicas de um algoritmo, mas não o algoritmo inteiro ou sua estrutura, quando tiver várias classes que contêm algoritmos quase idênticos, com algumas pequenas diferenças. Como resultado, pode ser necessário modificar todas as classes quando o algoritmo for alterado.
 
 
 [Estado(state)](#comportamental)
 --
 
-**O que é**: State é um padrão de design comportamental que permite alterar o comportamento de um objeto de acordo com o seu estado atual, a cada vez que o estado muda,  um novo comportamento pode ser tomado.
+**O que é**: State é um padrão de design comportamental que permite alterar o comportamento de um objeto de acordo com o seu estado atual, a cada vez que o estado muda, um novo comportamento pode ser tomado.
 
 **Problema**: Este padrão está relacionado ao conceito de uma máquina de estado finito, ou seja, quando seu código esta cheio de if/else e switch case, tomando vários comportamentos diferentes alterando o comportamento da lógica de negócio.
 
@@ -3150,7 +3150,7 @@ static void Main(string[] args)
 > <p>Resultado da multiplicaçao é: 5 * 1 = 5</p>
 > <p>Resultado da divisao é: 15 / 13 = 1</p>
 
-Use o padrão State quando você tiver um objeto que se comporte de maneira diferente dependendo do estado atual, o número de estados seja enorme e o código específico do estado seja alterado com frequência. Quando tiver uma classe poluída com condicionais massivas que alteram o comportamento da classe de acordo com os valores atuais dos campos da classe.
+**Quando usar**: Use o padrão State quando você tiver um objeto que se comporte de maneira diferente dependendo do estado atual, o número de estados seja enorme e o código específico do estado seja alterado com frequência. Quando tiver uma classe poluída com condicionais massivas que alteram o comportamento da classe de acordo com os valores atuais dos campos da classe.
  
 [Estratégia(strategy)](#comportamental)
 --
@@ -3163,7 +3163,7 @@ Use o padrão State quando você tiver um objeto que se comporte de maneira dife
 
 **Solução**: O padrão strategy sugere que você extraia o comportamento específico de um contexto em várias classes separadas de estratégias. A classe original de contexto deve possuir uma referência as classes de estratégia, para que seja possível delegar todo o trabalho a elas. A classe de contexto não tem conhecimento sobre as classes concretas de estratégias e sim da sua interface, tornando possível o contexto executar qualquer estratégia desejada.**
 
-Para implementar este pattern, devemos ter em mente que, Strategy é a interface usada pelo contexto para chamar os algoritmos desejados,**Context** é a classe que possui a referência a interfce Strategy, onde é possível ser configurada em tempo de execução de acordo com a necessidade e por fim **ConcreteStrategy** é a classe que contém os detalhes da implementação.
+Para implementar este pattern, devemos ter em mente que, **Strategy** é a interface usada pelo contexto para chamar os algoritmos desejados, **Context** é a classe que possui a referência a interfce Strategy, onde é possível ser configurada em tempo de execução de acordo com a necessidade e, por fim **ConcreteStrategy** é a classe que contém os detalhes da implementação.
 
 Para o nosso exemplo, foi criado um cenário simples onde será executado as operações de uma calculadora.
 
@@ -3277,20 +3277,20 @@ static void Main(string[] args)
 > <p>Resultado da multplicaçao é: 8 * 4 = 32</p>
 > <p>Resultado da divisao é: 8 / 4 = 2</p>
 
-Use o padrão Strategy quando desejar usar diferentes variantes de um algoritmo dentro de um objeto e poder alternar de um algoritmo para outro durante o tempo de execução, quando tiver muitas classes semelhantes que diferem apenas na maneira como elas executam algum comportamento. Use o padrão para isolar a lógica de negócios de uma classe dos detalhes de implementação de algoritmos que podem não ser tão importantes no contexto dessa lógica.
+**Quando usar**: Use o padrão Strategy quando desejar usar diferentes variantes de um algoritmo dentro de um objeto e poder alternar de um algoritmo para outro durante o tempo de execução, quando tiver muitas classes semelhantes que diferem apenas na maneira como elas executam algum comportamento. Use o padrão para isolar a lógica de negócios de uma classe dos detalhes de implementação de algoritmos que podem não ser tão importantes no contexto dessa lógica.
 
 [Visitante(visitor)](#comportamental)
 --
 
 **O que é**: Visitor é um padrão de design comportamental que permite separar algoritmos dos objetos nos quais eles operam. Permite que seja adicionado mais operações sem precisar modificar os objetos.
 
-**Problema**: Imagine que você possua uma classe grande, complexa e em produção. Surgiu uma nova demanda, em que você precisaria realizar uma implementação nesta classe para que seja possível extraí-la em um formato X. A primeira coisa que você pensou, foi adicionar um método a esta classe, para realizar a exportação, porém, o arquiteto não deixou, pois não queria correr o risco, de que uma nova implementação ocasionasse em um bug em algum outro local do sistema, a final, você estaria alterando a classe original. Outro ponto negativo, é que muito provavelmente haveria a necessidade de exportar também para o formato Y e a final, não tinha muito sentido acrescentar o código de exportação dentro dessas classes de nó, pois essa não era sua finalidade.
+**Problema**: Imagine que você possua uma classe grande, complexa e em produção. Surgiu uma nova demanda, em que você precisaria realizar uma implementação nesta classe para que seja possível extraí-la em um formato X. A primeira coisa que você pensou, foi adicionar um método a esta classe, para realizar a exportação, porém, o arquiteto não deixou, pois não queria correr o risco de que uma nova implementação ocasionasse em um bug em algum outro local do sistema, a final, você estaria alterando a classe original. Outro ponto negativo, é que muito provavelmente haveria a necessidade de exportar também para o formato Y e a final, não tinha muito sentido acrescentar o código de exportação dentro dessas classes de nó, pois essa não era sua finalidade.
 
 * [Verifique o código completo](https://github.com/Gustavo-Braga/Design-Patterns/tree/master/src/BackEnd/Design.Pattern.Visitor)
 
 **Solução**: O padrão visitor sugere que você coloque esse comportamento em uma classe separada chamada visitor, ao invés de integrá-lo a classe original, com isso o objeto original deve simplesmente chamar o método do visitor sendo passado como argumento, assim, o visitor teria acesso a todos os dados necessários do objeto.
 
-Para implementar este padrão, devemos ter em mente que, **Client** é a classe que tem acesso aos objetos da estrutura e pode informar qual visitante determinado objeto irá receber, no nosso caso, será o metodo Main, **Element** esta é a interface que define o método Accept, onde será passado como parâmetro um visitor, **ConcreteElement** esta é a classe "original" onde você poderá instrui-la a aceitar um visitante para executar determinadas ações, **Visitor** esta é a interface para especificar os objetos concretos, e por fim, **ConcreteVisitor** essas são as classes que iram implemetar a interface Visitor.
+Para implementar este padrão, devemos ter em mente que, **Client** é a classe que tem acesso aos objetos da estrutura e pode informar qual visitante determinado objeto irá receber, no nosso caso, será o metodo Main, **Element** esta é a interface que define o método Accept, onde será passado como parâmetro a um visitor, **ConcreteElement** esta é a classe "original" onde você poderá instrui-la a aceitar um visitante para executar determinadas ações, **Visitor** esta é a interface para especificar os objetos concretos, e por fim, **ConcreteVisitor** essas são as classes que iram implemetar a interface Visitor.
 
 Para o nosso exemplo, foi criado um cenário, onde há duas classes que executam operações de calculadora, e elas só poderãm ser modificadas, somente com base em um visitor(pois o arquiteto nao deixou mexer nelas). Para um dos visitantes deve transformar as classes em um JSON e o outro deve pegar o nome de suas propriedades.
 
@@ -3468,7 +3468,7 @@ static void Main(string[] args)
 > <p>Visitante Design.Pattern.Visitor.Visitor.VisitorGetPropertyName, obtem Design.Pattern.Visitor.Element.MultiplyNumerics</p>
 > <p>Visitante Design.Pattern.Visitor.Visitor.VisitorGetPropertyName, obtem Design.Pattern.Visitor.Element.SumDecimals</p>
 
-Use o Visitor quando precisar executar uma operação em todos os elementos de uma estrutura de objeto complexa (por exemplo, uma árvore de objetos), para limpar a lógica de negócios dos comportamentos auxiliares. Quando um comportamento fizer sentido apenas em algumas classes de uma hierarquia de classes, mas não em outras.
+**Quando usar**: Use o Visitor quando precisar executar uma operação em todos os elementos de uma estrutura de objeto complexa (por exemplo, uma árvore de objetos), para limpar a lógica de negócios dos comportamentos auxiliares. Quando um comportamento fizer sentido apenas em algumas classes de uma hierarquia de classes, mas não em outras.
 
 
 
