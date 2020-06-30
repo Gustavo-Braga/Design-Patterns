@@ -788,7 +788,7 @@ Refere-se a mecanismos para montar objetos em estruturas maiores, organizando a 
 
 * [Verifique o código completo](https://github.com/Gustavo-Braga/Design-Patterns/tree/master/src/BackEnd/Design.Patterns.Adapter)
 
-**Solução**: Você precisa criar um adaptador que realiza a conversão da interface de um objeto para que o outro possa entende-lo, este objeto de adaptador irá ocultar a complexidade que ocorre para ser convertido os dados. Para realizar a implementação devemos ter como base que **ITarget** é a interface usada pelo cliente pata atingir a funcionalidade, **Adaptee** é a classe que possui a funcionalidade exigida pelo cliente, **Adapter** é a classe que implementa o ITarget e herda a classe Adaptee, este fará a comunicação entre o Client e o Adaptee, e por fim, Client que é a clase que interage com o ITarget, no nosso caso será a classe Main.
+**Solução**: Você precisa criar um adaptador que realiza a conversão da interface de um objeto para que o outro possa entende-lo, este objeto de adaptador irá ocultar a complexidade que ocorre para ser convertido os dados. Para realizar a implementação devemos ter como base que **ITarget** é a interface usada pelo cliente pata atingir a funcionalidade, **Adaptee** é a classe que possui a funcionalidade exigida pelo cliente, **Adapter** é a classe que implementa o ITarget e herda a classe Adaptee, este fará a comunicação entre o Client e o Adaptee, e por fim, **Client** que é a clase que interage com o ITarget, no nosso caso será a classe Main.
 
 Para o nosso exemplo, foi criado uma classe para realizar o envio de email, onde o nosso request não é compatível com a classe de adaptee.
 
@@ -892,7 +892,7 @@ static void Main(string[] args)
 > <p>gustavo.braga10@outlook.com</p>
 > <p>{"Subject":"teste adapter","Body":"corpo do email"}</p>
 
-Use a classe Adapter quando desejar usar alguma classe existente, mas sua interface não é compatível com o restante do seu código. O adaptador permite criar uma camada intermediária que serve como tradutor entre as classes.
+**Quando usar**: Use a classe Adapter quando desejar usar alguma classe existente, mas sua interface não é compatível com o restante do seu código. O adaptador permite criar uma camada intermediária que serve como tradutor entre as classes.
 
 
 [Decorador(decorator)](#estrutural)
@@ -910,7 +910,7 @@ Use a classe Adapter quando desejar usar alguma classe existente, mas sua interf
 
 **Solução**: Uma das maneiras de superar essas advertências é usando Agregação(significa que a parte pode ser compartilhada entre vários objetos. O objeto de A contém os objetos de B, B pode viver sem A) ou Composição(significa que a parte não existe sem o todo. O objeto A consiste nos objetos B, um gerencia o ciclo de vida de B, B não pode viver sem A) em vez de herança. Com esta abordagem você consegue substituir o objeto auxiliar vinculando por outro, alterando o comportamento do container em tempo de execução. Um objeto pode usar o comportamento de várias classes, tendo referências a vários objetos e delegando a eles todos os tipos de trabalho.
 
-Para o nosso exemplo será criado um programa semelhante ao da cafeteria, porém uma pizzaria, onde criamos a pizza e adicionamos uma cobertura(ingrediente) extra. Para desenvolver o padrão decorador, temos que ter em mete que. **Component** é uma interface que contém os membros que serão implementados pela ConcreteClass e Decorator, **Decorator** é uma classe abstrata que implementa a interface Component e contém a referencia a uma instância Component, esta classe atua como classe base para todos os decoradores de Component, **ConcreteComponent** esta é uma classe concreta que imlementa a interface Component, **ConcreteDecorator** esta é a classe que herda de Decorator e fornece um decorador aos components.
+Para o nosso exemplo será criado um programa semelhante ao da cafeteria, porém uma pizzaria, onde criaremos a pizza e adicionaremos uma cobertura(ingrediente) extra. Para desenvolver o padrão decorador, temos que ter em mete que. **Component** é uma interface que contém os membros que serão implementados pela ConcreteClass e Decorator, **Decorator** é uma classe abstrata que implementa a interface Component e contém a referencia a uma instância Component, esta classe atua como classe base para todos os decoradores de Component, **ConcreteComponent** esta é uma classe concreta que imlementa a interface Component, **ConcreteDecorator** esta é a classe que herda de Decorator e fornece um decorador aos components.
 
 Inicialmente vamos criar o nosso Component IOrder(porque nossa pizza é um "pedido").
  
@@ -1008,14 +1008,14 @@ static void Main(string[] args)
 > <p>Frango, catupiry</p>
 > <p>29</p>
 
-Use o padrão Decorator quando precisar atribuir comportamentos extras a objetos em tempo de execução sem quebrar o código que usa esses objetos. Use o padrão quando for estranho ou impossível estender o comportamento de um objeto usando herança.
+**Quando usar**: Use o padrão Decorator quando precisar atribuir comportamentos extras a objetos em tempo de execução sem quebrar o código que usa esses objetos. Use o padrão quando for estranho ou impossível estender o comportamento de um objeto usando herança.
  
  [Ponte(bridge)](#estrutural)
  --
  
 **O que é**: Bridge é um padrão de design estrutural que permite dividir uma classe grande ou um conjunto de classes estreitamente relacionadas em duas hierarquias separadas - abstração e implementação - que podem ser desenvolvidas independentemente uma da outra. O padrão de bridge é referente a composição da herança, os detalhes da implementação são transferidos para uma hierarquia separada.
  
-**Problema**: Digamos que você precise criar uma página com diferentes tipos de tema light/dark. Inicialmente você precisaria criar uma cópia de cada página para cada um dos seus temas. Utilizando o padrão de bridge, permite que você crie apenas um tema separado e carregue-o com base na preferência do usuário.
+**Problema**: Digamos que você precise criar uma página com diferentes tipos de tema light/dark. Inicialmente você precisaria criar uma cópia de cada página para cada um dos seus temas. Utilizando o padrão de bridge, permite que você crie apenas um tema separado e carregue-os com base na preferência do usuário.
  
  * [Verifique o código completo](https://github.com/Gustavo-Braga/Design-Patterns/tree/master/src/BackEnd/Design.Patterns.Bridge)
  
@@ -1047,7 +1047,6 @@ public class Client
 
 }
 
-
 public class Product
 {
     public Product(string description)
@@ -1063,11 +1062,11 @@ public class Product
         return $"Id: {Id}, Descrição: {Description}";
     }
 } 
-  ```
+```
  
 Agora, vamos criar a nossa interface de Bridge(IConnectionDataBase).
 
-  ```c#
+```c#
 public interface IConnectionDataBase
 {
     void OpenConnection(string connectionString);
@@ -1168,6 +1167,7 @@ public class ProductRepository : RepositoryBase, IRepository<Product>
     }
 }
 ```
+
 Tudo pronto, agora só precisamos realizar a chamada e passar qual tipo de conexão queremos para qual repositório.
 
 ```c#
@@ -1200,7 +1200,7 @@ static void Main(string[] args)
 > <p>inserido Produto Id: 69, Descriçao: Martelo</p>
 > <p>Fecha conexao com banco de dados NoSQL</p>
 
-Use o padrão Bridge quando desejar dividir e organizar uma classe monolítica que tenha várias variantes de algumas funcionalidades (por exemplo, se a classe puder trabalhar com vários servidores de banco de dados). Use o padrão quando precisar estender uma classe em várias dimensões ortogonais (independentes) ou quando precisar alternar a implementação em tempo de execução.
+**Quando usar**: Use o padrão Bridge quando desejar dividir e organizar uma classe monolítica que tenha várias variantes de algumas funcionalidades (por exemplo, se a classe puder trabalhar com vários servidores de banco de dados). Use o padrão quando precisar estender uma classe em várias dimensões ortogonais (independentes) ou quando precisar alternar a implementação em tempo de execução.
  
 [Fachada(facade)](#estrutural)
 --
@@ -1295,7 +1295,7 @@ static void Main(string[] args)
 > <p>Body</p>
 > <p>Acessories</p>
 
-Use o padrão Fachada quando precisar ter uma interface limitada, mas direta, para um subsistema complexo, quando desejar estruturar um subsistema em camadas.
+**Quando usar**: Use o padrão Fachada quando precisar ter uma interface limitada, mas direta, para um subsistema complexo, quando desejar estruturar um subsistema em camadas.
 
 [Proxy](#estrutural)
 --
@@ -1306,7 +1306,7 @@ Use o padrão Fachada quando precisar ter uma interface limitada, mas direta, pa
 
 * [Verifique o código completo](https://github.com/Gustavo-Braga/Design-Patterns/tree/master/src/BackEnd/Design.Pattern.Proxy)
 
-**Implementação**: O padrão Proxy sugere que você crie uma nova classe de proxy com a mesma interface que um objeto de serviço original, para realizar a implementação, devemos ter em mente que: **Subject** Essa é uma interface com membros que serão implementados pelas classes RealSubject e Proxy, **RealSubject** esta é a classe original em que o proxy ira atuar, e **Proxy** esta é a classe que contém a instancia da RealSubject e pode acessar seus membros conforme necessário.
+**Implementação**: O padrão Proxy sugere que você crie uma nova classe de proxy com a mesma interface que um objeto de serviço original, para realizar a implementação, devemos ter em mente que: **Subject** Essa é uma interface com membros que serão implementados pelas classes RealSubject e Proxy, **RealSubject** esta é a classe original em que o proxy ira atuar, e **Proxy** esta é a classe que contém a instância da RealSubject e pode acessar seus membros conforme necessário.
 
 Para o nosso exemplo foi criado uma classe de repositório simples onde iremos salvar o produto e o log do produto.
 
@@ -1416,7 +1416,7 @@ static void Main(string[] args)
 > <p>Produto Log inserido = id: 197, name: Produto 2</p>
 > <p>Finalizando proxy</p>
 
-Use a classe de proxy quando quiser realizar o controle de acesso(é quando você deseja que apenas clientes específicos possam usar o objeto de serviço). Execução local de um serviço remoto(quando o objeto de serviço está localizado em um servidor remoto). Solicitações de log(quando você deseja manter um histórico de solicitações para o objeto de serviço). Resultados da solicitação de armazenamento em cache(quando você precisa armazenar em cache os resultados das solicitações do cliente e gerenciar o ciclo de vida desse cache, especialmente se os resultados forem muito grandes).
+**Quando usar**: Use a classe de proxy quando quiser realizar o controle de acesso(é quando você deseja que apenas clientes específicos possam usar o objeto de serviço). Execução local de um serviço remoto(quando o objeto de serviço está localizado em um servidor remoto). Solicitações de log(quando você deseja manter um histórico de solicitações para o objeto de serviço). Resultados da solicitação de armazenamento em cache(quando você precisa armazenar em cache os resultados das solicitações do cliente e gerenciar o ciclo de vida desse cache, especialmente se os resultados forem muito grandes).
 
 
 [Composto(composite)](#estrutural)
@@ -1430,9 +1430,9 @@ Use a classe de proxy quando quiser realizar o controle de acesso(é quando voc�
 
 **Solução**: O padrão Composto compõe objetos em termos de uma estrutura em árvore para representar partes e hierarquias inteiras. O maior benefício é que você não precisa se preocupar com as classes concretas de objetos que compõem a árvore, você pode tratá-los da mesma forma através da interface.
 
-Para realizar a implementação, precisamos ter em mente que **Component** é a classe abstrata que contém os membros que serão implementados pela hierarquia(atua como classe base para todos), **Leaf** é usado para implementar componentes de folha na estrutura da árvore, estar nao podem ter filhos e **Composite** esta é a classe que inclui os métodos para adicionar, remover, consultar, é aqui que são executadas as operações nos componentes filhos.
+Para realizar a implementação, precisamos ter em mente que **Component** é a classe abstrata que contém os membros que serão implementados pela hierarquia(atua como classe base para todos), **Leaf** é usado para implementar componentes de folha na estrutura da árvore, estas não podem ter filhos e **Composite** esta é a classe que inclui os métodos para adicionar, remover, consultar, é aqui que são executadas as operações nos componentes filhos.
 
-Para o nosso exemplo foi criado um cenário simples, onde temos os dados de uma empresa, funcionários, departamentos, setores e sede da empresa. Aqui criamos a estrutura de árvore da seguinte maneira, nossa interface IEmployee é a nossa folha(Leaf), todos os funcionários irão implementar esta interface. Foi criado um CompanyMember para que seja nosso objeto Component(classe base) o mesmo implementa a interface IEmployee e também possui os métodos de adicionar, remover, possui os métodos adquados para o seu negócio. Os nossos objetos de Composit serão CompanySector, CompanyDepartment e CompanyHeadquarters, observe que essas classes herdam de CompanyMember que é o nosso Composit, a lógica para este cenário é que, uma lista de funcionários pode estar em um setor, uma lista de setor(com funcionários) pode estar dentro de uma lista de Departamentos(com mais funcionários) e a lista de departamentos com a lista de setores, podem estar dentro da sede da empresa que pos rua vez também possui N funcionários.
+Para o nosso exemplo foi criado um cenário simples, onde temos os dados de uma empresa, funcionários, departamentos, setores e sede da empresa. Aqui criamos a estrutura de árvore da seguinte maneira, nossa interface IEmployee é a nossa folha(Leaf), todos os funcionários irão implementar esta interface. Foi criado um CompanyMember para que seja nosso objeto Component(classe base) o mesmo implementa a interface IEmployee e também possui os métodos de adicionar, remover, possui os métodos adquados para o seu negócio. Os nossos objetos de Composit serão CompanySector, CompanyDepartment e CompanyHeadquarters, observe que essas classes herdam de CompanyMember que é o nosso Composit, a lógica para este cenário é que, uma lista de funcionários pode estar em um setor, uma lista de setor(com funcionários) pode estar dentro de uma lista de Departamentos(com mais funcionários) e a lista de departamentos com a lista de setores, podem estar dentro da sede da empresa que pos sua vez também possui N funcionários.
 
 Vamos a implementação, primeiramente, criaremos a nossa Leaf(IEmployee).
  
@@ -1528,7 +1528,7 @@ public class CompanyDepartment: CompanyMember
 
 Observe que esta classe possui uma lista de Leaf, os métodos de adicionar e obter salário, é feito com base nesta lista(para ficar mais claro, a classe Component(CompanyMember) seria o tronco da árvore, a classe Composit(CompanyDepartment) seria os galhos e a interface Leaf(IEmployee) seria nossas folhas).
 
-Feito isso, agora conseguimos adicionar os funcionários aos departamentos/setores/sede, também conseguimos adicionar setores dentro de departamentos e departamentos dentro de sede. Com base no nosso CompanyMember iremos conseguir trabalhar com toda esta estrutura, de maneira simples. Abaixo eta o exemplo utilizando todos os recursos do nosso CompanyMember.
+Feito isso, agora conseguimos adicionar os funcionários aos departamentos/setores/sede, também conseguimos adicionar setores dentro de departamentos e departamentos dentro de sede. Com base no nosso CompanyMember iremos conseguir trabalhar com toda esta estrutura, de maneira simples. Abaixo está o exemplo utilizando todos os recursos do nosso CompanyMember.
 
 ```c#
 class Program
@@ -1608,7 +1608,7 @@ class Program
 > <p>Desenvolvedor: Nome: Lucia, Saláio: 3251, Habilidades: skill1, skill2</p>
 > <p>Desenvolvedor: Nome: Roberto, Saláio: 3309, Habilidades: skill1, skill2, skill5</p>
 
-Use o padrão Composto quando precisar implementar uma estrutura de objeto semelhante a uma árvore, quando desejar que o código do cliente trate elementos simples e complexos de maneira uniforme.
+**Quando usar**: Use o padrão Composto quando precisar implementar uma estrutura de objeto semelhante a uma árvore, quando desejar que o código do cliente trate elementos simples e complexos de maneira uniforme.
 
 [Flyweight](#estrutural)
 --
@@ -1773,57 +1773,56 @@ public class PlayersMapFactory
 }
 ```
 
-Feito isso, iremos realizar as chamadas, para o nosso exemplo não foi adicionado métodos intrínseco(campos que contêm dados imutáveis, duplicados em muitos objetos), foram feito somente métodos extrínsecos(campos que contêm dados contextuais exclusivos para cada objeto). Essa divisão é crucial na hora de implementar o patter flyweight, pois deve-se analisar muito bem para realizar esta separação. Aqui no método Main, foi criado alguns métodos para deixar mais dinâmico a criação dos personagens, como por exemplo o tipo de jogador Terrorist/CounterTerrorist tipo de arma e missões.
+Feito isso, iremos realizar as chamadas, para o nosso exemplo foi adicionado métodos intrínseco(campos que contêm dados imutáveis, duplicados em muitos objetos), que são referênte a criação dos players e, foram feito também  métodos extrínsecos(campos que contêm dados contextuais exclusivos para cada objeto), que é referênte a atribuir arma(AssignWeapon). Essa divisão é crucial na hora de implementar o pattern flyweight, pois deve-se analisar muito bem para realizar esta separação. Aqui no método Main, foi criado alguns métodos para deixar mais dinâmico a criação dos personagens, como por exemplo o tipo de jogador Terrorist/CounterTerrorist tipo de arma e missões.
 
 ```c#
-    class Program
-    {
-        public static string[] PlayerType = { "Terrorist", "CounterTerrorist" };
-        public static string[] Weapons = { "AK-47", "AWP", "Desert Eagle", "M4A4", "P90", "SSG 08", "MP7" };
-        public static string[] PoliceObjective = { "Desarmar Bomba", "Salvar Reféns" };
-        public static string[] TerroristObjective = { "Armar Bomba", "Pegar Reféns" };
+class Program
+{
+    public static string[] PlayerType = { "Terrorist", "CounterTerrorist" };
+    public static string[] Weapons = { "AK-47", "AWP", "Desert Eagle", "M4A4", "P90", "SSG 08", "MP7" };
+    public static string[] PoliceObjective = { "Desarmar Bomba", "Salvar Reféns" };
+    public static string[] TerroristObjective = { "Armar Bomba", "Pegar Reféns" };
 
-        static void Main(string[] args)
+    static void Main(string[] args)
+    {
+        Console.WriteLine("Hello World!");
+
+        var playerFactory = new PlayerFactory();
+        var playersMapFactory = new PlayersMapFactory();
+        for (int i = 0; i < 10; i++)
         {
-            Console.WriteLine("Hello World!");
+            var player = playerFactory.GetPlayer(GetPlayerType());
+            player.AssignWeapon(GetWeapons());
+            if (player.IsTerrorist())
+            player.Mission(GetTerroristObjective());
+        else
+            player.Mission(GetPoliceObjective());
 
-            var playerFactory = new PlayerFactory();
-            var playersMapFactory = new PlayersMapFactory();
-            for (int i = 0; i < 10; i++)
-            {
-                var player = playerFactory.GetPlayer(GetPlayerType());
-                player.AssignWeapon(GetWeapons());
-                if (player.IsTerrorist())
-                player.Mission(GetTerroristObjective());
-            else
-                player.Mission(GetPoliceObjective());
+        playersMapFactory.AddPlayer(i+1, player);
+    }
+    Console.WriteLine($"Terroristas: {playersMapFactory.GetTerrorist()}");
+    Console.WriteLine($"Policiais: {playersMapFactory.GetPolice()}");
+    playersMapFactory.ShowPlayers();
 
-            playersMapFactory.AddPlayer(i+1, player);
-        }
-        Console.WriteLine($"Terroristas: {playersMapFactory.GetTerrorist()}");
-        Console.WriteLine($"Policiais: {playersMapFactory.GetPolice()}");
-        playersMapFactory.ShowPlayers();
+    Console.ReadKey();
+}
 
-        Console.ReadKey();
-    }
+private static string GetPlayerType()
+{
+    return PlayerType[new Random().Next(PlayerType.Length)];
+}
 
-    private static string GetPlayerType()
-    {
-        return PlayerType[new Random().Next(PlayerType.Length)];
-    }
-
-    private static string GetWeapons()
-    {
-        return Weapons[new Random().Next(Weapons.Length)];
-    }
-    private static string GetPoliceObjective()
-    {
-        return PoliceObjective[new Random().Next(PoliceObjective.Length)];
-    }
-    private static string GetTerroristObjective()
-    {
-        return TerroristObjective[new Random().Next(TerroristObjective.Length)];
-    }
+private static string GetWeapons()
+{
+    return Weapons[new Random().Next(Weapons.Length)];
+}
+private static string GetPoliceObjective()
+{
+    return PoliceObjective[new Random().Next(PoliceObjective.Length)];
+}
+private static string GetTerroristObjective()
+{
+    return TerroristObjective[new Random().Next(TerroristObjective.Length)];
 }
 ```
 
@@ -1863,7 +1862,7 @@ Feito isso, iremos realizar as chamadas, para o nosso exemplo não foi adicionad
 > <p>Policial deve realizar o objetivo de Salvar Reféns</p>
 > <p>Possui arma: SSG 08</p>
 
-Use o padrão Flyweight apenas quando seu programa precisar suportar um grande número de objetos que mal cabem na RAM disponível.
+**Quando usar**: Use o padrão Flyweight apenas quando seu programa precisar suportar um grande número de objetos que mal cabem na RAM disponível.
 
 [Comportamental](#tipos-de-padrões-de-projeto)
 --
