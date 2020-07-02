@@ -31,19 +31,12 @@ bld/
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
 
-# NUNIT
-*.VisualState.xml
-TestResult.xml
 
 # Build Results of an ATL Project
 [Dd]ebugPS/
 [Rr]eleasePS/
 dlldata.c
 
-# DNX
-project.lock.json
-project.fragment.lock.json
-artifacts/
 
 *_i.c
 *_p.c
@@ -96,10 +89,6 @@ $tf/
 # Guidance Automation Toolkit
 *.gpState
 
-# ReSharper is a .NET coding add-in
-_ReSharper*/
-*.[Rr]e[Ss]harper
-*.DotSettings.user
 
 # JustCode is a .NET coding add-in
 .JustCode
@@ -107,8 +96,6 @@ _ReSharper*/
 # TeamCity is a build add-in
 _TeamCity*
 
-# DotCover is a Code Coverage Tool
-*.dotCover
 
 # NCrunch
 _NCrunch_*
@@ -119,8 +106,6 @@ nCrunchTemp_*
 *.mm.*
 AutoTest.Net/
 
-# Web workbench (sass)
-.sass-cache/
 
 # Installshield output folder
 [Ee]xpress/
@@ -146,10 +131,6 @@ publish/
 #*.pubxml
 *.publishproj
 
-# Microsoft Azure Web App publish settings. Comment the next line if you want to
-# checkin your Azure Web App publish settings, but sensitive information contained
-# in these scripts will be unencrypted
-PublishScripts/
 
 # NuGet Packages
 *.nupkg
@@ -163,13 +144,6 @@ PublishScripts/
 *.nuget.props
 *.nuget.targets
 
-# Microsoft Azure Build Output
-csx/
-*.build.csdef
-
-# Microsoft Azure Emulator
-ecf/
-rcf/
 
 # Windows Store app package directories and files
 AppPackages/
@@ -192,7 +166,6 @@ ClientBin/
 *.jfm
 *.pfx
 *.publishsettings
-node_modules/
 orleans.codegen.cs
 
 # Since there are multiple workflows, uncomment next line to ignore bower_components
@@ -219,8 +192,6 @@ UpgradeLog*.htm
 *.bim.layout
 *.bim_*.settings
 
-# Microsoft Fakes
-FakesAssemblies/
 
 # GhostDoc plugin setting file
 *.GhostDoc.xml
@@ -233,25 +204,6 @@ FakesAssemblies/
 
 # Visual Studio 6 workspace options file
 *.opt
-
-# Visual Studio LightSwitch build output
-**/*.HTMLClient/GeneratedArtifacts
-**/*.DesktopClient/GeneratedArtifacts
-**/*.DesktopClient/ModelManifest.xml
-**/*.Server/GeneratedArtifacts
-**/*.Server/ModelManifest.xml
-_Pvt_Extensions
-
-# Paket dependency manager
-.paket/paket.exe
-paket-files/
-
-# FAKE - F# Make
-.fake/
-
-# JetBrains Rider
-.idea/
-*.sln.iml
 
 # CodeRush
 .cr/
